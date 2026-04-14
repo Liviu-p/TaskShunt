@@ -164,8 +164,7 @@ final class TasksListTable extends \WP_List_Table {
 		}
 
 		if ( TaskStatus::Pushing !== $item->status ) {
-			$label = TaskStatus::Pushed === $item->status ? esc_html__( 'Remove', 'stagify' ) : esc_html__( 'Discard', 'stagify' );
-			$actions['discard'] = $this->discard_form( $item->id, $label );
+			$actions['discard'] = $this->discard_form( $item->id, esc_html__( 'Delete', 'stagify' ) );
 		}
 
 		return $actions;
@@ -204,8 +203,11 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" class="stagify-link-warning">%s</a>',
+			'<a href="%s" class="stagify-link-warning stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a>',
 			esc_url( $url ),
+			esc_attr__( 'Retry push?', 'stagify' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
+			esc_attr__( 'Retry', 'stagify' ),
 			esc_html__( 'Retry', 'stagify' )
 		);
 	}

@@ -239,8 +239,11 @@ final class TaskDetailPage {
 		);
 
 		return sprintf(
-			'<a href="%s" class="button stagify-link-warning" data-cy="retry-task">%s</a> ',
+			'<a href="%s" class="button stagify-link-warning stagify-confirm-link" data-cy="retry-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a> ',
 			esc_url( $url ),
+			esc_attr__( 'Retry push?', 'stagify' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
+			esc_attr__( 'Retry', 'stagify' ),
 			esc_html__( 'Retry', 'stagify' )
 		);
 	}
@@ -255,7 +258,7 @@ final class TaskDetailPage {
 		if ( empty( $items ) ) {
 			echo '<div class="stagify-empty-state">';
 			printf( '<p><strong>%s</strong></p>', esc_html__( 'No changes recorded yet', 'stagify' ) );
-			printf( '<p>%s</p>', esc_html__( 'Edit pages, posts, or media on your site — changes will appear here automatically.', 'stagify' ) );
+			printf( '<p>%s</p>', esc_html__( 'Just work on your site as usual — edit content, upload media, activate plugins, or switch themes. Every change is tracked automatically and will show up here.', 'stagify' ) );
 			echo '</div>';
 			return;
 		}
