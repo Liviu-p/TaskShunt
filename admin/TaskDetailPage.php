@@ -55,6 +55,17 @@ final class TaskDetailPage {
 
 		echo '<div class="wrap stagify-wrap">';
 		$this->render_header( $task, $active_task_id, $base_action_url );
+
+		if ( TaskStatus::Pushed === $task->status ) {
+			printf(
+				'<div class="stagify-readonly-banner">'
+				. '<span class="dashicons dashicons-yes-alt"></span>'
+				. '<span>%s</span>'
+				. '</div>',
+				esc_html__( 'This task has been pushed to production. Changes below are read-only.', 'stagify' )
+			);
+		}
+
 		$this->render_items_table( $items );
 		$this->render_footer_actions( $task, $active_task_id, $base_action_url );
 		echo '</div>';
@@ -79,6 +90,10 @@ final class TaskDetailPage {
 		echo '<h1>' . esc_html( $task->title );
 		if ( $is_active ) {
 			echo ' <span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Active', 'stagify' ) . '</span>';
+		} elseif ( TaskStatus::Pushed === $task->status ) {
+			echo ' <span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>';
+		} elseif ( TaskStatus::Failed === $task->status ) {
+			echo ' <span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>';
 		}
 		echo '</h1>';
 		echo '<div class="stagify-actions" style="margin:0;">';
@@ -86,17 +101,16 @@ final class TaskDetailPage {
 		echo '</div>';
 		echo '</div>';
 
-		printf(
-			'<p class="stagify-meta">%s &middot; %s</p>',
-			esc_html( $task->created_at->format( 'M j, Y H:i' ) ),
-			esc_html(
-				sprintf(
-					/* translators: %d: number of tracked changes */
-					_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
-					$task->item_count
-				)
-			)
-		);
+		$meta_parts = array( esc_html( $task->created_at->format( 'M j, Y H:i' ) ) );
+		$meta_parts[] = esc_html( sprintf(
+			_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
+			$task->item_count
+		) );
+		if ( TaskStatus::Pushed === $task->status && null !== $task->pushed_at ) {
+			/* translators: %s: relative time like "2 hours ago" */
+			$meta_parts[] = esc_html( sprintf( __( 'Pushed %s', 'stagify' ), human_time_diff( $task->pushed_at->getTimestamp(), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'stagify' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		}
+		echo '<p class="stagify-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>';
 	}
 
 	/**

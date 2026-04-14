@@ -396,15 +396,18 @@ final class TasksPage {
 			/* translators: %d: task ID */
 			$title = ! empty( $log->task_title ) ? $log->task_title : sprintf( __( 'Task #%d', 'stagify' ), $log->task_id );
 
+			$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $log->task_id );
+
 			printf(
-				'<div class="stagify-history-item">'
+				'<a href="%s" class="stagify-history-item">'
 				. '<span class="dashicons %s %s"></span>'
 				. '<div class="stagify-history-info">'
 				. '<strong>%s</strong>'
 				. '<span class="stagify-history-meta">%s</span>'
 				. '</div>'
 				. '<span class="stagify-history-time">%s</span>'
-				. '</div>',
+				. '</a>',
+				esc_url( $detail_url ),
 				esc_attr( $icon ),
 				esc_attr( $icon_class ),
 				esc_html( $title ),

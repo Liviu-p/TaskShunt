@@ -163,8 +163,9 @@ final class TasksListTable extends \WP_List_Table {
 			$actions['retry'] = $this->retry_form( $item->id );
 		}
 
-		if ( TaskStatus::Pending === $item->status || TaskStatus::Failed === $item->status ) {
-			$actions['discard'] = $this->discard_form( $item->id );
+		if ( TaskStatus::Pushing !== $item->status ) {
+			$label = TaskStatus::Pushed === $item->status ? esc_html__( 'Remove', 'stagify' ) : esc_html__( 'Discard', 'stagify' );
+			$actions['discard'] = $this->discard_form( $item->id, $label );
 		}
 
 		return $actions;
@@ -215,7 +216,11 @@ final class TasksListTable extends \WP_List_Table {
 	 * @param int $task_id Task ID to discard.
 	 * @return string HTML link.
 	 */
-	private function discard_form( int $task_id ): string {
+	private function discard_form( int $task_id, string $label = '' ): string {
+		if ( '' === $label ) {
+			$label = esc_html__( 'Discard', 'stagify' );
+		}
+
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
@@ -228,9 +233,12 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" class="stagify-link-danger">%s</a>',
+			'<a href="%s" class="stagify-link-danger stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $url ),
-			esc_html__( 'Discard', 'stagify' )
+			esc_attr__( 'Remove this task?', 'stagify' ),
+			esc_attr__( 'This task and its history will be permanently deleted.', 'stagify' ),
+			esc_attr__( 'Remove', 'stagify' ),
+			$label
 		);
 	}
 

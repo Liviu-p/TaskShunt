@@ -1245,6 +1245,21 @@
 .stagify-test-result {
     margin-left: 8px;
     font-size: 13px;
+    font-weight: 600;
+}
+
+.stagify-test-result--success {
+    color: #39594d;
+}
+
+.stagify-test-result--error {
+    color: #b20000;
+}
+
+/* Loading button state */
+.stagify-btn-loading {
+    opacity: 0.7 !important;
+    pointer-events: none;
 }
 
 /* ----------------------------------------------------------------
@@ -1445,11 +1460,139 @@
     margin-bottom: 0 !important;
 }
 
+/* Read-only banner for pushed tasks */
+.stagify-readonly-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #757575;
+}
+
+.stagify-readonly-banner > .dashicons {
+    color: #39594d;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
 /* Detail page footer — discard at bottom, subtle */
 .stagify-detail-footer {
     margin-top: 24px;
     padding-top: 16px;
     border-top: 1px solid #f0f0f0;
+}
+
+/* ----------------------------------------------------------------
+   Push status banners (injected via JS)
+   ---------------------------------------------------------------- */
+.stagify-push-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #212121;
+    animation: stagify-modal-in 0.2s ease;
+    text-align: left;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.stagify-push-status-banner--success {
+    background: #f0faf2;
+    border: 1px solid #c8e6c9;
+}
+
+.stagify-push-status-banner--error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.stagify-push-status-banner > .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.stagify-push-status-banner--success > .dashicons {
+    color: #39594d;
+}
+
+.stagify-push-status-banner--error > .dashicons {
+    color: #b20000;
+}
+
+.stagify-push-status-banner > span {
+    flex: 1;
+    text-align: left;
+}
+
+.stagify-push-status-banner > a {
+    margin-left: auto;
+}
+
+.stagify-push-status-banner > a {
+    color: #39594d !important;
+    font-weight: 600;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.stagify-push-status-banner > a:hover {
+    text-decoration: underline;
+}
+
+/* Pushing overlay */
+.stagify-pushing-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.stagify-pushing-content {
+    text-align: center;
+}
+
+.stagify-pushing-content strong {
+    display: block;
+    font-size: 15px;
+    color: #212121;
+    margin-bottom: 4px;
+}
+
+.stagify-pushing-content p {
+    font-size: 13px !important;
+    color: #9e9e9e !important;
+    margin: 0 !important;
+}
+
+.stagify-pushing-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #212121;
+    border-radius: 50%;
+    animation: stagify-spin 0.7s linear infinite;
+    margin: 0 auto 12px;
+}
+
+@keyframes stagify-spin {
+    to { transform: rotate(360deg); }
 }
 
 /* ----------------------------------------------------------------
@@ -1562,11 +1705,19 @@
     overflow: hidden;
 }
 
+a.stagify-history-item,
 .stagify-history-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+}
+
+a.stagify-history-item:hover {
+    background: #fafafa;
 }
 
 .stagify-history-item + .stagify-history-item {
@@ -1802,18 +1953,115 @@
         padding: 10px;
     }
 
+    /* Page header — stack title and button */
+    .stagify-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    /* Setup cards — stack vertically */
     .stagify-setup-cards {
         flex-direction: column;
         align-items: center;
     }
 
+    .stagify-setup-card-form {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Active banner */
     .stagify-active-banner {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
 
+    /* Inputs full width */
     .stagify-wrap .regular-text {
         width: 100%;
+    }
+
+    /* Checklist */
+    .stagify-checklist-step {
+        padding: 10px 14px;
+    }
+
+    /* Notices/prompts */
+    .stagify-notice,
+    .stagify-prompt {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .stagify-prompt .button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Status card */
+    .stagify-status-card {
+        flex-wrap: wrap;
+    }
+
+    .stagify-server-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 8px;
+    }
+
+    /* Mode bar */
+    .stagify-mode-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Modal */
+    .stagify-modal {
+        padding: 24px 20px;
+        max-width: 95%;
+    }
+
+    /* Table */
+    .stagify-wrap .wp-list-table {
+        border-radius: 8px;
+    }
+
+    /* API key display */
+    .stagify-apikey-display {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .stagify-apikey-display code {
+        max-width: 100%;
+    }
+
+    /* Guide inline */
+    .stagify-guide-inline {
+        flex-wrap: wrap;
+    }
+
+    /* History */
+    .stagify-history-item {
+        flex-wrap: wrap;
+    }
+
+    .stagify-history-time {
+        width: 100%;
+        margin-top: 2px;
+    }
+
+    /* Push overlay */
+    .stagify-pushing-overlay {
+        border-radius: 0;
+    }
+
+    /* Detail page actions */
+    .stagify-actions {
+        flex-wrap: wrap;
     }
 }

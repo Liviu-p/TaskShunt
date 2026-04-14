@@ -19,9 +19,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	}
 
 	button.addEventListener( 'click', async () => {
+		const originalText = button.textContent ?? '';
 		button.disabled = true;
+		button.textContent = 'Testing…';
+		button.classList.add( 'stagify-btn-loading' );
 		result.textContent = '';
-		result.removeAttribute( 'style' );
+		result.className = 'stagify-test-result';
 
 		try {
 			const body = new URLSearchParams( {
@@ -38,16 +41,14 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			const data: TestConnectionResponse = await response.json() as TestConnectionResponse;
 
 			result.textContent = data.message;
-			result.style.color = data.success ? '#46b450' : '#dc3232';
-			result.style.fontWeight = '600';
-			result.style.marginLeft = '10px';
+			result.className = 'stagify-test-result ' + ( data.success ? 'stagify-test-result--success' : 'stagify-test-result--error' );
 		} catch {
 			result.textContent = 'Request failed. Check your network.';
-			result.style.color = '#dc3232';
-			result.style.fontWeight = '600';
-			result.style.marginLeft = '10px';
+			result.className = 'stagify-test-result stagify-test-result--error';
 		} finally {
 			button.disabled = false;
+			button.textContent = originalText;
+			button.classList.remove( 'stagify-btn-loading' );
 		}
 	} );
 } );
