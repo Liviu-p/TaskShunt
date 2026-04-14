@@ -9,7 +9,9 @@ interface StagifyAdminBarData {
 	hasServer: boolean;
 	discardLabel: string;
 	discardConfirm: string;
+	discardMessage: string;
 	pushConfirm: string;
+	pushMessage: string;
 	pushingLabel: string;
 	pushedLabel: string;
 	noActiveLabel: string;
@@ -74,10 +76,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy || ! activeTaskId || ! stagifyAdminBar.hasServer ) {
 					return;
 				}
-				if ( ! window.confirm( stagifyAdminBar.pushConfirm ) ) {
-					return;
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel } ).then( ( ok: boolean ) => {
+						if ( ok ) pushTask( activeTaskId, root );
+					} );
+				} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+					pushTask( activeTaskId, root );
 				}
-				pushTask( activeTaskId, root );
 				return;
 			}
 
@@ -87,10 +93,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy || ! activeTaskId ) {
 					return;
 				}
-				if ( ! window.confirm( stagifyAdminBar.discardConfirm ) ) {
-					return;
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( { title: stagifyAdminBar.discardConfirm, message: stagifyAdminBar.discardMessage, confirm: stagifyAdminBar.discardLabel, danger: true } ).then( ( ok: boolean ) => {
+						if ( ok ) discardTask( activeTaskId, root );
+					} );
+				} else if ( window.confirm( stagifyAdminBar.discardConfirm ) ) {
+					discardTask( activeTaskId, root );
 				}
-				discardTask( activeTaskId, root );
 				return;
 			}
 
@@ -373,11 +383,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				return;
 			}
 
-			if ( ! window.confirm( stagifyAdminBar.pushConfirm ) ) {
-				return;
+			const confirmFn = ( window as any ).stagifyConfirm;
+			if ( confirmFn ) {
+				confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel } ).then( ( ok: boolean ) => {
+					if ( ok ) pagePush( taskId, btn );
+				} );
+			} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+				pagePush( taskId, btn );
 			}
-
-			pagePush( taskId, btn );
 		} );
 	}
 

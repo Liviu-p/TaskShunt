@@ -11,6 +11,7 @@ namespace Stagify\Admin\Pages;
 
 use DI\Container;
 use Stagify\Admin\Notices;
+use Stagify\Admin\OnboardingChecklist;
 use Stagify\Admin\TasksListTable;
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\ServerRepositoryInterface;
@@ -80,12 +81,17 @@ final class TasksPage {
 		echo '<h1>' . esc_html__( 'Tasks', 'stagify' ) . '</h1>';
 		$this->render_create_form();
 		echo '</div>';
-		echo '<p class="stagify-subheading">' . esc_html__( 'Track and push content changes from staging to production.', 'stagify' ) . '</p>';
+		echo '<p class="stagify-subheading">' . esc_html__( 'Group your changes into tasks and push them to production when ready.', 'stagify' ) . '</p>';
 
+		OnboardingChecklist::render_sender( $this->server_repository );
 		$this->render_server_badge( $server );
 
-		if ( null !== $active_task ) {
-			$this->render_active_banner( $active_task->title, $active_task->item_count, $active_task->id );
+		if ( null !== $active_task && 0 === $active_task->item_count ) {
+			$this->render_active_guide( $active_task->title );
+		}
+
+		if ( null === $active_task ) {
+			$this->render_no_active_prompt();
 		}
 
 		$this->render_list_table();
@@ -219,18 +225,20 @@ final class TasksPage {
 	 * @return void
 	 */
 	private function render_active_banner( string $title, int $item_count, int $task_id ): void {
-		printf(
-			'<div class="stagify-active-banner">'
-			. '<strong>%s</strong>'
-			. '<span class="stagify-change-count">%s</span>'
-			. '<a href="#" class="button button-primary button-small stagify-push-btn" data-task-id="%d">%s</a>'
-			. '</div>',
-			esc_html( $title ),
-			/* translators: %d: number of tracked changes in the task */
-			esc_html( sprintf( _n( '%d change', '%d changes', $item_count, 'stagify' ), $item_count ) ),
-			$task_id,
-			esc_html__( 'Push now', 'stagify' )
-		);
+		echo '<div class="stagify-active-banner">';
+		printf( '<strong>%s</strong>', esc_html( $title ) );
+		/* translators: %d: number of tracked changes in the task */
+		printf( '<span class="stagify-change-count">%s</span>', esc_html( sprintf( _n( '%d change', '%d changes', $item_count, 'stagify' ), $item_count ) ) );
+
+		if ( $item_count > 0 ) {
+			printf(
+				'<a href="#" class="button button-primary button-small stagify-push-btn" data-task-id="%d">%s</a>',
+				$task_id,
+				esc_html__( 'Push now', 'stagify' )
+			);
+		}
+
+		echo '</div>';
 	}
 
 	/**
@@ -244,6 +252,14 @@ final class TasksPage {
 	 */
 	private function render_server_badge( ?\Stagify\Domain\Server $server ): void {
 		if ( null !== $server ) {
+			return;
+		}
+
+		// Don't show if onboarding checklist is visible — it already explains this.
+		if ( OnboardingChecklist::should_show() && ! OnboardingChecklist::is_complete(
+			\Stagify\Domain\PluginMode::Sender,
+			$this->server_repository
+		) ) {
 			return;
 		}
 
@@ -264,6 +280,78 @@ final class TasksPage {
 	}
 
 	/**
+	 * Render the active task guide when a task has 0 changes.
+	 *
+	 * @param string $title Active task title.
+	 * @return void
+	 */
+	private function render_active_guide( string $title ): void {
+		printf(
+			'<div class="stagify-guide-inline">'
+			. '<span class="stagify-pulse-dot"></span>'
+			. '<span><strong>"%s"</strong> %s</span>'
+			. '</div>',
+			esc_html( $title ),
+			esc_html__( 'is active — edit pages, posts, or media as usual. Changes are tracked automatically. Push when done.', 'stagify' )
+		);
+	}
+
+	/**
+	 * Render a prompt when no task is active.
+	 *
+	 * Shows contextual message — success after push, or nudge to start.
+	 *
+	 * @return void
+	 */
+	private function render_no_active_prompt(): void {
+		$all_tasks  = $this->task_repository->find_all();
+		$has_pushed = false;
+
+		foreach ( $all_tasks as $task ) {
+			if ( \Stagify\Domain\TaskStatus::Pushed === $task->status ) {
+				$has_pushed = true;
+				break;
+			}
+		}
+
+		if ( empty( $all_tasks ) ) {
+			// First time.
+			$icon    = 'dashicons-flag';
+			$title   = __( 'Ready to start', 'stagify' );
+			$message = __( 'Create your first task to begin tracking content changes.', 'stagify' );
+			$class   = '';
+		} elseif ( $has_pushed ) {
+			// Has pushed tasks — celebrate.
+			$icon    = 'dashicons-yes-alt';
+			$title   = __( 'All changes pushed!', 'stagify' );
+			$message = __( 'Your changes are live on production. Create a new task to keep going.', 'stagify' );
+			$class   = ' stagify-prompt--success';
+		} else {
+			// Has tasks but none active.
+			$icon    = 'dashicons-info-outline';
+			$title   = __( 'No active task', 'stagify' );
+			$message = __( 'Create a new task or click "Work on this" on an existing one.', 'stagify' );
+			$class   = '';
+		}
+
+		printf(
+			'<div class="stagify-prompt%s">'
+			. '<span class="dashicons %s"></span>'
+			. '<div>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>'
+			. '<button type="button" class="button button-primary" onclick="document.getElementById(\'stagify-new-task-toggle\').click();">%s</button>'
+			. '</div>',
+			esc_attr( $class ),
+			esc_attr( $icon ),
+			esc_html( $title ),
+			esc_html( $message ),
+			esc_html__( '+ New Task', 'stagify' )
+		);
+	}
+
+	/**
 	 * Render the create-new-task form.
 	 *
 	 * @return void
@@ -271,13 +359,13 @@ final class TasksPage {
 	private function render_create_form(): void {
 		printf(
 			'<button type="button" class="button button-primary stagify-new-task-btn" id="stagify-new-task-toggle">+ %s</button>',
-			esc_html__( 'New task', 'stagify' )
+			esc_html__( 'New Task', 'stagify' )
 		);
 		echo '<form method="post" class="stagify-create-form" id="stagify-create-form" style="display:none;">';
 		wp_nonce_field( 'stagify_create_task' );
 		printf(
 			'<input type="text" name="stagify_task_title" placeholder="%s" maxlength="%d" required>',
-			esc_attr__( 'Task name…', 'stagify' ),
+			esc_attr__( 'e.g. Homepage redesign, Blog updates…', 'stagify' ),
 			(int) self::MAX_TITLE_LENGTH
 		);
 		printf(

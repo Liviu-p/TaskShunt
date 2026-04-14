@@ -147,11 +147,16 @@ final class TasksListTable extends \WP_List_Table {
 		$actions    = array();
 		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
 
-		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
-		$actions['push'] = $this->push_form( $item->id );
+		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
-		if ( TaskStatus::Pending === $item->status && null === $this->active_task_id ) {
-			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Set as active', 'stagify' ) . '</a>';
+		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
+
+		if ( $is_active ) {
+			$actions['push'] = $this->push_form( $item->id );
+		}
+
+		if ( TaskStatus::Pending === $item->status && ! $is_active ) {
+			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Work on this', 'stagify' ) . '</a>';
 		}
 
 		if ( TaskStatus::Failed === $item->status ) {
@@ -260,8 +265,8 @@ final class TasksListTable extends \WP_List_Table {
 		}
 
 		return match ( $item->status ) {
-			TaskStatus::Pending => '<span class="stagify-badge stagify-badge--pending">' . esc_html__( 'Pending', 'stagify' ) . '</span>',
-			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing', 'stagify' ) . '</span>',
+			TaskStatus::Pending => '',
+			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing…', 'stagify' ) . '</span>',
 			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
 			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};

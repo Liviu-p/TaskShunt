@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Pages;
 
+use Stagify\Admin\OnboardingChecklist;
 use Stagify\Api\ReceiverApi;
 
 /**
@@ -117,9 +118,15 @@ final class ReceiverSettingsPage {
 		$ping_url = rest_url( 'stagify/v1/ping' );
 
 		echo '<div class="wrap stagify-wrap">';
-		echo '<h1>' . esc_html__( 'Stagify — Production (Receiver)', 'stagify' ) . '</h1>';
+
+		echo '<div class="stagify-page-header">';
+		echo '<h1>' . esc_html__( 'Production', 'stagify' ) . '</h1>';
+		echo '</div>';
+		echo '<p class="stagify-subheading">' . esc_html__( 'Accept and apply changes pushed from your staging server.', 'stagify' ) . '</p>';
 
 		settings_errors( 'stagify' );
+
+		OnboardingChecklist::render_receiver();
 
 		$this->render_status_section( $has_key, $ping_url );
 		$this->render_api_key_section( $api_key, $has_key );
@@ -136,25 +143,32 @@ final class ReceiverSettingsPage {
 	 * @return void
 	 */
 	private function render_status_section( bool $has_key, string $ping_url ): void {
-		echo '<h2>' . esc_html__( 'Status', 'stagify' ) . '</h2>';
-
 		if ( $has_key ) {
 			printf(
-				'<p><span style="color:#39594d;font-weight:600;">&#10003; %s</span></p>',
-				esc_html__( 'Receiver is active and ready to accept pushes.', 'stagify' )
+				'<div class="stagify-status-card stagify-status-card--ready">'
+				. '<span class="stagify-status-dot stagify-status-dot--ready"></span>'
+				. '<div>'
+				. '<strong>%s</strong>'
+				. '<p>%s <code>%s</code></p>'
+				. '</div>'
+				. '</div>',
+				esc_html__( 'Ready to receive', 'stagify' ),
+				esc_html__( 'Ping endpoint:', 'stagify' ),
+				esc_html( $ping_url )
 			);
 		} else {
 			printf(
-				'<p><span style="color:#ca492d;font-weight:600;">&#9888; %s</span></p>',
-				esc_html__( 'No API key configured. Generate or set one below to start receiving pushes.', 'stagify' )
+				'<div class="stagify-status-card stagify-status-card--inactive">'
+				. '<span class="stagify-status-dot stagify-status-dot--inactive"></span>'
+				. '<div>'
+				. '<strong>%s</strong>'
+				. '<p>%s</p>'
+				. '</div>'
+				. '</div>',
+				esc_html__( 'Not configured', 'stagify' ),
+				esc_html__( 'Generate or set an API key below to start receiving pushes.', 'stagify' )
 			);
 		}
-
-		printf(
-			'<p>%s <code>%s</code></p>',
-			esc_html__( 'Ping endpoint:', 'stagify' ),
-			esc_html( $ping_url )
-		);
 	}
 
 	/**
@@ -165,35 +179,70 @@ final class ReceiverSettingsPage {
 	 * @return void
 	 */
 	private function render_api_key_section( string $api_key, bool $has_key ): void {
+		echo '<div class="stagify-section-card">';
 		echo '<h2>' . esc_html__( 'API Key', 'stagify' ) . '</h2>';
-		echo '<p>' . esc_html__( 'This key must match the one configured on the staging (sender) site.', 'stagify' ) . '</p>';
+		echo '<p>' . esc_html__( 'Copy this key and paste it in the staging (sender) site settings.', 'stagify' ) . '</p>';
 
-		printf( '<form method="post">' );
-		wp_nonce_field( 'stagify_receiver_settings' );
-		echo '<input type="hidden" name="stagify_receiver_action" value="save_api_key">';
+		if ( $has_key ) {
+			// Show key with copy + regenerate.
+			printf(
+				'<div class="stagify-apikey-display">'
+				. '<code id="stagify-key-value">%s</code>'
+				. '<button type="button" class="button button-small" id="stagify-copy-key" title="%s">%s</button>'
+				. '</div>',
+				esc_html( $api_key ),
+				esc_attr__( 'Copy to clipboard', 'stagify' ),
+				esc_html__( 'Copy', 'stagify' )
+			);
 
-		echo '<table class="form-table" role="presentation"><tbody>';
-		printf(
-			'<tr><th scope="row"><label for="stagify_api_key">%s</label></th>'
-			. '<td><input type="text" id="stagify_api_key" name="stagify_api_key" value="%s" class="regular-text" autocomplete="off"></td></tr>',
-			esc_html__( 'API Key', 'stagify' ),
-			esc_attr( $api_key )
-		);
-		echo '</tbody></table>';
+			echo '<form method="post" class="stagify-apikey-generate">';
+			wp_nonce_field( 'stagify_receiver_settings' );
+			echo '<input type="hidden" name="stagify_receiver_action" value="generate_api_key">';
+			printf(
+				'<button type="submit" class="button button-small stagify-confirm-submit" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1"><span class="dashicons dashicons-update"></span> %s</button>',
+				esc_attr__( 'Regenerate API key?', 'stagify' ),
+				esc_attr__( 'This will replace the current key. The staging site must be updated to match.', 'stagify' ),
+				esc_attr__( 'Regenerate', 'stagify' ),
+				esc_html__( 'Regenerate', 'stagify' )
+			);
+			echo '</form>';
+		} else {
+			// No key — just generate.
+			echo '<form method="post">';
+			wp_nonce_field( 'stagify_receiver_settings' );
+			echo '<input type="hidden" name="stagify_receiver_action" value="generate_api_key">';
+			printf(
+				'<button type="submit" class="button button-primary">%s</button>',
+				esc_html__( 'Generate API key', 'stagify' )
+			);
+			echo '</form>';
+		}
 
-		submit_button( __( 'Save API key', 'stagify' ) );
-		echo '</form>';
+		echo '</div>';
 
-		// Generate button as a separate form.
-		printf( '<form method="post" style="margin-top:-16px;">' );
-		wp_nonce_field( 'stagify_receiver_settings' );
-		echo '<input type="hidden" name="stagify_receiver_action" value="generate_api_key">';
-		printf(
-			'<button type="submit" class="button" onclick="return confirm(\'%s\');">%s</button>',
-			esc_js( $has_key ? __( 'This will replace the current API key. The sender must be updated to match. Continue?', 'stagify' ) : '' ),
-			esc_html__( 'Generate new key', 'stagify' )
-		);
-		echo '</form>';
+		$this->render_copy_script();
+	}
+
+	/**
+	 * Output the inline JS for the copy button.
+	 *
+	 * @return void
+	 */
+	private function render_copy_script(): void {
+		echo '<script>'
+			. '(function(){'
+			. 'var btn=document.getElementById("stagify-copy-key");'
+			. 'var code=document.getElementById("stagify-key-value");'
+			. 'if(!btn||!code)return;'
+			. 'btn.addEventListener("click",function(){'
+			. 'navigator.clipboard.writeText(code.textContent).then(function(){'
+			. 'var orig=btn.textContent;'
+			. 'btn.textContent="' . esc_js( __( 'Copied!', 'stagify' ) ) . '";'
+			. 'setTimeout(function(){btn.textContent=orig;},1500);'
+			. '});'
+			. '});'
+			. '})();'
+			. '</script>';
 	}
 
 	/**
@@ -202,13 +251,45 @@ final class ReceiverSettingsPage {
 	 * @return void
 	 */
 	private function render_mode_section(): void {
-		echo '<h2>' . esc_html__( 'Plugin mode', 'stagify' ) . '</h2>';
+		$setup_url = esc_url( admin_url( 'admin.php?page=stagify-setup' ) );
+
 		printf(
-			'<p><strong>%s</strong> &mdash; <a href="%s" onclick="return confirm(\'%s\');">%s</a></p>',
-			esc_html__( 'Production (Receiver)', 'stagify' ),
-			esc_url( admin_url( 'admin.php?page=stagify-setup' ) ),
-			esc_js( __( 'Changing the mode will alter which features are active. Continue?', 'stagify' ) ),
-			esc_html__( 'Change', 'stagify' )
+			'<div class="stagify-mode-bar">'
+			. '<span>%s <strong>%s</strong></span>'
+			. '<button type="button" class="button button-small" id="stagify-switch-mode-btn">%s</button>'
+			. '</div>',
+			esc_html__( 'Mode:', 'stagify' ),
+			esc_html__( 'Production', 'stagify' ),
+			esc_html__( 'Switch mode', 'stagify' )
 		);
+
+		printf(
+			'<div class="stagify-mode-confirm" id="stagify-mode-confirm" style="display:none;">'
+			. '<div class="stagify-mode-confirm-inner">'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '<div class="stagify-mode-confirm-actions">'
+			. '<a href="%s" class="button button-primary stagify-btn-danger">%s</a>'
+			. '<button type="button" class="button" id="stagify-switch-mode-cancel">%s</button>'
+			. '</div>'
+			. '</div>'
+			. '</div>',
+			esc_html__( 'Change plugin mode?', 'stagify' ),
+			esc_html__( 'You will be redirected to choose a new mode. This will change which features are active on this site.', 'stagify' ),
+			$setup_url,
+			esc_html__( 'Continue', 'stagify' ),
+			esc_html__( 'Cancel', 'stagify' )
+		);
+
+		echo '<script>'
+			. '(function(){'
+			. 'var btn=document.getElementById("stagify-switch-mode-btn");'
+			. 'var panel=document.getElementById("stagify-mode-confirm");'
+			. 'var cancel=document.getElementById("stagify-switch-mode-cancel");'
+			. 'if(!btn||!panel||!cancel)return;'
+			. 'btn.addEventListener("click",function(){panel.style.display="block";btn.style.display="none";});'
+			. 'cancel.addEventListener("click",function(){panel.style.display="none";btn.style.display="inline-flex";});'
+			. '})();'
+			. '</script>';
 	}
 }

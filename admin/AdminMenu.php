@@ -70,6 +70,65 @@ final class AdminMenu {
 				$this->container->get( SettingsPage::class )->enqueue_scripts( $hook );
 			}
 		);
+		add_action(
+			'admin_footer',
+			static function (): void {
+				self::render_confirm_modal();
+			}
+		);
+	}
+
+	/**
+	 * Render the global confirm modal HTML and JS.
+	 *
+	 * @return void
+	 */
+	private static function render_confirm_modal(): void {
+		$cancel = esc_js( __( 'Cancel', 'stagify' ) );
+		echo '<div class="stagify-modal-overlay" id="stagify-modal-overlay">'
+			. '<div class="stagify-modal">'
+			. '<strong id="stagify-modal-title"></strong>'
+			. '<p id="stagify-modal-message"></p>'
+			. '<div class="stagify-modal-actions">'
+			. '<button type="button" class="button" id="stagify-modal-cancel">' . esc_html__( 'Cancel', 'stagify' ) . '</button>'
+			. '<button type="button" class="button button-primary" id="stagify-modal-ok"></button>'
+			. '</div></div></div>';
+
+		echo '<script>'
+			. 'window.stagifyConfirm=function(opts){'
+			. 'return new Promise(function(resolve){'
+			. 'var ov=document.getElementById("stagify-modal-overlay");'
+			. 'var ti=document.getElementById("stagify-modal-title");'
+			. 'var msg=document.getElementById("stagify-modal-message");'
+			. 'var ok=document.getElementById("stagify-modal-ok");'
+			. 'var cn=document.getElementById("stagify-modal-cancel");'
+			. 'if(!ov)return resolve(false);'
+			. 'ti.textContent=opts.title||"";'
+			. 'msg.textContent=opts.message||"";'
+			. 'ok.textContent=opts.confirm||"OK";'
+			. 'ok.className="button button-primary"+(opts.danger?" stagify-modal-confirm--danger":"");'
+			. 'ov.classList.add("stagify-modal--open");'
+			. 'function close(val){ov.classList.remove("stagify-modal--open");ok.onclick=null;cn.onclick=null;resolve(val);}'
+			. 'ok.onclick=function(){close(true);};'
+			. 'cn.onclick=function(){close(false);};'
+			. 'ov.addEventListener("click",function(e){if(e.target===ov)close(false);},{once:true});'
+			. '});'
+			. '};'
+			// Links with data-confirm attributes.
+			. 'document.addEventListener("click",function(e){'
+			. 'var el=e.target.closest(".stagify-confirm-link");'
+			. 'if(!el)return;'
+			. 'e.preventDefault();'
+			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)window.location.href=el.href;});'
+			. '});'
+			// Submit buttons with data-confirm attributes.
+			. 'document.addEventListener("click",function(e){'
+			. 'var el=e.target.closest(".stagify-confirm-submit");'
+			. 'if(!el)return;'
+			. 'e.preventDefault();'
+			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)el.closest("form").submit();});'
+			. '});'
+			. '</script>';
 	}
 
 	/**
@@ -190,8 +249,10 @@ final class AdminMenu {
 				'settingsUrl'   => admin_url( 'admin.php?page=stagify-settings' ),
 				'hasServer'     => null !== $this->server_repository->find(),
 				'discardLabel'  => __( 'Discard task', 'stagify' ),
-				'discardConfirm' => __( 'Discard this task and all its tracked changes?', 'stagify' ),
+				'discardConfirm' => __( 'Discard this task?', 'stagify' ),
+				'discardMessage' => __( 'This will permanently delete this task and all its tracked changes. This action cannot be undone.', 'stagify' ),
 				'pushConfirm'   => __( 'Push this task to production?', 'stagify' ),
+				'pushMessage'   => __( 'All tracked changes in this task will be sent to your production site and applied automatically.', 'stagify' ),
 				'pushingLabel'  => __( 'Pushing…', 'stagify' ),
 				'pushedLabel'   => __( 'Pushed!', 'stagify' ),
 				'noActiveLabel' => __( 'No active task', 'stagify' ),

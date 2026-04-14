@@ -52,6 +52,22 @@ final class SetupPage {
 				);
 			}
 		);
+
+		add_action(
+			'admin_enqueue_scripts',
+			static function (): void {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+				if ( 'stagify-setup' === $page ) {
+					wp_enqueue_style(
+						'stagify-admin',
+						STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
+						array(),
+						STAGIFY_VERSION
+					);
+				}
+			}
+		);
 	}
 
 	/**
@@ -104,75 +120,105 @@ final class SetupPage {
 	 */
 	public function render(): void {
 		echo '<div class="wrap stagify-wrap stagify-setup">';
+
 		echo '<h1>' . esc_html__( 'Welcome to Stagify', 'stagify' ) . '</h1>';
 		echo '<p class="stagify-subtitle">'
-			. esc_html__( 'How will this site use Stagify?', 'stagify' )
+			. esc_html__( 'Sync content changes between staging and production.', 'stagify' )
 			. '</p>';
+		echo '<h2 class="stagify-setup-choose">' . esc_html__( 'What is this site?', 'stagify' ) . '</h2>';
+
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" id="stagify-setup-form">';
+		echo '<input type="hidden" name="action" value="stagify_save_mode">';
+		echo '<input type="hidden" name="stagify_mode" value="" id="stagify-mode-input">';
+		wp_nonce_field( 'stagify_save_mode' );
 
 		echo '<div class="stagify-setup-cards">';
-		$this->render_sender_card();
-		$this->render_receiver_card();
-		echo '</div>';
-		echo '</div>';
-	}
-
-	/**
-	 * Render the Sender mode card.
-	 *
-	 * @return void
-	 */
-	private function render_sender_card(): void {
 		$this->render_mode_card(
 			PluginMode::Sender,
-			__( 'Staging (Sender)', 'stagify' ),
-			__( 'This is a staging site. Track content and file changes, then push them to production.', 'stagify' ),
-			'dashicons-upload'
+			__( 'Staging', 'stagify' ),
+			__( 'I edit and test content here.', 'stagify' ),
+			'dashicons-edit'
 		);
-	}
-
-	/**
-	 * Render the Receiver mode card.
-	 *
-	 * @return void
-	 */
-	private function render_receiver_card(): void {
 		$this->render_mode_card(
 			PluginMode::Receiver,
-			__( 'Production (Receiver)', 'stagify' ),
-			__( 'This is a production site. Accept and apply changes pushed from a staging server.', 'stagify' ),
-			'dashicons-download'
+			__( 'Production', 'stagify' ),
+			__( 'This is my live website.', 'stagify' ),
+			'dashicons-admin-site-alt3'
 		);
+		echo '</div>';
+
+		echo '<div class="stagify-setup-submit" id="stagify-setup-submit" style="display:none;">';
+		printf(
+			'<button type="submit" class="button button-primary stagify-setup-go" id="stagify-setup-go">%s</button>',
+			esc_html__( 'Continue', 'stagify' )
+		);
+		echo '</div>';
+
+		echo '</form>';
+
+		echo '<p class="stagify-setup-hint">'
+			. esc_html__( 'Install Stagify on both sites. We\'ll guide you through the rest.', 'stagify' )
+			. '</p>';
+
+		echo '</div>';
+
+		$this->render_select_script();
 	}
 
 	/**
-	 * Render a single mode selection card.
+	 * Render a selectable mode card (no submit button inside).
 	 *
-	 * @param PluginMode $mode  The mode this card represents.
-	 * @param string     $title Card heading.
-	 * @param string     $desc  Card description text.
-	 * @param string     $icon  Dashicons class name.
+	 * @param PluginMode $mode  The mode enum value.
+	 * @param string     $title Card title.
+	 * @param string     $desc  Short description.
+	 * @param string     $icon  Dashicons class.
 	 * @return void
 	 */
 	private function render_mode_card( PluginMode $mode, string $title, string $desc, string $icon ): void {
 		printf(
-			'<form method="post" action="%s" style="flex:1;max-width:320px;">'
-			. '<div class="stagify-card">'
+			'<div class="stagify-setup-card-form">'
+			. '<div class="stagify-card stagify-card--selectable" data-mode="%s" data-label="%s">'
+			. '<span class="stagify-card-radio"></span>'
 			. '<span class="dashicons %s stagify-card-icon"></span>'
-			. '<h2>%s</h2>'
+			. '<h3>%s</h3>'
 			. '<p>%s</p>'
-			. '<input type="hidden" name="action" value="stagify_save_mode">'
-			. '<input type="hidden" name="stagify_mode" value="%s">',
-			esc_url( admin_url( 'admin-post.php' ) ),
+			. '</div>'
+			. '</div>',
+			esc_attr( $mode->value ),
+			esc_attr( sprintf(
+				/* translators: %s: mode name */
+				__( 'Continue as %s', 'stagify' ),
+				$title
+			) ),
 			esc_attr( $icon ),
 			esc_html( $title ),
-			esc_html( $desc ),
-			esc_attr( $mode->value )
+			esc_html( $desc )
 		);
-		wp_nonce_field( 'stagify_save_mode' );
-		printf(
-			'<button type="submit" class="button button-primary button-hero" style="margin-top:16px;">%s</button>'
-			. '</div></form>',
-			esc_html__( 'Select', 'stagify' )
-		);
+	}
+
+	/**
+	 * Output the card selection JS.
+	 *
+	 * @return void
+	 */
+	private function render_select_script(): void {
+		echo '<script>'
+			. '(function(){'
+			. 'var cards=document.querySelectorAll(".stagify-card--selectable");'
+			. 'var input=document.getElementById("stagify-mode-input");'
+			. 'var submit=document.getElementById("stagify-setup-submit");'
+			. 'var btn=document.getElementById("stagify-setup-go");'
+			. 'if(!cards.length||!input||!submit||!btn)return;'
+			. 'cards.forEach(function(card){'
+			. 'card.addEventListener("click",function(){'
+			. 'cards.forEach(function(c){c.classList.remove("stagify-card--selected");});'
+			. 'card.classList.add("stagify-card--selected");'
+			. 'input.value=card.dataset.mode;'
+			. 'btn.textContent=card.dataset.label;'
+			. 'submit.style.display="block";'
+			. '});'
+			. '});'
+			. '})();'
+			. '</script>';
 	}
 }
