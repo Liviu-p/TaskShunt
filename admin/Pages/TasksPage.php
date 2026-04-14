@@ -233,7 +233,7 @@ final class TasksPage {
 		if ( $item_count > 0 ) {
 			printf(
 				'<a href="#" class="button button-primary button-small stagify-push-btn" data-task-id="%d">%s</a>',
-				$task_id,
+				(int) $task_id,
 				esc_html__( 'Push now', 'stagify' )
 			);
 		}
@@ -304,6 +304,31 @@ final class TasksPage {
 	 * @return void
 	 */
 	private function render_no_active_prompt(): void {
+		$prompt = $this->resolve_prompt_data();
+
+		printf(
+			'<div class="stagify-prompt%s">'
+			. '<span class="dashicons %s"></span>'
+			. '<div>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>'
+			. '<button type="button" class="button button-primary" onclick="document.getElementById(\'stagify-new-task-toggle\').click();">%s</button>'
+			. '</div>',
+			esc_attr( $prompt['class'] ),
+			esc_attr( $prompt['icon'] ),
+			esc_html( $prompt['title'] ),
+			esc_html( $prompt['message'] ),
+			esc_html__( '+ New Task', 'stagify' )
+		);
+	}
+
+	/**
+	 * Determine the prompt icon, title, message, and class based on task state.
+	 *
+	 * @return array{icon: string, title: string, message: string, class: string}
+	 */
+	private function resolve_prompt_data(): array {
 		$all_tasks  = $this->task_repository->find_all();
 		$has_pushed = false;
 
@@ -315,39 +340,28 @@ final class TasksPage {
 		}
 
 		if ( empty( $all_tasks ) ) {
-			// First time.
-			$icon    = 'dashicons-flag';
-			$title   = __( 'Ready to start', 'stagify' );
-			$message = __( 'Create your first task to begin tracking content changes.', 'stagify' );
-			$class   = '';
-		} elseif ( $has_pushed ) {
-			// Has pushed tasks — celebrate.
-			$icon    = 'dashicons-yes-alt';
-			$title   = __( 'All changes pushed!', 'stagify' );
-			$message = __( 'Your changes are live on production. Create a new task to keep going.', 'stagify' );
-			$class   = ' stagify-prompt--success';
-		} else {
-			// Has tasks but none active.
-			$icon    = 'dashicons-info-outline';
-			$title   = __( 'No active task', 'stagify' );
-			$message = __( 'Create a new task or click "Work on this" on an existing one.', 'stagify' );
-			$class   = '';
+			return array(
+				'icon'    => 'dashicons-flag',
+				'title'   => __( 'Ready to start', 'stagify' ),
+				'message' => __( 'Create your first task to begin tracking content changes.', 'stagify' ),
+				'class'   => '',
+			);
 		}
 
-		printf(
-			'<div class="stagify-prompt%s">'
-			. '<span class="dashicons %s"></span>'
-			. '<div>'
-			. '<strong>%s</strong>'
-			. '<p>%s</p>'
-			. '</div>'
-			. '<button type="button" class="button button-primary" onclick="document.getElementById(\'stagify-new-task-toggle\').click();">%s</button>'
-			. '</div>',
-			esc_attr( $class ),
-			esc_attr( $icon ),
-			esc_html( $title ),
-			esc_html( $message ),
-			esc_html__( '+ New Task', 'stagify' )
+		if ( $has_pushed ) {
+			return array(
+				'icon'    => 'dashicons-yes-alt',
+				'title'   => __( 'All changes pushed!', 'stagify' ),
+				'message' => __( 'Your changes are live on production. Create a new task to keep going.', 'stagify' ),
+				'class'   => ' stagify-prompt--success',
+			);
+		}
+
+		return array(
+			'icon'    => 'dashicons-info-outline',
+			'title'   => __( 'No active task', 'stagify' ),
+			'message' => __( 'Create a new task or click "Work on this" on an existing one.', 'stagify' ),
+			'class'   => '',
 		);
 	}
 

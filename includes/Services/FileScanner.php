@@ -148,9 +148,9 @@ final class FileScanner {
 	/**
 	 * Scan a single directory tree for created and updated files.
 	 *
-	 * @param int               $task_id    Active task ID.
-	 * @param string            $abs_dir    Absolute path to scan.
-	 * @param string            $label      Label prefix for relative paths.
+	 * @param int                $task_id    Active task ID.
+	 * @param string             $abs_dir    Absolute path to scan.
+	 * @param string             $label      Label prefix for relative paths.
 	 * @param array<string,bool> $seen_paths Collector of visited paths (by reference).
 	 * @return void
 	 */
@@ -162,7 +162,7 @@ final class FileScanner {
 				continue;
 			}
 
-			$relative              = $this->relative_path( $abs_dir, $file->getPathname(), $label );
+			$relative                = $this->relative_path( $abs_dir, $file->getPathname(), $label );
 			$seen_paths[ $relative ] = true;
 
 			$hash = $this->hash_file( $file->getPathname() );
@@ -212,15 +212,17 @@ final class FileScanner {
 	 * @param string     $abs_path Absolute path for payload (empty for deletes).
 	 * @return void
 	 */
-	private function record_change( int $task_id, TaskAction $action, string $relative, string $abs_path ): void {
+	private function record_change( int $task_id, TaskAction $action, string $relative, string $abs_path ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		if ( $this->task_item_repository->item_exists( $task_id, TaskItemType::File, 'file', $relative ) ) {
 			return;
 		}
 
-		$payload = wp_json_encode( array(
-			'path'   => $relative,
-			'action' => $action->value,
-		) );
+		$payload = wp_json_encode(
+			array(
+				'path'   => $relative,
+				'action' => $action->value,
+			) 
+		);
 
 		$this->task_item_repository->add_item(
 			$task_id,
@@ -288,7 +290,7 @@ final class FileScanner {
 
 		$filter = new \RecursiveCallbackFilterIterator(
 			$dir_iterator,
-			static function ( \SplFileInfo $current, string $key, \RecursiveDirectoryIterator $iterator ): bool {
+			static function ( \SplFileInfo $current, string $key, \RecursiveDirectoryIterator $iterator ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 				if ( $current->isDir() ) {
 					$name = $current->getFilename();
 					return ! in_array( $name, array( 'node_modules', 'vendor', '.git' ), true );

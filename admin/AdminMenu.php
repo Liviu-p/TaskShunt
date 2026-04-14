@@ -63,6 +63,15 @@ final class AdminMenu {
 			},
 			100
 		);
+		$this->register_asset_hooks();
+	}
+
+	/**
+	 * Register script/style enqueue and footer hooks.
+	 *
+	 * @return void
+	 */
+	private function register_asset_hooks(): void {
 		add_action(
 			'admin_enqueue_scripts',
 			function ( string $hook ): void {
@@ -84,7 +93,16 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private static function render_confirm_modal(): void {
-		$cancel = esc_js( __( 'Cancel', 'stagify' ) );
+		self::render_modal_html();
+		self::render_modal_script();
+	}
+
+	/**
+	 * Output the confirm modal HTML.
+	 *
+	 * @return void
+	 */
+	private static function render_modal_html(): void {
 		echo '<div class="stagify-modal-overlay" id="stagify-modal-overlay">'
 			. '<div class="stagify-modal">'
 			. '<strong id="stagify-modal-title"></strong>'
@@ -93,7 +111,14 @@ final class AdminMenu {
 			. '<button type="button" class="button" id="stagify-modal-cancel">' . esc_html__( 'Cancel', 'stagify' ) . '</button>'
 			. '<button type="button" class="button button-primary" id="stagify-modal-ok"></button>'
 			. '</div></div></div>';
+	}
 
+	/**
+	 * Output the confirm modal inline JS.
+	 *
+	 * @return void
+	 */
+	private static function render_modal_script(): void {
 		echo '<script>'
 			. 'window.stagifyConfirm=function(opts){'
 			. 'return new Promise(function(resolve){'
@@ -116,16 +141,12 @@ final class AdminMenu {
 			. '};'
 			// Links with data-confirm attributes.
 			. 'document.addEventListener("click",function(e){'
-			. 'var el=e.target.closest(".stagify-confirm-link");'
-			. 'if(!el)return;'
-			. 'e.preventDefault();'
+			. 'var el=e.target.closest(".stagify-confirm-link");if(!el)return;e.preventDefault();'
 			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)window.location.href=el.href;});'
 			. '});'
 			// Submit buttons with data-confirm attributes.
 			. 'document.addEventListener("click",function(e){'
-			. 'var el=e.target.closest(".stagify-confirm-submit");'
-			. 'if(!el)return;'
-			. 'e.preventDefault();'
+			. 'var el=e.target.closest(".stagify-confirm-submit");if(!el)return;e.preventDefault();'
 			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)el.closest("form").submit();});'
 			. '});'
 			. '</script>';
@@ -221,47 +242,38 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private function enqueue_admin_bar_script(): void {
-		wp_enqueue_style(
-			'stagify-admin',
-			STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
-			array(),
-			STAGIFY_VERSION
-		);
+		wp_enqueue_style( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css', array(), STAGIFY_VERSION );
+		wp_enqueue_script( 'stagify-admin-bar', STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js', array(), STAGIFY_VERSION, true );
+		wp_localize_script( 'stagify-admin-bar', 'stagifyAdminBar', $this->get_admin_bar_data() );
+	}
 
-		wp_enqueue_script(
-			'stagify-admin-bar',
-			STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js',
-			array(),
-			STAGIFY_VERSION,
-			true
+	/**
+	 * Return the localized data array for the admin bar script.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_admin_bar_data(): array {
+		return array(
+			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+			'nonce'          => wp_create_nonce( 'stagify_activate_task' ),
+			'allTasksUrl'    => admin_url( 'admin.php?page=stagify' ),
+			'allTasksLabel'  => __( 'All tasks', 'stagify' ),
+			'pushLabel'      => __( 'Push now', 'stagify' ),
+			'noServerLabel'  => __( 'Configure server to push', 'stagify' ),
+			'settingsUrl'    => admin_url( 'admin.php?page=stagify-settings' ),
+			'hasServer'      => null !== $this->server_repository->find(),
+			'discardLabel'   => __( 'Discard task', 'stagify' ),
+			'discardConfirm' => __( 'Discard this task?', 'stagify' ),
+			'discardMessage' => __( 'This will permanently delete this task and all its tracked changes. This action cannot be undone.', 'stagify' ),
+			'pushConfirm'    => __( 'Push this task to production?', 'stagify' ),
+			'pushMessage'    => __( 'All tracked changes in this task will be sent to your production site and applied automatically.', 'stagify' ),
+			'pushingLabel'   => __( 'Pushing…', 'stagify' ),
+			'pushedLabel'    => __( 'Pushed!', 'stagify' ),
+			'noActiveLabel'  => __( 'No active task', 'stagify' ),
+			'activeTaskId'   => $this->task_repository->get_active_task_id() ?? 0,
+			/* translators: %d: number of additional changes not shown in admin bar */
+			'moreLabel'      => __( '+ %d more…', 'stagify' ),
 		);
-
-		wp_localize_script(
-			'stagify-admin-bar',
-			'stagifyAdminBar',
-			array(
-				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-				'nonce'         => wp_create_nonce( 'stagify_activate_task' ),
-				'allTasksUrl'   => admin_url( 'admin.php?page=stagify' ),
-				'allTasksLabel' => __( 'All tasks', 'stagify' ),
-				'pushLabel'     => __( 'Push now', 'stagify' ),
-				'noServerLabel' => __( 'Configure server to push', 'stagify' ),
-				'settingsUrl'   => admin_url( 'admin.php?page=stagify-settings' ),
-				'hasServer'     => null !== $this->server_repository->find(),
-				'discardLabel'  => __( 'Discard task', 'stagify' ),
-				'discardConfirm' => __( 'Discard this task?', 'stagify' ),
-				'discardMessage' => __( 'This will permanently delete this task and all its tracked changes. This action cannot be undone.', 'stagify' ),
-				'pushConfirm'   => __( 'Push this task to production?', 'stagify' ),
-				'pushMessage'   => __( 'All tracked changes in this task will be sent to your production site and applied automatically.', 'stagify' ),
-				'pushingLabel'  => __( 'Pushing…', 'stagify' ),
-				'pushedLabel'   => __( 'Pushed!', 'stagify' ),
-				'noActiveLabel' => __( 'No active task', 'stagify' ),
-				'activeTaskId'  => $this->task_repository->get_active_task_id() ?? 0,
-				'moreLabel'     => __( '+ %d more…', 'stagify' ),
-			)
-		);
-
-		// Admin bar styles are in assets/css/stagify-admin.css.
 	}
 
 	/**
@@ -293,11 +305,14 @@ final class AdminMenu {
 			$this->task_repository->set_active( $task_id );
 
 			$this->container->get( EventDispatcherInterface::class )->dispatch( new TaskActivated( $task ) );
-			Notices::add( 'success', sprintf(
+			Notices::add(
+				'success',
+				sprintf(
 				/* translators: %s: task title */
-				__( 'Task "%s" is now active.', 'stagify' ),
-				$task->title
-			) );
+					__( 'Task "%s" is now active.', 'stagify' ),
+					$task->title
+				) 
+			);
 		}
 
 		$referer = wp_get_referer();
@@ -350,13 +365,27 @@ final class AdminMenu {
 	/**
 	 * Add nodes for the active task: recent items, push link, and view link.
 	 *
-	 * @param \WP_Admin_Bar              $wp_admin_bar WordPress admin bar instance.
-	 * @param \Stagify\Domain\Task       $task         The active task.
+	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \Stagify\Domain\Task $task         The active task.
 	 * @return void
 	 */
 	private function add_active_task_nodes( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
-		$items = $this->container->get( TaskItemRepositoryInterface::class )->find_by_task( $task->id );
-		$shown = array_slice( $items, 0, 5 );
+		$this->add_item_nodes( $wp_admin_bar, $task );
+		$this->add_push_node( $wp_admin_bar, $task );
+		$this->add_discard_and_separator( $wp_admin_bar );
+	}
+
+	/**
+	 * Add item preview nodes for the active task.
+	 *
+	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \Stagify\Domain\Task $task         The active task.
+	 * @return void
+	 */
+	private function add_item_nodes( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
+		$items    = $this->container->get( TaskItemRepositoryInterface::class )->find_by_task( $task->id );
+		$shown    = array_slice( $items, 0, 5 );
+		$task_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . $task->id );
 
 		foreach ( $shown as $item ) {
 			$wp_admin_bar->add_node(
@@ -364,7 +393,7 @@ final class AdminMenu {
 					'parent' => 'stagify',
 					'id'     => 'stagify-item-' . $item->id,
 					'title'  => $this->format_item_label( $item ),
-					'href'   => admin_url( 'admin.php?page=stagify&action=view&task_id=' . $task->id ),
+					'href'   => $task_url,
 					'meta'   => array( 'class' => 'stagify-ab-item' ),
 				)
 			);
@@ -380,38 +409,57 @@ final class AdminMenu {
 						esc_html__( '+ %d more…', 'stagify' ),
 						count( $items ) - 5
 					),
-					'href'   => admin_url( 'admin.php?page=stagify&action=view&task_id=' . $task->id ),
+					'href'   => $task_url,
 					'meta'   => array( 'class' => 'stagify-ab-item' ),
 				)
 			);
 		}
+	}
 
-		if ( ! empty( $items ) ) {
-			$server = $this->server_repository->find();
-
-			if ( null !== $server ) {
-				$wp_admin_bar->add_node(
-					array(
-						'parent' => 'stagify',
-						'id'     => 'stagify-push',
-						'title'  => esc_html__( 'Push now', 'stagify' ),
-						'href'   => '#',
-						'meta'   => array( 'class' => 'stagify-ab-push' ),
-					)
-				);
-			} else {
-				$wp_admin_bar->add_node(
-					array(
-						'parent' => 'stagify',
-						'id'     => 'stagify-push',
-						'title'  => esc_html__( 'Configure server to push', 'stagify' ),
-						'href'   => admin_url( 'admin.php?page=stagify-settings' ),
-						'meta'   => array( 'class' => 'stagify-ab-no-server' ),
-					)
-				);
-			}
+	/**
+	 * Add the push or configure-server node.
+	 *
+	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \Stagify\Domain\Task $task         The active task.
+	 * @return void
+	 */
+	private function add_push_node( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
+		if ( 0 === $task->item_count ) {
+			return;
 		}
 
+		$server = $this->server_repository->find();
+
+		if ( null !== $server ) {
+			$wp_admin_bar->add_node(
+				array(
+					'parent' => 'stagify',
+					'id'     => 'stagify-push',
+					'title'  => esc_html__( 'Push now', 'stagify' ),
+					'href'   => '#',
+					'meta'   => array( 'class' => 'stagify-ab-push' ),
+				)
+			);
+		} else {
+			$wp_admin_bar->add_node(
+				array(
+					'parent' => 'stagify',
+					'id'     => 'stagify-push',
+					'title'  => esc_html__( 'Configure server to push', 'stagify' ),
+					'href'   => admin_url( 'admin.php?page=stagify-settings' ),
+					'meta'   => array( 'class' => 'stagify-ab-no-server' ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Add the discard node and visual separator.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar WordPress admin bar instance.
+	 * @return void
+	 */
+	private function add_discard_and_separator( \WP_Admin_Bar $wp_admin_bar ): void {
 		$wp_admin_bar->add_node(
 			array(
 				'parent' => 'stagify',
@@ -422,7 +470,6 @@ final class AdminMenu {
 			)
 		);
 
-		// Visual separator before "Switch to" tasks.
 		$wp_admin_bar->add_node(
 			array(
 				'parent' => 'stagify',
@@ -445,7 +492,7 @@ final class AdminMenu {
 			'update' => '#ff7759',
 			'delete' => '#b20000',
 		);
-		$color = $action_colors[ $item->action->value ] ?? '#a0a5aa';
+		$color         = $action_colors[ $item->action->value ] ?? '#a0a5aa';
 
 		$icon = match ( $item->action->value ) {
 			'create' => '+',

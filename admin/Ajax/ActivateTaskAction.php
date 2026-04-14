@@ -61,13 +61,15 @@ final class ActivateTaskAction {
 		$this->task_repository->set_active( $task_id );
 		$this->event_dispatcher->dispatch( new TaskActivated( $task ) );
 
-		wp_send_json_success( array(
-			'admin_bar_title' => $this->build_title( $task ),
-			'items'           => $this->build_item_list( $task_id ),
-			'total_items'     => $task->item_count,
-			'task_id'         => $task_id,
-			'tasks'           => $this->build_task_list( $task_id ),
-		) );
+		wp_send_json_success(
+			array(
+				'admin_bar_title' => $this->build_title( $task ),
+				'items'           => $this->build_item_list( $task_id ),
+				'total_items'     => $task->item_count,
+				'task_id'         => $task_id,
+				'tasks'           => $this->build_task_list( $task_id ),
+			) 
+		);
 	}
 
 	/**
@@ -119,7 +121,7 @@ final class ActivateTaskAction {
 			'update' => '#f0b849',
 			'delete' => '#dc3232',
 		);
-		$color = $action_colors[ $item->action->value ] ?? '#a0a5aa';
+		$color         = $action_colors[ $item->action->value ] ?? '#a0a5aa';
 
 		$icon = match ( $item->action->value ) {
 			'create' => '+',

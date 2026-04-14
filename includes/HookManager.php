@@ -64,7 +64,18 @@ final class HookManager {
 	 * @return void
 	 */
 	public function register(): void {
-		// --- Content tracking hooks ---
+		$this->register_content_hooks();
+		$this->register_plugin_hooks();
+		$this->register_theme_hooks();
+		$this->register_file_hooks();
+	}
+
+	/**
+	 * Register content tracking hooks (save, transition, delete, attachments).
+	 *
+	 * @return void
+	 */
+	private function register_content_hooks(): void {
 		add_action(
 			'save_post',
 			function ( int $post_id, \WP_Post $post ): void {
@@ -81,6 +92,16 @@ final class HookManager {
 			10,
 			3
 		);
+		$this->register_delete_hooks();
+		$this->register_attachment_hooks();
+	}
+
+	/**
+	 * Register post/attachment delete hooks.
+	 *
+	 * @return void
+	 */
+	private function register_delete_hooks(): void {
 		add_action(
 			'before_delete_post',
 			function ( int $post_id, \WP_Post $post ): void {
@@ -97,6 +118,14 @@ final class HookManager {
 			10,
 			2
 		);
+	}
+
+	/**
+	 * Register attachment create/edit hooks.
+	 *
+	 * @return void
+	 */
+	private function register_attachment_hooks(): void {
 		add_action(
 			'add_attachment',
 			function ( int $post_id ): void {
@@ -118,8 +147,14 @@ final class HookManager {
 			999,
 			2
 		);
+	}
 
-		// --- Plugin lifecycle hooks ---
+	/**
+	 * Register plugin lifecycle hooks (activate, deactivate, delete, upgrade).
+	 *
+	 * @return void
+	 */
+	private function register_plugin_hooks(): void {
 		add_action(
 			'activated_plugin',
 			function ( string $plugin ): void {
@@ -148,8 +183,14 @@ final class HookManager {
 			10,
 			2
 		);
+	}
 
-		// --- Theme lifecycle hooks ---
+	/**
+	 * Register theme lifecycle hooks.
+	 *
+	 * @return void
+	 */
+	private function register_theme_hooks(): void {
 		add_action(
 			'switch_theme',
 			function ( string $new_name, \WP_Theme $new_theme ): void {
@@ -158,11 +199,14 @@ final class HookManager {
 			10,
 			2
 		);
+	}
 
-		// --- File change detection ---
-
-		// When a task is activated, take a snapshot of all theme/mu-plugin files.
-		// This baseline means only files changed AFTER activation get tracked (no false positives).
+	/**
+	 * Register file change detection hooks and event listeners.
+	 *
+	 * @return void
+	 */
+	private function register_file_hooks(): void {
 		$this->event_dispatcher->add_listener(
 			TaskActivated::class,
 			function (): void {
@@ -170,8 +214,6 @@ final class HookManager {
 			}
 		);
 
-		// On every admin page load, scan for file changes by comparing SHA-256 hashes
-		// against the baseline snapshot. Throttled internally to run at most once per 30 seconds.
 		if ( is_admin() ) {
 			add_action(
 				'admin_init',
@@ -453,11 +495,13 @@ final class HookManager {
 
 
 
-		$payload = wp_json_encode( array(
-			'slug'   => $plugin,
-			'action' => 'delete',
-			'name'   => $plugin,
-		) );
+		$payload = wp_json_encode(
+			array(
+				'slug'   => $plugin,
+				'action' => 'delete',
+				'name'   => $plugin,
+			) 
+		);
 
 		$this->task_item_repository->add_item(
 			$task_id,
@@ -479,10 +523,15 @@ final class HookManager {
 	private function on_switch_theme( string $new_name, \WP_Theme $new_theme ): void {
 		$slug = $new_theme->get_stylesheet();
 
-		$this->record_environment_change( $slug, 'theme', 'switch', array(
-			'name'    => $new_name,
-			'version' => $new_theme->get( 'Version' ),
-		) );
+		$this->record_environment_change(
+			$slug,
+			'theme',
+			'switch',
+			array(
+				'name'    => $new_name,
+				'version' => $new_theme->get( 'Version' ),
+			) 
+		);
 	}
 
 	/**
@@ -500,7 +549,7 @@ final class HookManager {
 			return;
 		}
 
-		$type = $options['type'] ?? '';
+		$type      = $options['type'] ?? '';
 		$wp_action = $options['action'] ?? '';
 
 		if ( 'plugin' === $type ) {
@@ -518,23 +567,8 @@ final class HookManager {
 	 * @param array<string, mixed> $options   Upgrade context.
 	 * @return void
 	 */
-	private function handle_upgrader_plugins( int $task_id, string $wp_action, array $options ): void {
-		$slugs = array();
-
-		if ( 'install' === $wp_action && ! empty( $options['destination_name'] ) ) {
-			// Single install — find the main plugin file.
-			$plugin_dir  = $options['destination_name'];
-			$all_plugins = get_plugins();
-			foreach ( $all_plugins as $basename => $data ) {
-				if ( str_starts_with( $basename, $plugin_dir . '/' ) ) {
-					$slugs[] = $basename;
-					break;
-				}
-			}
-		} elseif ( 'update' === $wp_action && ! empty( $options['plugins'] ) ) {
-			$slugs = (array) $options['plugins'];
-		}
-
+	private function handle_upgrader_plugins( int $task_id, string $wp_action, array $options ): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
+		$slugs  = $this->resolve_plugin_slugs( $wp_action, $options );
 		$action = 'install' === $wp_action ? TaskAction::Create : TaskAction::Update;
 
 		foreach ( $slugs as $plugin ) {
@@ -542,14 +576,17 @@ final class HookManager {
 				return;
 			}
 			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
-			$wp_slug     = strstr( $plugin, '/', true ) ?: $plugin;
-			$payload     = wp_json_encode( array(
-				'slug'    => $plugin,
-				'wp_slug' => $wp_slug,
-				'action'  => $wp_action,
-				'name'    => $plugin_data['Name'] ?? $plugin,
-				'version' => $plugin_data['Version'] ?? '',
-			) );
+			$wp_slug_raw = strstr( $plugin, '/', true );
+			$wp_slug     = false !== $wp_slug_raw ? $wp_slug_raw : $plugin;
+			$payload     = wp_json_encode(
+				array(
+					'slug'    => $plugin,
+					'wp_slug' => $wp_slug,
+					'action'  => $wp_action,
+					'name'    => $plugin_data['Name'] ?? $plugin,
+					'version' => $plugin_data['Version'] ?? '',
+				) 
+			);
 
 			$existing = $this->task_item_repository->find_item( $task_id, TaskItemType::Environment, 'plugin', $plugin );
 			if ( null !== $existing ) {
@@ -569,6 +606,32 @@ final class HookManager {
 	}
 
 	/**
+	 * Resolve plugin basenames from upgrader options.
+	 *
+	 * @param string               $wp_action WordPress upgrader action.
+	 * @param array<string, mixed> $options   Upgrade context.
+	 * @return list<string>
+	 */
+	private function resolve_plugin_slugs( string $wp_action, array $options ): array {
+		if ( 'install' === $wp_action && ! empty( $options['destination_name'] ) ) {
+			$plugin_dir  = $options['destination_name'];
+			$all_plugins = get_plugins();
+			foreach ( $all_plugins as $basename => $data ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+				if ( str_starts_with( $basename, $plugin_dir . '/' ) ) {
+					return array( $basename );
+				}
+			}
+			return array();
+		}
+
+		if ( 'update' === $wp_action && ! empty( $options['plugins'] ) ) {
+			return (array) $options['plugins'];
+		}
+
+		return array();
+	}
+
+	/**
 	 * Process theme install/update events from the upgrader.
 	 *
 	 * @param int                  $task_id   Active task ID.
@@ -577,14 +640,7 @@ final class HookManager {
 	 * @return void
 	 */
 	private function handle_upgrader_themes( int $task_id, string $wp_action, array $options ): void {
-		$slugs = array();
-
-		if ( 'install' === $wp_action && ! empty( $options['destination_name'] ) ) {
-			$slugs[] = $options['destination_name'];
-		} elseif ( 'update' === $wp_action && ! empty( $options['themes'] ) ) {
-			$slugs = (array) $options['themes'];
-		}
-
+		$slugs  = $this->resolve_theme_slugs( $wp_action, $options );
 		$action = 'install' === $wp_action ? TaskAction::Create : TaskAction::Update;
 
 		foreach ( $slugs as $slug ) {
@@ -592,12 +648,14 @@ final class HookManager {
 				return;
 			}
 			$theme   = wp_get_theme( $slug );
-			$payload = wp_json_encode( array(
-				'slug'    => $slug,
-				'action'  => $wp_action,
-				'name'    => $theme->exists() ? $theme->get( 'Name' ) : $slug,
-				'version' => $theme->exists() ? $theme->get( 'Version' ) : '',
-			) );
+			$payload = wp_json_encode(
+				array(
+					'slug'    => $slug,
+					'action'  => $wp_action,
+					'name'    => $theme->exists() ? $theme->get( 'Name' ) : $slug,
+					'version' => $theme->exists() ? $theme->get( 'Version' ) : '',
+				) 
+			);
 
 			$existing = $this->task_item_repository->find_item( $task_id, TaskItemType::Environment, 'theme', $slug );
 			if ( null !== $existing ) {
@@ -614,6 +672,25 @@ final class HookManager {
 				(string) $payload
 			);
 		}
+	}
+
+	/**
+	 * Resolve theme slugs from upgrader options.
+	 *
+	 * @param string               $wp_action WordPress upgrader action.
+	 * @param array<string, mixed> $options   Upgrade context.
+	 * @return list<string>
+	 */
+	private function resolve_theme_slugs( string $wp_action, array $options ): array {
+		if ( 'install' === $wp_action && ! empty( $options['destination_name'] ) ) {
+			return array( $options['destination_name'] );
+		}
+
+		if ( 'update' === $wp_action && ! empty( $options['themes'] ) ) {
+			return (array) $options['themes'];
+		}
+
+		return array();
 	}
 
 	/**
@@ -640,53 +717,75 @@ final class HookManager {
 		$existing = $this->task_item_repository->find_item( $task_id, TaskItemType::Environment, $object_type, $slug );
 
 		if ( null !== $existing ) {
-			$existing_payload = json_decode( $existing->payload, true );
-			$existing_action  = $existing_payload['action'] ?? '';
+			$this->handle_existing_env_item( $existing, $slug, $env_action, $extra );
+			return;
+		}
 
-			// Activate then deactivate (or vice versa) in the same task — cancel out.
-			$cancels = array(
-				'activate'   => 'deactivate',
-				'deactivate' => 'activate',
-			);
+		$this->create_env_item( $task_id, $slug, $object_type, $env_action, $extra );
+	}
 
-			if ( isset( $cancels[ $env_action ] ) && $cancels[ $env_action ] === $existing_action ) {
-				$this->task_item_repository->delete_item( $existing->id, $task_id );
-				return;
-			}
+	/**
+	 * Handle deduplication logic for an existing environment item.
+	 *
+	 * @param TaskItem             $existing   The existing task item.
+	 * @param string               $slug       Object identifier.
+	 * @param string               $env_action The environment action.
+	 * @param array<string, mixed> $extra      Additional payload fields.
+	 * @return void
+	 */
+	private function handle_existing_env_item( TaskItem $existing, string $slug, string $env_action, array $extra ): void {
+		$existing_payload = json_decode( $existing->payload, true );
+		$existing_action  = $existing_payload['action'] ?? '';
 
-			// Install then activate/switch — keep install as the primary action
-			// and flag the post-install step so the receiver does both.
-			if ( 'install' === $existing_action && in_array( $env_action, array( 'activate', 'switch' ), true ) ) {
-				$existing_payload['activate_after'] = true;
-				$this->task_item_repository->update_payload( $existing->id, (string) wp_json_encode( $existing_payload ) );
-				return;
-			}
+		$cancels = array(
+			'activate'   => 'deactivate',
+			'deactivate' => 'activate',
+		);
 
-			// Same type of change again — update the payload.
-			$payload = wp_json_encode( array_merge(
+		if ( isset( $cancels[ $env_action ] ) && $cancels[ $env_action ] === $existing_action ) {
+			$this->task_item_repository->delete_item( $existing->id, $existing->task_id );
+			return;
+		}
+
+		if ( 'install' === $existing_action && in_array( $env_action, array( 'activate', 'switch' ), true ) ) {
+			$existing_payload['activate_after'] = true;
+			$this->task_item_repository->update_payload( $existing->id, (string) wp_json_encode( $existing_payload ) );
+			return;
+		}
+
+		$payload = wp_json_encode(
+			array_merge(
 				array(
 					'slug'   => $slug,
 					'action' => $env_action,
 					'name'   => $slug,
 				),
-				$extra
-			) );
-			$this->task_item_repository->update_payload( $existing->id, (string) $payload );
-			return;
-		}
+				$extra 
+			) 
+		);
+		$this->task_item_repository->update_payload( $existing->id, (string) $payload );
+	}
 
-
-
+	/**
+	 * Create a new environment task item.
+	 *
+	 * @param int                  $task_id     Active task ID.
+	 * @param string               $slug        Object identifier.
+	 * @param string               $object_type "plugin" or "theme".
+	 * @param string               $env_action  The environment action.
+	 * @param array<string, mixed> $extra       Additional payload fields.
+	 * @return void
+	 */
+	private function create_env_item( int $task_id, string $slug, string $object_type, string $env_action, array $extra ): void {
 		$payload_data = array_merge(
 			array(
 				'slug'   => $slug,
 				'action' => $env_action,
 				'name'   => $slug,
 			),
-			$extra
+			$extra 
 		);
 
-		// For plugins, try to get the human-readable name.
 		if ( 'plugin' === $object_type && empty( $extra['name'] ) ) {
 			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $slug, false, false );
 			if ( ! empty( $plugin_data['Name'] ) ) {
@@ -695,15 +794,13 @@ final class HookManager {
 			}
 		}
 
-		$payload = wp_json_encode( $payload_data );
-
 		$this->task_item_repository->add_item(
 			$task_id,
 			TaskItemType::Environment,
 			TaskAction::Update,
 			$object_type,
 			$slug,
-			(string) $payload
+			(string) wp_json_encode( $payload_data )
 		);
 	}
 

@@ -17,6 +17,7 @@ use Stagify\Api\Handlers\ContentHandler;
 use Stagify\Api\Handlers\EnvironmentHandler;
 use Stagify\Api\Handlers\FileHandler;
 use Stagify\Api\ReceiverApi;
+use Stagify\Admin\Actions\DeleteServerAction;
 use Stagify\Admin\Actions\DiscardTaskAction;
 use Stagify\Admin\Actions\PushTaskAction;
 use Stagify\Admin\Actions\RetryTaskAction;
@@ -78,13 +79,14 @@ $builder->addDefinitions(
 
 		// Admin.
 		AdminMenu::class                       => \DI\autowire(),
+		DeleteServerAction::class              => \DI\autowire(),
 		DiscardTaskAction::class               => \DI\autowire(),
 		PushTaskAction::class                  => \DI\autowire(),
 		RetryTaskAction::class                 => \DI\autowire(),
 		SaveModeAction::class                  => \DI\autowire(),
 		SaveServerAction::class                => \DI\autowire(),
 		SaveTrackingAction::class              => \DI\autowire(),
-		ReceiverSettingsPage::class             => \DI\autowire(),
+		ReceiverSettingsPage::class            => \DI\autowire(),
 		SetupPage::class                       => \DI\autowire(),
 		ActivateTaskAction::class              => \DI\autowire(),
 		AjaxDiscardTaskAction::class           => \DI\autowire(),

@@ -57,8 +57,7 @@ final class SettingsPage {
 	 * @return void
 	 */
 	private function render_mode_section(): void {
-		$mode      = SetupPage::get_mode();
-		$setup_url = esc_url( admin_url( 'admin.php?page=stagify-setup' ) );
+		$mode = SetupPage::get_mode();
 
 		printf(
 			'<div class="stagify-mode-bar">'
@@ -70,6 +69,16 @@ final class SettingsPage {
 			esc_html__( 'Switch mode', 'stagify' )
 		);
 
+		$this->render_mode_confirm_panel();
+		$this->render_mode_toggle_script();
+	}
+
+	/**
+	 * Render the mode-switch confirmation panel (hidden by default).
+	 *
+	 * @return void
+	 */
+	private function render_mode_confirm_panel(): void {
 		printf(
 			'<div class="stagify-mode-confirm" id="stagify-mode-confirm" style="display:none;">'
 			. '<div class="stagify-mode-confirm-inner">'
@@ -78,16 +87,21 @@ final class SettingsPage {
 			. '<div class="stagify-mode-confirm-actions">'
 			. '<a href="%s" class="button button-primary stagify-btn-danger">%s</a>'
 			. '<button type="button" class="button" id="stagify-switch-mode-cancel">%s</button>'
-			. '</div>'
-			. '</div>'
-			. '</div>',
+			. '</div></div></div>',
 			esc_html__( 'Change plugin mode?', 'stagify' ),
 			esc_html__( 'You will be redirected to choose a new mode. This will change which features are active on this site.', 'stagify' ),
-			$setup_url,
+			esc_url( admin_url( 'admin.php?page=stagify-setup' ) ),
 			esc_html__( 'Continue', 'stagify' ),
 			esc_html__( 'Cancel', 'stagify' )
 		);
+	}
 
+	/**
+	 * Output the mode toggle inline JS.
+	 *
+	 * @return void
+	 */
+	private function render_mode_toggle_script(): void {
 		echo '<script>'
 			. '(function(){'
 			. 'var btn=document.getElementById("stagify-switch-mode-btn");'
@@ -215,7 +229,7 @@ final class SettingsPage {
 	 * @param Server $server The configured server entity.
 	 * @return void
 	 */
-	private function render_server_card( Server $server ): void {
+	private function render_server_card( Server $server ): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		$delete_url = wp_nonce_url(
 			add_query_arg(
 				array(

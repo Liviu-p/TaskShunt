@@ -175,7 +175,7 @@ final class Plugin {
 	/**
 	 * Register all admin_post and AJAX handlers for sender mode.
 	 *
-	 * admin_post handlers process traditional form submissions (POST → redirect).
+	 * Admin_post handlers process traditional form submissions (POST → redirect).
 	 * AJAX handlers process JavaScript-driven requests from the admin bar and task pages.
 	 *
 	 * @return void
@@ -183,6 +183,7 @@ final class Plugin {
 	private function register_sender_actions(): void {
 		$this->register_task_actions();
 		$this->register_server_actions();
+		$this->register_ajax_actions();
 	}
 
 	/**
@@ -212,7 +213,7 @@ final class Plugin {
 	}
 
 	/**
-	 * Register server-related admin_post and AJAX handlers.
+	 * Register server-related admin_post handlers.
 	 *
 	 * @return void
 	 */
@@ -226,19 +227,7 @@ final class Plugin {
 		add_action(
 			'admin_post_stagify_delete_server',
 			function (): void {
-				check_admin_referer( 'stagify_delete_server' );
-
-				if ( ! current_user_can( 'manage_options' ) ) {
-					wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
-				}
-
-				$server_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
-				if ( $server_id > 0 ) {
-					$this->container->get( \Stagify\Contracts\ServerRepositoryInterface::class )->delete( $server_id );
-				}
-
-				wp_safe_redirect( admin_url( 'admin.php?page=stagify-settings' ) );
-				exit;
+				$this->container->get( \Stagify\Admin\Actions\DeleteServerAction::class )->handle();
 			}
 		);
 		add_action(
@@ -253,6 +242,14 @@ final class Plugin {
 				$this->container->get( TestConnectionAction::class )->handle();
 			}
 		);
+	}
+
+	/**
+	 * Register AJAX handlers for task management.
+	 *
+	 * @return void
+	 */
+	private function register_ajax_actions(): void {
 		add_action(
 			'wp_ajax_stagify_activate_task',
 			function (): void {

@@ -51,59 +51,83 @@ final class EnvironmentHandler {
 	 * @return array{success: bool, message: string}
 	 */
 	private function handle_plugin( string $env_action, string $slug, array $payload ): array {
+		return match ( $env_action ) {
+			'activate'   => $this->activate_plugin( $slug, $payload ),
+			'deactivate' => $this->deactivate_plugin( $slug, $payload ),
+			'install'    => $this->install_plugin_from_wporg( $slug, $payload ),
+			'update'     => $this->update_plugin_from_wporg( $slug, $payload ),
+			'delete'     => $this->delete_plugin( $slug, $payload ),
+			default      => $this->error( sprintf( 'Unknown plugin action: %s.', $env_action ) ),
+		};
+	}
+
+	/**
+	 * Activate a plugin, installing from WordPress.org if needed.
+	 *
+	 * @param string               $slug    Plugin basename.
+	 * @param array<string, mixed> $payload Payload data.
+	 * @return array{success: bool, message: string}
+	 */
+	private function activate_plugin( string $slug, array $payload ): array {
 		$name = $payload['name'] ?? $slug;
 
-		switch ( $env_action ) {
-			case 'activate':
-				if ( is_plugin_active( $slug ) ) {
-					return $this->success( sprintf( 'Plugin "%s" is already active.', $name ) );
-				}
-
-				// If the plugin files don't exist, try installing from WordPress.org first.
-				if ( ! file_exists( WP_PLUGIN_DIR . '/' . $slug ) ) {
-					$install = $this->install_plugin_from_wporg( $slug, $payload );
-					if ( ! $install['success'] ) {
-						return $install;
-					}
-				}
-
-				$result = activate_plugin( $slug, '', false, true );
-				if ( is_wp_error( $result ) ) {
-					return $this->error( sprintf( 'Failed to activate plugin "%s": %s', $name, $result->get_error_message() ) );
-				}
-
-				return $this->success( sprintf( 'Plugin "%s" installed and activated.', $name ) );
-
-			case 'deactivate':
-				if ( ! is_plugin_active( $slug ) ) {
-					return $this->success( sprintf( 'Plugin "%s" is already inactive.', $name ) );
-				}
-
-				deactivate_plugins( $slug, true );
-
-				return $this->success( sprintf( 'Plugin "%s" deactivated.', $name ) );
-
-			case 'install':
-				return $this->install_plugin_from_wporg( $slug, $payload );
-
-			case 'update':
-				return $this->update_plugin_from_wporg( $slug, $payload );
-
-			case 'delete':
-				if ( is_plugin_active( $slug ) ) {
-					deactivate_plugins( $slug, true );
-				}
-
-				$result = delete_plugins( array( $slug ) );
-				if ( is_wp_error( $result ) ) {
-					return $this->error( sprintf( 'Failed to delete plugin "%s": %s', $name, $result->get_error_message() ) );
-				}
-
-				return $this->success( sprintf( 'Plugin "%s" deleted.', $name ) );
-
-			default:
-				return $this->error( sprintf( 'Unknown plugin action: %s.', $env_action ) );
+		if ( is_plugin_active( $slug ) ) {
+			return $this->success( sprintf( 'Plugin "%s" is already active.', $name ) );
 		}
+
+		if ( ! file_exists( WP_PLUGIN_DIR . '/' . $slug ) ) {
+			$install = $this->install_plugin_from_wporg( $slug, $payload );
+			if ( ! $install['success'] ) {
+				return $install;
+			}
+		}
+
+		$result = activate_plugin( $slug, '', false, true );
+		if ( is_wp_error( $result ) ) {
+			return $this->error( sprintf( 'Failed to activate "%s": %s', $name, $result->get_error_message() ) );
+		}
+
+		return $this->success( sprintf( 'Plugin "%s" activated.', $name ) );
+	}
+
+	/**
+	 * Deactivate a plugin.
+	 *
+	 * @param string               $slug    Plugin basename.
+	 * @param array<string, mixed> $payload Payload data.
+	 * @return array{success: bool, message: string}
+	 */
+	private function deactivate_plugin( string $slug, array $payload ): array {
+		$name = $payload['name'] ?? $slug;
+
+		if ( ! is_plugin_active( $slug ) ) {
+			return $this->success( sprintf( 'Plugin "%s" is already inactive.', $name ) );
+		}
+
+		deactivate_plugins( $slug, true );
+		return $this->success( sprintf( 'Plugin "%s" deactivated.', $name ) );
+	}
+
+	/**
+	 * Delete a plugin (deactivates first if active).
+	 *
+	 * @param string               $slug    Plugin basename.
+	 * @param array<string, mixed> $payload Payload data.
+	 * @return array{success: bool, message: string}
+	 */
+	private function delete_plugin( string $slug, array $payload ): array {
+		$name = $payload['name'] ?? $slug;
+
+		if ( is_plugin_active( $slug ) ) {
+			deactivate_plugins( $slug, true );
+		}
+
+		$result = delete_plugins( array( $slug ) );
+		if ( is_wp_error( $result ) ) {
+			return $this->error( sprintf( 'Failed to delete "%s": %s', $name, $result->get_error_message() ) );
+		}
+
+		return $this->success( sprintf( 'Plugin "%s" deleted.', $name ) );
 	}
 
 	/**
@@ -179,22 +203,27 @@ final class EnvironmentHandler {
 	 * @param array<string, mixed> $payload Payload data.
 	 * @return array{success: bool, message: string}
 	 */
-	private function install_plugin_from_wporg( string $slug, array $payload ): array {
+	private function install_plugin_from_wporg( string $slug, array $payload ): array { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		$name    = $payload['name'] ?? $slug;
-		$wp_slug = $payload['wp_slug'] ?? ( strstr( $slug, '/', true ) ?: $slug );
+		$wp_slug = $payload['wp_slug'] ?? ( ( strstr( $slug, '/', true ) !== false ? strstr( $slug, '/', true ) : $slug ) );
 
 		$this->load_upgrader_dependencies();
 
-		$api_result = plugins_api( 'plugin_information', array(
-			'slug'   => $wp_slug,
-			'fields' => array( 'sections' => false ),
-		) );
+		$api_result = plugins_api(
+			'plugin_information',
+			array(
+				'slug'   => $wp_slug,
+				'fields' => array( 'sections' => false ),
+			) 
+		);
 
 		if ( is_wp_error( $api_result ) ) {
-			return $this->error( sprintf(
-				'Plugin "%s" is not available on WordPress.org and must be installed manually.',
-				$name
-			) );
+			return $this->error(
+				sprintf(
+					'Plugin "%s" is not available on WordPress.org and must be installed manually.',
+					$name
+				) 
+			);
 		}
 
 		$skin     = new \WP_Ajax_Upgrader_Skin();
@@ -202,7 +231,7 @@ final class EnvironmentHandler {
 		$result   = $upgrader->install( $api_result->download_link );
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
-			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( $skin->get_errors()->get_error_message() ?: 'Unknown error.' );
+			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : 'Unknown error.' ) );
 			return $this->error( sprintf( 'Failed to install plugin "%s" from WordPress.org: %s', $name, $error_msg ) );
 		}
 
@@ -227,20 +256,25 @@ final class EnvironmentHandler {
 	 */
 	private function update_plugin_from_wporg( string $slug, array $payload ): array {
 		$name    = $payload['name'] ?? $slug;
-		$wp_slug = $payload['wp_slug'] ?? ( strstr( $slug, '/', true ) ?: $slug );
+		$wp_slug = $payload['wp_slug'] ?? ( ( strstr( $slug, '/', true ) !== false ? strstr( $slug, '/', true ) : $slug ) );
 
 		$this->load_upgrader_dependencies();
 
-		$api_result = plugins_api( 'plugin_information', array(
-			'slug'   => $wp_slug,
-			'fields' => array( 'sections' => false ),
-		) );
+		$api_result = plugins_api(
+			'plugin_information',
+			array(
+				'slug'   => $wp_slug,
+				'fields' => array( 'sections' => false ),
+			) 
+		);
 
 		if ( is_wp_error( $api_result ) ) {
-			return $this->error( sprintf(
-				'Plugin "%s" is not available on WordPress.org and must be updated manually.',
-				$name
-			) );
+			return $this->error(
+				sprintf(
+					'Plugin "%s" is not available on WordPress.org and must be updated manually.',
+					$name
+				) 
+			);
 		}
 
 		$skin     = new \WP_Ajax_Upgrader_Skin();
@@ -248,7 +282,7 @@ final class EnvironmentHandler {
 		$result   = $upgrader->upgrade( $slug );
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
-			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( $skin->get_errors()->get_error_message() ?: 'Unknown error.' );
+			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : 'Unknown error.' ) );
 			return $this->error( sprintf( 'Failed to update plugin "%s": %s', $name, $error_msg ) );
 		}
 
@@ -267,16 +301,21 @@ final class EnvironmentHandler {
 
 		$this->load_upgrader_dependencies();
 
-		$api_result = themes_api( 'theme_information', array(
-			'slug'   => $slug,
-			'fields' => array( 'sections' => false ),
-		) );
+		$api_result = themes_api(
+			'theme_information',
+			array(
+				'slug'   => $slug,
+				'fields' => array( 'sections' => false ),
+			) 
+		);
 
 		if ( is_wp_error( $api_result ) ) {
-			return $this->error( sprintf(
-				'Theme "%s" is not available on WordPress.org and must be installed manually.',
-				$name
-			) );
+			return $this->error(
+				sprintf(
+					'Theme "%s" is not available on WordPress.org and must be installed manually.',
+					$name
+				) 
+			);
 		}
 
 		$skin     = new \WP_Ajax_Upgrader_Skin();
@@ -284,7 +323,7 @@ final class EnvironmentHandler {
 		$result   = $upgrader->install( $api_result->download_link );
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
-			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( $skin->get_errors()->get_error_message() ?: 'Unknown error.' );
+			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : 'Unknown error.' ) );
 			return $this->error( sprintf( 'Failed to install theme "%s" from WordPress.org: %s', $name, $error_msg ) );
 		}
 
@@ -309,16 +348,21 @@ final class EnvironmentHandler {
 
 		$this->load_upgrader_dependencies();
 
-		$api_result = themes_api( 'theme_information', array(
-			'slug'   => $slug,
-			'fields' => array( 'sections' => false ),
-		) );
+		$api_result = themes_api(
+			'theme_information',
+			array(
+				'slug'   => $slug,
+				'fields' => array( 'sections' => false ),
+			) 
+		);
 
 		if ( is_wp_error( $api_result ) ) {
-			return $this->error( sprintf(
-				'Theme "%s" is not available on WordPress.org and must be updated manually.',
-				$name
-			) );
+			return $this->error(
+				sprintf(
+					'Theme "%s" is not available on WordPress.org and must be updated manually.',
+					$name
+				) 
+			);
 		}
 
 		$skin     = new \WP_Ajax_Upgrader_Skin();
@@ -326,7 +370,7 @@ final class EnvironmentHandler {
 		$result   = $upgrader->upgrade( $slug );
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
-			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( $skin->get_errors()->get_error_message() ?: 'Unknown error.' );
+			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : 'Unknown error.' ) );
 			return $this->error( sprintf( 'Failed to update theme "%s": %s', $name, $error_msg ) );
 		}
 

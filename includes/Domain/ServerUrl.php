@@ -64,7 +64,7 @@ final readonly class ServerUrl extends ValueObject {
 	/**
 	 * Check equality with another ServerUrl.
 	 *
-	 * @param self $other The other value object to compare.
+	 * @param ValueObject $other The other value object to compare.
 	 * @return bool
 	 */
 	public function equals( ValueObject $other ): bool {

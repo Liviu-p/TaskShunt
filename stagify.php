@@ -51,7 +51,7 @@ register_activation_hook(
 /**
  * Bootstrap the plugin on every page load.
  *
- * plugins_loaded is the earliest hook where all plugins are available,
+ * Plugins_loaded is the earliest hook where all plugins are available,
  * making it safe to build the DI container and wire everything together.
  */
 add_action(

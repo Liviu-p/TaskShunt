@@ -162,7 +162,7 @@ final class ReceiverApi {
 
 		$sender_url = isset( $body['site_url'] ) ? (string) $body['site_url'] : '';
 		$results    = $this->process_items( $body['items'], $sender_url );
-		$success = $this->all_succeeded( $results );
+		$success    = $this->all_succeeded( $results );
 
 		$this->log_operation( $body, $results, $success );
 

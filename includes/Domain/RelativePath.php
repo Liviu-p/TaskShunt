@@ -74,7 +74,7 @@ final readonly class RelativePath extends ValueObject {
 	/**
 	 * Check equality with another RelativePath.
 	 *
-	 * @param self $other The other value object to compare.
+	 * @param ValueObject $other The other value object to compare.
 	 * @return bool
 	 */
 	public function equals( ValueObject $other ): bool {

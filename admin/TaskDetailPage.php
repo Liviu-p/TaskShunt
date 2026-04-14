@@ -91,6 +91,7 @@ final class TaskDetailPage {
 			esc_html( $task->created_at->format( 'M j, Y H:i' ) ),
 			esc_html(
 				sprintf(
+					/* translators: %d: number of tracked changes */
 					_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
 					$task->item_count
 				)
@@ -104,6 +105,7 @@ final class TaskDetailPage {
 	 * @param Task     $task            The task entity.
 	 * @param int|null $active_task_id  Currently active task ID or null.
 	 * @param string   $base_action_url Base URL for action links (nonce included).
+	 * @param bool     $is_active       Whether this task is the active task.
 	 * @return void
 	 */
 	private function render_action_buttons( Task $task, ?int $active_task_id, string $base_action_url, bool $is_active ): void {
@@ -157,14 +159,6 @@ final class TaskDetailPage {
 	}
 
 	/**
-	 * Render the conditional 'Set as active' and 'Discard task' buttons.
-	 *
-	 * @param Task     $task            The task entity.
-	 * @param int|null $active_task_id  Currently active task ID or null.
-	 * @param string   $base_action_url Base URL for action links.
-	 * @return void
-	 */
-	/**
 	 * Render footer actions (discard) — subtle, at the bottom.
 	 *
 	 * @param Task     $task            The task entity.
@@ -172,7 +166,7 @@ final class TaskDetailPage {
 	 * @param string   $base_action_url Base URL for action links.
 	 * @return void
 	 */
-	private function render_footer_actions( Task $task, ?int $active_task_id, string $base_action_url ): void {
+	private function render_footer_actions( Task $task, ?int $active_task_id, string $base_action_url ): void { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$is_active = TaskStatus::Pending === $task->status && $task->id === $active_task_id;
 
 		if ( $is_active || ( TaskStatus::Pending !== $task->status && TaskStatus::Failed !== $task->status ) ) {
@@ -245,10 +239,6 @@ final class TaskDetailPage {
 	 */
 	private function render_items_table( array $items ): void {
 		if ( empty( $items ) ) {
-			$is_active = $this->task_repository->get_active_task_id() === null
-				? false
-				: true;
-
 			echo '<div class="stagify-empty-state">';
 			printf( '<p><strong>%s</strong></p>', esc_html__( 'No changes recorded yet', 'stagify' ) );
 			printf( '<p>%s</p>', esc_html__( 'Edit pages, posts, or media on your site — changes will appear here automatically.', 'stagify' ) );

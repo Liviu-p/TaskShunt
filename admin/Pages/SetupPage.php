@@ -127,6 +127,23 @@ final class SetupPage {
 			. '</p>';
 		echo '<h2 class="stagify-setup-choose">' . esc_html__( 'What is this site?', 'stagify' ) . '</h2>';
 
+		$this->render_setup_form();
+
+		echo '<p class="stagify-setup-hint">'
+			. esc_html__( 'Install Stagify on both sites. We\'ll guide you through the rest.', 'stagify' )
+			. '</p>';
+
+		echo '</div>';
+
+		$this->render_select_script();
+	}
+
+	/**
+	 * Render the setup form with mode cards and submit button.
+	 *
+	 * @return void
+	 */
+	private function render_setup_form(): void {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" id="stagify-setup-form">';
 		echo '<input type="hidden" name="action" value="stagify_save_mode">';
 		echo '<input type="hidden" name="stagify_mode" value="" id="stagify-mode-input">';
@@ -153,16 +170,7 @@ final class SetupPage {
 			esc_html__( 'Continue', 'stagify' )
 		);
 		echo '</div>';
-
 		echo '</form>';
-
-		echo '<p class="stagify-setup-hint">'
-			. esc_html__( 'Install Stagify on both sites. We\'ll guide you through the rest.', 'stagify' )
-			. '</p>';
-
-		echo '</div>';
-
-		$this->render_select_script();
 	}
 
 	/**
@@ -185,11 +193,13 @@ final class SetupPage {
 			. '</div>'
 			. '</div>',
 			esc_attr( $mode->value ),
-			esc_attr( sprintf(
+			esc_attr(
+				sprintf(
 				/* translators: %s: mode name */
-				__( 'Continue as %s', 'stagify' ),
-				$title
-			) ),
+					__( 'Continue as %s', 'stagify' ),
+					$title
+				) 
+			),
 			esc_attr( $icon ),
 			esc_html( $title ),
 			esc_html( $desc )

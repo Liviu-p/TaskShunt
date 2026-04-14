@@ -163,8 +163,19 @@ final class OnboardingChecklist {
 		}
 
 		echo '<div class="stagify-checklist">';
+		self::render_checklist_header( $done_count, $total_count );
+		self::render_checklist_steps( $steps );
+		echo '</div>';
+	}
 
-		// Header.
+	/**
+	 * Render the checklist header with progress bar.
+	 *
+	 * @param int $done_count  Number of completed steps.
+	 * @param int $total_count Total number of steps.
+	 * @return void
+	 */
+	private static function render_checklist_header( int $done_count, int $total_count ): void {
 		printf(
 			'<div class="stagify-checklist-header">'
 			. '<div>'
@@ -174,16 +185,25 @@ final class OnboardingChecklist {
 			. '<div class="stagify-checklist-bar"><div class="stagify-checklist-bar-fill" style="width:%d%%"></div></div>'
 			. '</div>',
 			esc_html__( 'Getting started', 'stagify' ),
-			esc_html( sprintf(
+			esc_html(
+				sprintf(
 				/* translators: 1: completed steps, 2: total steps */
-				__( '%1$d of %2$d complete', 'stagify' ),
-				$done_count,
-				$total_count
-			) ),
+					__( '%1$d of %2$d complete', 'stagify' ),
+					$done_count,
+					$total_count
+				)
+			),
 			$total_count > 0 ? (int) ( ( $done_count / $total_count ) * 100 ) : 0
 		);
+	}
 
-		// Steps.
+	/**
+	 * Render individual checklist step items.
+	 *
+	 * @param array<int, array{done: bool, label: string, desc: string}> $steps Steps to render.
+	 * @return void
+	 */
+	private static function render_checklist_steps( array $steps ): void {
 		echo '<div class="stagify-checklist-steps">';
 
 		foreach ( $steps as $index => $step ) {
@@ -200,13 +220,12 @@ final class OnboardingChecklist {
 			);
 
 			if ( '' !== $step['desc'] && ! $step['done'] ) {
-				// Description may contain a link, so use wp_kses.
 				echo '<p>' . wp_kses( $step['desc'], array( 'a' => array( 'href' => array() ) ) ) . '</p>';
 			}
 
 			echo '</div></div>';
 		}
 
-		echo '</div></div>';
+		echo '</div>';
 	}
 }
