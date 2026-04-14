@@ -1,8 +1,0 @@
-{
-    "phpcs.enable": true,
-    "phpcs.executablePath": "/Users/sharps/Sites/stagify/src/wp-content/plugins/stagify/vendor/bin/phpcs",
-    "phpcs.standard": "/Users/sharps/Sites/stagify/src/wp-content/plugins/stagify/phpcs.xml",
-    "phpcbf.executablePath": "/Users/sharps/Sites/stagify/src/wp-content/plugins/stagify/vendor/bin/phpcbf",
-    "phpcbf.standard": "/Users/sharps/Sites/stagify/src/wp-content/plugins/stagify/phpcs.xml",
-    "phpcbf.onsave": false
-}
