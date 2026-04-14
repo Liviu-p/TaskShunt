@@ -95,6 +95,7 @@ final class TasksPage {
 		}
 
 		$this->render_list_table();
+		$this->render_push_history();
 
 		echo '</div>';
 	}
@@ -363,6 +364,55 @@ final class TasksPage {
 			'message' => __( 'Create a new task or click "Work on this" on an existing one.', 'stagify' ),
 			'class'   => '',
 		);
+	}
+
+	/**
+	 * Render the recent push history log.
+	 *
+	 * @return void
+	 */
+	private function render_push_history(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'stagify_push_log';
+		$tasks = $wpdb->prefix . 'stagify_tasks';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$logs = $wpdb->get_results(
+			"SELECT l.*, t.title as task_title FROM {$table} l LEFT JOIN {$tasks} t ON l.task_id = t.id ORDER BY l.pushed_at DESC LIMIT 10" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		if ( empty( $logs ) ) {
+			return;
+		}
+
+		echo '<div class="stagify-history">';
+		echo '<h2>' . esc_html__( 'Recent pushes', 'stagify' ) . '</h2>';
+		echo '<div class="stagify-history-list">';
+
+		foreach ( $logs as $log ) {
+			$is_success = (int) $log->http_code >= 200 && (int) $log->http_code < 300;
+			$icon_class = $is_success ? 'stagify-history-icon--success' : 'stagify-history-icon--failed';
+			$icon       = $is_success ? 'dashicons-yes-alt' : 'dashicons-warning';
+			$title      = ! empty( $log->task_title ) ? $log->task_title : sprintf( __( 'Task #%d', 'stagify' ), $log->task_id );
+
+			printf(
+				'<div class="stagify-history-item">'
+				. '<span class="dashicons %s %s"></span>'
+				. '<div class="stagify-history-info">'
+				. '<strong>%s</strong>'
+				. '<span class="stagify-history-meta">%s</span>'
+				. '</div>'
+				. '<span class="stagify-history-time">%s</span>'
+				. '</div>',
+				esc_attr( $icon ),
+				esc_attr( $icon_class ),
+				esc_html( $title ),
+				$is_success ? esc_html__( 'Pushed successfully', 'stagify' ) : esc_html( $log->response_message ),
+				esc_html( human_time_diff( strtotime( $log->pushed_at ), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'stagify' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			);
+		}
+
+		echo '</div></div>';
 	}
 
 	/**

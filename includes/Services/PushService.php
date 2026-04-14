@@ -188,6 +188,7 @@ final class PushService {
 	private function succeed( Task $task, int $code ): PushResult {
 		$this->task_repository->update_status( $task->id, TaskStatus::Pushed );
 		$this->task_repository->clear_active();
+		$this->log_push( $task->id, $code, __( 'Task pushed successfully.', 'stagify' ) );
 		$this->event_dispatcher->dispatch( new TaskPushed( $task, $code ) );
 
 		return new PushResult( true, $code, __( 'Task pushed successfully.', 'stagify' ) );
@@ -203,8 +204,31 @@ final class PushService {
 	 */
 	private function fail( Task $task, int $code, string $message ): PushResult {
 		$this->task_repository->update_status( $task->id, TaskStatus::Failed );
+		$this->log_push( $task->id, $code, $message );
 		$this->event_dispatcher->dispatch( new TaskFailed( $task, $message ) );
 
 		return new PushResult( false, $code, $message );
+	}
+
+	/**
+	 * Write a row to the push log table.
+	 *
+	 * @param int    $task_id Task ID.
+	 * @param int    $code    HTTP response code.
+	 * @param string $message Result message.
+	 * @return void
+	 */
+	private function log_push( int $task_id, int $code, string $message ): void {
+		global $wpdb;
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->prefix . 'stagify_push_log',
+			array(
+				'task_id'          => $task_id,
+				'pushed_at'        => current_time( 'mysql' ),
+				'http_code'        => $code,
+				'response_message' => $message,
+			),
+			array( '%d', '%s', '%d', '%s' )
+		);
 	}
 }

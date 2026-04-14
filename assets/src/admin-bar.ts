@@ -78,7 +78,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				}
 				const confirmFn = ( window as any ).stagifyConfirm;
 				if ( confirmFn ) {
-					confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel } ).then( ( ok: boolean ) => {
+					confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: activeTaskId } ).then( ( ok: boolean ) => {
 						if ( ok ) pushTask( activeTaskId, root );
 					} );
 				} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
@@ -385,7 +385,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 			const confirmFn = ( window as any ).stagifyConfirm;
 			if ( confirmFn ) {
-				confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel } ).then( ( ok: boolean ) => {
+				confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: taskId } ).then( ( ok: boolean ) => {
 					if ( ok ) pagePush( taskId, btn );
 				} );
 			} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {

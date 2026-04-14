@@ -107,6 +107,7 @@ final class AdminMenu {
 			. '<div class="stagify-modal">'
 			. '<strong id="stagify-modal-title"></strong>'
 			. '<p id="stagify-modal-message"></p>'
+			. '<div id="stagify-modal-preview" class="stagify-modal-preview"></div>'
 			. '<div class="stagify-modal-actions">'
 			. '<button type="button" class="button" id="stagify-modal-cancel">' . esc_html__( 'Cancel', 'stagify' ) . '</button>'
 			. '<button type="button" class="button button-primary" id="stagify-modal-ok"></button>'
@@ -119,21 +120,64 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private static function render_modal_script(): void {
+		$action_labels = wp_json_encode(
+			array(
+				'create' => __( 'Create', 'stagify' ),
+				'update' => __( 'Update', 'stagify' ),
+				'delete' => __( 'Delete', 'stagify' ),
+			)
+		);
+		$type_labels = wp_json_encode(
+			array(
+				'content'     => __( 'Content', 'stagify' ),
+				'file'        => __( 'File', 'stagify' ),
+				'environment' => __( 'Plugin/Theme', 'stagify' ),
+				'database'    => __( 'Database', 'stagify' ),
+			)
+		);
 		echo '<script>'
+			. 'var stagifyActionLabels=' . $action_labels . ';' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			. 'var stagifyTypeLabels=' . $type_labels . ';' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			. 'window.stagifyConfirm=function(opts){'
 			. 'return new Promise(function(resolve){'
 			. 'var ov=document.getElementById("stagify-modal-overlay");'
 			. 'var ti=document.getElementById("stagify-modal-title");'
 			. 'var msg=document.getElementById("stagify-modal-message");'
+			. 'var pv=document.getElementById("stagify-modal-preview");'
 			. 'var ok=document.getElementById("stagify-modal-ok");'
 			. 'var cn=document.getElementById("stagify-modal-cancel");'
 			. 'if(!ov)return resolve(false);'
 			. 'ti.textContent=opts.title||"";'
 			. 'msg.textContent=opts.message||"";'
+			. 'pv.innerHTML="";pv.style.display="none";'
 			. 'ok.textContent=opts.confirm||"OK";'
 			. 'ok.className="button button-primary"+(opts.danger?" stagify-modal-confirm--danger":"");'
 			. 'ov.classList.add("stagify-modal--open");'
-			. 'function close(val){ov.classList.remove("stagify-modal--open");ok.onclick=null;cn.onclick=null;resolve(val);}'
+			// Fetch preview if taskId provided.
+			. 'if(opts.previewTaskId&&window.stagifyAdminBar){'
+			. 'pv.style.display="block";pv.innerHTML="<div class=\"stagify-preview-loading\">' . esc_js( __( 'Loading preview…', 'stagify' ) ) . '</div>";'
+			. 'fetch(stagifyAdminBar.ajaxUrl+"?action=stagify_preview_task&task_id="+opts.previewTaskId+"&_ajax_nonce="+stagifyAdminBar.nonce)'
+			. '.then(function(r){return r.json();})'
+			. '.then(function(d){'
+			. 'if(!d.success){pv.innerHTML="";pv.style.display="none";return;}'
+			. 'var items=d.data.items;if(!items.length){pv.innerHTML="";pv.style.display="none";return;}'
+			. 'var html="<div class=\"stagify-preview-list\">";'
+			. 'items.forEach(function(item){'
+			. 'var actionCls="stagify-action--"+item.action;'
+			. 'var actionLabel=stagifyActionLabels[item.action]||item.action;'
+			. 'var typeLabel=stagifyTypeLabels[item.type]||item.type;'
+			. 'html+="<div class=\"stagify-preview-item\">";'
+			. 'html+="<span class=\"stagify-preview-action "+actionCls+"\">"+actionLabel+"</span> ";'
+			. 'html+="<strong>"+(item.title||item.object_id)+"</strong>";'
+			. 'html+="<span class=\"stagify-preview-type\">"+typeLabel+"</span>";'
+			. 'if(item.excerpt)html+="<p class=\"stagify-preview-excerpt\">"+item.excerpt+"</p>";'
+			. 'html+="</div>";'
+			. '});'
+			. 'html+="</div>";'
+			. 'pv.innerHTML=html;'
+			. '}).catch(function(){pv.innerHTML="";pv.style.display="none";});'
+			. '}'
+			. 'function close(val){ov.classList.remove("stagify-modal--open");ok.onclick=null;cn.onclick=null;pv.innerHTML="";pv.style.display="none";resolve(val);}'
 			. 'ok.onclick=function(){close(true);};'
 			. 'cn.onclick=function(){close(false);};'
 			. 'ov.addEventListener("click",function(e){if(e.target===ov)close(false);},{once:true});'
@@ -158,6 +202,9 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private function register_menu_pages(): void {
+		$icon_svg = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$icon_uri = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+
 		$hook = add_menu_page(
 			__( 'Stagify', 'stagify' ),
 			__( 'Stagify', 'stagify' ),
@@ -166,7 +213,7 @@ final class AdminMenu {
 			function (): void {
 				$this->render_tasks_router();
 			},
-			'dashicons-migrate',
+			$icon_uri,
 			80
 		);
 

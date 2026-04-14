@@ -18,9 +18,11 @@ use Stagify\Admin\Actions\SaveServerAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
+use Stagify\Admin\Ajax\PreviewTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
 use Stagify\Admin\Ajax\TestConnectionAction;
 use Stagify\Admin\AdminMenu;
+use Stagify\Admin\DashboardWidget;
 use Stagify\Admin\Notices;
 use Stagify\Admin\Pages\ReceiverSettingsPage;
 use Stagify\Admin\Pages\SetupPage;
@@ -131,6 +133,7 @@ final class Plugin {
 		$this->container->get( HookManager::class )->register();
 		if ( is_admin() ) {
 			$this->container->get( AdminMenu::class )->register();
+			$this->container->get( DashboardWidget::class )->register();
 			Notices::register();
 			$this->register_sender_actions();
 		}
@@ -266,6 +269,12 @@ final class Plugin {
 			'wp_ajax_stagify_push_task_ajax',
 			function (): void {
 				$this->container->get( AjaxPushTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_preview_task',
+			function (): void {
+				$this->container->get( PreviewTaskAction::class )->handle();
 			}
 		);
 	}
