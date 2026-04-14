@@ -162,6 +162,13 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private function enqueue_admin_bar_script(): void {
+		wp_enqueue_style(
+			'stagify-admin',
+			STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
+			array(),
+			STAGIFY_VERSION
+		);
+
 		wp_enqueue_script(
 			'stagify-admin-bar',
 			STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js',
@@ -193,15 +200,7 @@ final class AdminMenu {
 			)
 		);
 
-		wp_add_inline_style(
-			'admin-bar',
-			'#wp-admin-bar-stagify .stagify-ab-separator > .ab-item { height:1px !important; min-height:1px !important; padding:0 !important; margin:4px 12px !important; background:#464b50 !important; cursor:default !important; }
-			#wp-admin-bar-stagify .stagify-ab-item > .ab-item { font-size:12px !important; opacity:0.85; }
-			#wp-admin-bar-stagify .stagify-ab-item > .ab-item:hover { opacity:1; }
-			#wp-admin-bar-stagify .stagify-ab-push > .ab-item { color:#46b450 !important; font-weight:600 !important; }
-			#wp-admin-bar-stagify .stagify-ab-no-server > .ab-item { color:#f0b849 !important; font-style:italic !important; }
-			#wp-admin-bar-stagify .stagify-ab-discard > .ab-item { color:#dc3232 !important; }'
-		);
+		// Admin bar styles are in assets/css/stagify-admin.css.
 	}
 
 	/**
@@ -381,9 +380,9 @@ final class AdminMenu {
 	 */
 	private function format_item_label( \Stagify\Domain\TaskItem $item ): string {
 		$action_colors = array(
-			'create' => '#46b450',
-			'update' => '#f0b849',
-			'delete' => '#dc3232',
+			'create' => '#39594d',
+			'update' => '#ff7759',
+			'delete' => '#b20000',
 		);
 		$color = $action_colors[ $item->action->value ] ?? '#a0a5aa';
 
@@ -463,7 +462,7 @@ final class AdminMenu {
 	 */
 	private function get_admin_bar_title( ?\Stagify\Domain\Task $task ): string {
 		if ( null === $task ) {
-			return '<span style="color:#a0a5aa;">' . esc_html__( 'No active task', 'stagify' ) . '</span>';
+			return '<span style="color:#9e9e9e;">' . esc_html__( 'No active task', 'stagify' ) . '</span>';
 		}
 
 		$label = esc_html( $task->title )
@@ -472,6 +471,6 @@ final class AdminMenu {
 			. ' '
 			. esc_html__( 'changes', 'stagify' );
 
-		return '<span style="color:#46b450;">' . $label . '</span>';
+		return '<span style="color:#ff7759;">' . $label . '</span>';
 	}
 }

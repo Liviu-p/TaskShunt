@@ -36,7 +36,7 @@ final class SettingsPage {
 	public function render(): void {
 		$server = $this->server_repository->find();
 
-		echo '<div class="wrap">';
+		echo '<div class="wrap stagify-wrap">';
 		echo '<h1>' . esc_html__( 'Stagify Settings', 'stagify' ) . '</h1>';
 
 		$this->render_mode_section();

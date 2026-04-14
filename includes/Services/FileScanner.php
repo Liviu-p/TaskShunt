@@ -19,13 +19,19 @@ use Stagify\Domain\TaskAction;
 use Stagify\Domain\TaskItemType;
 
 /**
- * Scans the active theme (and optionally mu-plugins) for file changes,
- * comparing current hashes against stored snapshots.
+ * Watches for file changes in your theme and mu-plugins folders.
+ *
+ * How it works:
+ *  - When you activate a task, it takes a "photo" (SHA-256 hash) of every file.
+ *  - On each admin page load (max once per 30 sec), it re-scans and compares hashes.
+ *  - New files → recorded as "created". Changed hashes → "updated". Missing files → "deleted".
+ *  - Skips node_modules, vendor, and .git folders automatically.
+ *  - Only looks at code-related files: .php, .css, .js, .json, .html, .svg, .twig, etc.
  */
 final class FileScanner {
 
 	/**
-	 * File extensions to include in the scan.
+	 * Only these file types are scanned — images, fonts, etc. are ignored.
 	 *
 	 * @var list<string>
 	 */

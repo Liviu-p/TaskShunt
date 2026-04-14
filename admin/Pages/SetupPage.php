@@ -103,13 +103,13 @@ final class SetupPage {
 	 * @return void
 	 */
 	public function render(): void {
-		echo '<div class="wrap" style="max-width:720px;margin:40px auto;">';
-		echo '<h1 style="text-align:center;margin-bottom:8px;">' . esc_html__( 'Welcome to Stagify', 'stagify' ) . '</h1>';
-		echo '<p style="text-align:center;color:#50575e;margin-bottom:32px;">'
+		echo '<div class="wrap stagify-wrap stagify-setup">';
+		echo '<h1>' . esc_html__( 'Welcome to Stagify', 'stagify' ) . '</h1>';
+		echo '<p class="stagify-subtitle">'
 			. esc_html__( 'How will this site use Stagify?', 'stagify' )
 			. '</p>';
 
-		echo '<div style="display:flex;gap:24px;justify-content:center;">';
+		echo '<div class="stagify-setup-cards">';
 		$this->render_sender_card();
 		$this->render_receiver_card();
 		echo '</div>';
@@ -156,10 +156,10 @@ final class SetupPage {
 	private function render_mode_card( PluginMode $mode, string $title, string $desc, string $icon ): void {
 		printf(
 			'<form method="post" action="%s" style="flex:1;max-width:320px;">'
-			. '<div style="border:1px solid #c3c4c7;border-radius:8px;padding:28px 24px;text-align:center;background:#fff;">'
-			. '<span class="dashicons %s" style="font-size:48px;width:48px;height:48px;color:#2271b1;margin-bottom:16px;"></span>'
-			. '<h2 style="margin:0 0 8px;">%s</h2>'
-			. '<p style="color:#50575e;min-height:48px;">%s</p>'
+			. '<div class="stagify-card">'
+			. '<span class="dashicons %s stagify-card-icon"></span>'
+			. '<h2>%s</h2>'
+			. '<p>%s</p>'
 			. '<input type="hidden" name="action" value="stagify_save_mode">'
 			. '<input type="hidden" name="stagify_mode" value="%s">',
 			esc_url( admin_url( 'admin-post.php' ) ),

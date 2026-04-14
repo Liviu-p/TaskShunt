@@ -10,8 +10,11 @@ declare(strict_types=1);
 namespace Stagify\Domain;
 
 /**
- * Represents a validated API key.
- * Construction fails fast if the key is shorter than 16 characters.
+ * A validated API key — the shared secret between sender and receiver.
+ *
+ * The sender includes this key in the X-Stagify-API-Key HTTP header when pushing.
+ * The receiver compares it against its stored key to authenticate the request.
+ * Must be at least 16 characters — construction throws if shorter.
  */
 final readonly class ApiKey extends ValueObject {
 

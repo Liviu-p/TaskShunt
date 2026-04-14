@@ -74,8 +74,13 @@ final class TasksPage {
 		$active_task = $this->task_repository->find_active();
 		$server      = $this->server_repository->find();
 
-		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'Stagify Tasks', 'stagify' ) . '</h1>';
+		echo '<div class="wrap stagify-wrap">';
+
+		echo '<div class="stagify-page-header">';
+		echo '<h1>' . esc_html__( 'Tasks', 'stagify' ) . '</h1>';
+		$this->render_create_form();
+		echo '</div>';
+		echo '<p class="stagify-subheading">' . esc_html__( 'Track and push content changes from staging to production.', 'stagify' ) . '</p>';
 
 		$this->render_server_badge( $server );
 
@@ -83,7 +88,6 @@ final class TasksPage {
 			$this->render_active_banner( $active_task->title, $active_task->item_count, $active_task->id );
 		}
 
-		$this->render_create_form();
 		$this->render_list_table();
 
 		echo '</div>';
@@ -216,9 +220,9 @@ final class TasksPage {
 	 */
 	private function render_active_banner( string $title, int $item_count, int $task_id ): void {
 		printf(
-			'<div style="background:#edfaef;border-left:4px solid #46b450;padding:12px 16px;margin:16px 0;display:flex;align-items:center;gap:16px;">'
+			'<div class="stagify-active-banner">'
 			. '<strong>%s</strong>'
-			. '<span style="color:#555;">%s</span>'
+			. '<span class="stagify-change-count">%s</span>'
 			. '<a href="#" class="button button-primary button-small stagify-push-btn" data-task-id="%d">%s</a>'
 			. '</div>',
 			esc_html( $title ),
@@ -240,18 +244,22 @@ final class TasksPage {
 	 */
 	private function render_server_badge( ?\Stagify\Domain\Server $server ): void {
 		if ( null !== $server ) {
-			printf(
-				'<p style="text-align:right;"><span style="background:#f0f0f1;color:#50575e;padding:4px 10px;border-radius:3px;font-size:13px;">%s</span></p>',
-				esc_html( $server->name )
-			);
 			return;
 		}
 
 		printf(
-			'<p style="text-align:right;"><span style="background:#fcf9e8;color:#996800;padding:4px 10px;border-radius:3px;font-size:13px;">%s</span> <a href="%s">%s</a></p>',
-			esc_html__( 'No server configured', 'stagify' ),
+			'<div class="stagify-notice stagify-notice--warning">'
+			. '<span class="dashicons dashicons-warning"></span>'
+			. '<div>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>'
+			. '<a href="%s" class="button button-small stagify-btn-coral">%s</a>'
+			. '</div>',
+			esc_html__( 'No server connected', 'stagify' ),
+			esc_html__( 'Connect a production server to start pushing changes.', 'stagify' ),
 			esc_url( admin_url( 'admin.php?page=stagify-settings' ) ),
-			esc_html__( 'Configure', 'stagify' )
+			esc_html__( 'Set up server', 'stagify' )
 		);
 	}
 
@@ -261,16 +269,36 @@ final class TasksPage {
 	 * @return void
 	 */
 	private function render_create_form(): void {
-		echo '<h2>' . esc_html__( 'Create new task', 'stagify' ) . '</h2>';
-		echo '<form method="post">';
+		printf(
+			'<button type="button" class="button button-primary stagify-new-task-btn" id="stagify-new-task-toggle">+ %s</button>',
+			esc_html__( 'New task', 'stagify' )
+		);
+		echo '<form method="post" class="stagify-create-form" id="stagify-create-form" style="display:none;">';
 		wp_nonce_field( 'stagify_create_task' );
 		printf(
-			'<input type="text" name="stagify_task_title" placeholder="%s" maxlength="%d" style="width:320px;" required> ',
-			esc_attr__( 'Task title…', 'stagify' ),
+			'<input type="text" name="stagify_task_title" placeholder="%s" maxlength="%d" required>',
+			esc_attr__( 'Task name…', 'stagify' ),
 			(int) self::MAX_TITLE_LENGTH
 		);
-		submit_button( __( 'Create task', 'stagify' ), 'secondary', 'submit', false );
+		printf(
+			'<button type="submit" class="button button-primary">%s</button>',
+			esc_html__( 'Create', 'stagify' )
+		);
+		printf(
+			'<button type="button" class="button stagify-create-cancel" id="stagify-create-cancel">%s</button>',
+			esc_html__( 'Cancel', 'stagify' )
+		);
 		echo '</form>';
+		echo '<script>'
+			. '(function(){'
+			. 'var btn=document.getElementById("stagify-new-task-toggle");'
+			. 'var form=document.getElementById("stagify-create-form");'
+			. 'var cancel=document.getElementById("stagify-create-cancel");'
+			. 'if(!btn||!form||!cancel)return;'
+			. 'btn.addEventListener("click",function(){btn.style.display="none";form.style.display="flex";form.querySelector("input").focus();});'
+			. 'cancel.addEventListener("click",function(){form.style.display="none";btn.style.display="inline-flex";});'
+			. '})();'
+			. '</script>';
 	}
 
 	/**

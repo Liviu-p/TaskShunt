@@ -21,7 +21,16 @@ use Stagify\Services\FileScanner;
 use Stagify\Services\PostTypeRegistry;
 
 /**
- * Registers all WordPress action and filter hooks for the plugin.
+ * The "ears" of the sender — listens to WordPress events and records changes.
+ *
+ * Every time a post is saved, a plugin is activated, a theme file is edited, etc.,
+ * this class catches the event and adds a TaskItem to the currently active task.
+ *
+ * Key behaviors:
+ *  - Only records when a task is active (get_active_task_id() returns non-null).
+ *  - Skips autosaves, revisions, and untracked post types.
+ *  - Deduplicates: if you create then delete a post in the same task, both entries cancel out.
+ *  - For plugins: "install" + "activate" merges into one item with an activate_after flag.
  */
 final class HookManager {
 
@@ -45,11 +54,17 @@ final class HookManager {
 	) {}
 
 	/**
-	 * Register all WordPress hooks.
+	 * Register all WordPress hooks that the sender needs to track changes.
+	 *
+	 * Content hooks — save_post, transition_post_status, before_delete_post, add/edit_attachment
+	 * Plugin hooks  — activated_plugin, deactivated_plugin, deleted_plugin, upgrader_process_complete
+	 * Theme hooks   — switch_theme, upgrader_process_complete
+	 * File hooks    — file scanner runs on admin_init (throttled to once per 30 seconds)
 	 *
 	 * @return void
 	 */
 	public function register(): void {
+		// --- Content tracking hooks ---
 		add_action(
 			'save_post',
 			function ( int $post_id, \WP_Post $post ): void {
@@ -104,7 +119,7 @@ final class HookManager {
 			2
 		);
 
-		// Plugin lifecycle hooks.
+		// --- Plugin lifecycle hooks ---
 		add_action(
 			'activated_plugin',
 			function ( string $plugin ): void {
@@ -134,7 +149,7 @@ final class HookManager {
 			2
 		);
 
-		// Theme lifecycle hooks.
+		// --- Theme lifecycle hooks ---
 		add_action(
 			'switch_theme',
 			function ( string $new_name, \WP_Theme $new_theme ): void {
@@ -144,7 +159,10 @@ final class HookManager {
 			2
 		);
 
-		// Snapshot all files when a task is activated so only subsequent changes are tracked.
+		// --- File change detection ---
+
+		// When a task is activated, take a snapshot of all theme/mu-plugin files.
+		// This baseline means only files changed AFTER activation get tracked (no false positives).
 		$this->event_dispatcher->add_listener(
 			TaskActivated::class,
 			function (): void {
@@ -152,7 +170,8 @@ final class HookManager {
 			}
 		);
 
-		// Scan for file changes on admin page loads (throttled internally).
+		// On every admin page load, scan for file changes by comparing SHA-256 hashes
+		// against the baseline snapshot. Throttled internally to run at most once per 30 seconds.
 		if ( is_admin() ) {
 			add_action(
 				'admin_init',
@@ -166,7 +185,9 @@ final class HookManager {
 	/**
 	 * Handle the before_delete_post action.
 	 *
-	 * Records a Delete action for posts and attachments before they are removed from the database.
+	 * Records a Delete action. Smart deduplication:
+	 *  - If the post was CREATED in this same task → both entries cancel out (net zero).
+	 *  - If the post was UPDATED in this task → replace the update with a delete.
 	 *
 	 * @param int      $post_id WordPress post ID.
 	 * @param \WP_Post $post    WordPress post object.
@@ -253,6 +274,7 @@ final class HookManager {
 		}
 
 
+		// Detect if this is a brand new post or an edit: if post_date == post_modified it was just created.
 		$action  = $post->post_date === $post->post_modified ? TaskAction::Create : TaskAction::Update;
 		$item_id = $this->task_item_repository->add_item(
 			$task_id,
@@ -597,8 +619,11 @@ final class HookManager {
 	/**
 	 * Record a plugin or theme state change (activate, deactivate, switch).
 	 *
-	 * Handles deduplication: if the same object was already tracked with the
-	 * opposite state change (e.g. activate then deactivate), they cancel out.
+	 * Smart deduplication for environment changes:
+	 *  - activate + deactivate (or vice versa) in the same task → cancel out, both removed.
+	 *  - install + activate in the same task → merge into one "install" with activate_after=true,
+	 *    so the receiver does both in one step.
+	 *  - Same action again → just update the payload with latest data.
 	 *
 	 * @param string               $slug        Object identifier (plugin basename or theme slug).
 	 * @param string               $object_type "plugin" or "theme".

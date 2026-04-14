@@ -122,7 +122,7 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	public function column_item_count( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 		return sprintf(
-			'<span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e0e0e0;font-weight:600;">%d</span>',
+			'<span class="stagify-pill">%d</span>',
 			(int) $item->item_count
 		);
 	}
@@ -198,7 +198,7 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" style="color:#f0b849;">%s</a>',
+			'<a href="%s" class="stagify-link-warning">%s</a>',
 			esc_url( $url ),
 			esc_html__( 'Retry', 'stagify' )
 		);
@@ -223,7 +223,7 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" style="color:#b32d2e;">%s</a>',
+			'<a href="%s" class="stagify-link-danger">%s</a>',
 			esc_url( $url ),
 			esc_html__( 'Discard', 'stagify' )
 		);
@@ -256,14 +256,14 @@ final class TasksListTable extends \WP_List_Table {
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
 		if ( $is_active ) {
-			return $this->badge( __( 'Active', 'stagify' ), '#46b450', true );
+			return '<span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Active', 'stagify' ) . '</span>';
 		}
 
 		return match ( $item->status ) {
-			TaskStatus::Pending => $this->badge( __( 'Pending', 'stagify' ), '#a0a5aa' ),
-			TaskStatus::Pushing => $this->badge( __( 'Pushing', 'stagify' ), '#f0b849' ),
-			TaskStatus::Pushed  => $this->badge( __( 'Pushed', 'stagify' ), '#00a0d2' ),
-			TaskStatus::Failed  => $this->badge( __( 'Failed', 'stagify' ), '#dc3232' ),
+			TaskStatus::Pending => '<span class="stagify-badge stagify-badge--pending">' . esc_html__( 'Pending', 'stagify' ) . '</span>',
+			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing', 'stagify' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
+			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};
 	}
 

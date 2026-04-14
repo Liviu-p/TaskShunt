@@ -2,8 +2,10 @@
 /**
  * DI container bootstrap.
  *
- * Builds and returns a configured PHP-DI container with all
- * application services bound to their interfaces.
+ * Builds and returns a configured PHP-DI container with all application
+ * services bound to their interfaces. This is the central wiring point:
+ * every class the plugin needs is registered here so that constructor
+ * injection resolves dependencies automatically.
  *
  * @package Stagify
  */

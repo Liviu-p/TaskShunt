@@ -20,7 +20,13 @@ use Stagify\Events\TaskFailed;
 use Stagify\Events\TaskPushed;
 
 /**
- * Pushes a task and its items to the configured receiver server.
+ * Pushes a task to the production server. This is what happens when you click "Push now":
+ *
+ *  1. Loads the task and all its items from the database.
+ *  2. Serializes everything into a JSON payload.
+ *  3. Sends an HTTP POST to {server_url}/wp-json/stagify/v1/receive with the API key header.
+ *  4. Reads the receiver's response — checks if each item succeeded or failed.
+ *  5. Updates the task status to Pushed (success) or Failed (error).
  */
 final class PushService {
 
@@ -152,7 +158,8 @@ final class PushService {
 			return $this->fail( $task, $code, sprintf( __( 'HTTP %1$d: %2$s', 'stagify' ), $code, $message ) );
 		}
 
-		// Check the per-item results from the receiver.
+		// The receiver returns {success: bool, results: [{success, message}, ...]} for each item.
+		// Even with HTTP 200, individual items may have failed (e.g. a plugin not found on WordPress.org).
 		if ( is_array( $decoded ) && isset( $decoded['success'] ) && false === $decoded['success'] ) {
 			$failed_messages = array();
 			foreach ( ( $decoded['results'] ?? array() ) as $result ) {

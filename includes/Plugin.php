@@ -29,6 +29,14 @@ use Stagify\Domain\PluginMode;
 
 /**
  * Plugin singleton that bootstraps the application.
+ *
+ * Stagify operates in one of two modes:
+ *  - Sender (staging site): tracks content/file/plugin/theme changes, groups them
+ *    into "tasks", and pushes the task payload to a production site via HTTP.
+ *  - Receiver (production site): exposes a REST API that accepts incoming tasks
+ *    and applies the changes (create/update/delete posts, install plugins, etc.).
+ *
+ * On first activation, neither mode is set and the user sees a setup screen.
  */
 final class Plugin {
 
@@ -75,19 +83,23 @@ final class Plugin {
 	 * @return void
 	 */
 	public function boot(): void {
+		// The mode-switch action must always be available so users can change modes.
 		$this->register_mode_action();
 
 		$mode = SetupPage::get_mode();
 
+		// No mode selected yet — show the first-run setup screen.
 		if ( is_admin() && null === $mode ) {
 			$this->boot_setup();
 			return;
 		}
 
+		// Sender mode: enable change tracking (HookManager), admin UI, and push actions.
 		if ( PluginMode::Sender === $mode ) {
 			$this->boot_sender();
 		}
 
+		// Receiver mode: register the REST API endpoint that accepts pushes.
 		if ( PluginMode::Receiver === $mode ) {
 			$this->boot_receiver();
 		}
@@ -95,6 +107,7 @@ final class Plugin {
 
 	/**
 	 * Boot the first-run setup screen when no mode is selected.
+	 * Shows a full-page "Sender or Receiver?" choice, and redirects admins there until they pick one.
 	 *
 	 * @return void
 	 */
@@ -106,6 +119,11 @@ final class Plugin {
 
 	/**
 	 * Boot the sender (staging) feature set.
+	 *
+	 * HookManager — listens to WordPress events (post saves, plugin activations, etc.)
+	 *               and automatically records every change into the active task.
+	 * AdminMenu  — registers the Stagify menu pages (Tasks, Settings) and admin bar widget.
+	 * Actions    — form handlers for push, discard, retry, save server, etc.
 	 *
 	 * @return void
 	 */
@@ -120,6 +138,11 @@ final class Plugin {
 
 	/**
 	 * Boot the receiver (production) feature set.
+	 *
+	 * ReceiverApi          — registers the REST endpoint (POST /stagify/v1/receive) that accepts
+	 *                        incoming pushes and applies changes to this site.
+	 * ReceiverSettingsPage — admin page to manage the API key and view receiver status.
+	 * SetupPage            — kept available so the user can switch back to sender mode.
 	 *
 	 * @return void
 	 */
@@ -150,7 +173,10 @@ final class Plugin {
 	}
 
 	/**
-	 * Register admin_post and AJAX handlers for sender mode.
+	 * Register all admin_post and AJAX handlers for sender mode.
+	 *
+	 * admin_post handlers process traditional form submissions (POST → redirect).
+	 * AJAX handlers process JavaScript-driven requests from the admin bar and task pages.
 	 *
 	 * @return void
 	 */

@@ -10,7 +10,15 @@ declare(strict_types=1);
 namespace Stagify\Domain;
 
 /**
- * Represents a single change item within a staging task.
+ * A TaskItem is one individual change inside a task.
+ *
+ * Examples:
+ *  - "Post 'About Us' was updated"   → type=Content, action=Update, object_type=page
+ *  - "Plugin WooCommerce activated"   → type=Environment, action=Update, object_type=plugin
+ *  - "theme/style.css was modified"   → type=File, action=Update, object_type=file
+ *
+ * The payload field holds the serialized data needed to replay this change on the receiver
+ * (e.g. full post content + meta for a content item, or the plugin slug for an environment item).
  *
  * Pure data object — no DB access. Hydrate via TaskItem::from_db_row().
  */

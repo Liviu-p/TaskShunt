@@ -1,0 +1,830 @@
+/**
+ * Stagify Admin Styles — Cohere Brand
+ *
+ * Palette:
+ *   Coral:    #ff7759 / #ca492d / #511d12
+ *   Blue:     #4c6ee6 / #2d4cb9
+ *   Green:    #39594d / #71867e
+ *   Quartz:   #d18ee2 / #9b60aa
+ *   Neutral:  #212121 #333 #424242 #616161 #757575 #9e9e9e
+ *   Light:    #fafafa #f5f5f5
+ *   Border:   #d9d9dd #e0e0e0
+ */
+
+/* ----------------------------------------------------------------
+   1. Base wrapper
+   ---------------------------------------------------------------- */
+.stagify-wrap {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #333;
+    max-width: calc(100% - 20px);
+    padding: 20px 0 40px;
+    margin-right: 20px;
+}
+
+.stagify-wrap * {
+    box-sizing: border-box;
+}
+
+.stagify-wrap h1 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: #212121;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    padding: 0;
+    line-height: 1.3;
+}
+
+.stagify-wrap h2 {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #212121;
+    letter-spacing: -0.01em;
+    margin: 24px 0 10px;
+    padding: 0;
+    line-height: 1.4;
+}
+
+.stagify-wrap p {
+    color: #616161;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 4px 0 12px;
+}
+
+.stagify-subheading {
+    color: #9e9e9e !important;
+    font-size: 13px !important;
+    margin: 0 0 4px !important;
+}
+
+/* ----------------------------------------------------------------
+   2. Buttons — Cohere style: pill-shaped, dark primary
+   ---------------------------------------------------------------- */
+.stagify-wrap .button,
+.stagify-wrap .button-secondary,
+.stagify-wrap .button-primary,
+.stagify-wrap input[type="submit"].button,
+.stagify-wrap input[type="submit"].button-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 20px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    border-radius: 9999px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    text-decoration: none !important;
+    line-height: 36px !important;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Secondary — light outline, Cohere style (must come BEFORE primary) */
+.stagify-wrap .button,
+.stagify-wrap .button-secondary,
+.stagify-wrap input[type="submit"].button {
+    background: #fff !important;
+    border: 1px solid #d9d9dd !important;
+    color: #424242 !important;
+}
+
+.stagify-wrap .button:hover,
+.stagify-wrap .button-secondary:hover,
+.stagify-wrap input[type="submit"].button:hover {
+    background: #f5f5f5 !important;
+    border-color: #bbbbc3 !important;
+    color: #212121 !important;
+}
+
+/* Primary — dark like Cohere (after secondary so it wins) */
+.stagify-wrap .button-primary,
+.stagify-wrap input[type="submit"].button-primary {
+    background: #212121 !important;
+    border: 1px solid #212121 !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.stagify-wrap .button-primary:hover,
+.stagify-wrap input[type="submit"].button-primary:hover {
+    background: #333 !important;
+    border-color: #333 !important;
+    color: #fff !important;
+}
+
+.stagify-wrap .button-primary:active {
+    transform: scale(1);
+}
+
+.stagify-wrap .button-primary:focus {
+    box-shadow: 0 0 0 2px rgba(33, 33, 33, 0.25) !important;
+}
+
+/* Coral accent button — for warnings/CTAs */
+.stagify-wrap .button.stagify-btn-coral,
+.stagify-wrap .stagify-btn-coral {
+    background: #ff7759 !important;
+    border: 1px solid #ca492d !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.stagify-wrap .button.stagify-btn-coral:hover,
+.stagify-wrap .stagify-btn-coral:hover {
+    background: #ca492d !important;
+    border-color: #511d12 !important;
+    color: #fff !important;
+}
+
+/* Small button variant */
+.stagify-wrap .button-small,
+.stagify-wrap .button.button-small {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    line-height: 30px !important;
+}
+
+/* Hero button (setup page) */
+.stagify-wrap .button-hero {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 32px !important;
+    font-size: 15px !important;
+    line-height: 44px !important;
+}
+
+/* ----------------------------------------------------------------
+   3. Inputs — matched height to buttons
+   ---------------------------------------------------------------- */
+.stagify-wrap input[type="text"],
+.stagify-wrap input[type="url"],
+.stagify-wrap input[type="password"],
+.stagify-wrap input[type="email"],
+.stagify-wrap input[type="search"] {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #d9d9dd;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #333;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+.stagify-wrap input[type="text"]:focus,
+.stagify-wrap input[type="url"]:focus,
+.stagify-wrap input[type="password"]:focus,
+.stagify-wrap input[type="email"]:focus {
+    border-color: #ff7759;
+    box-shadow: 0 0 0 2px rgba(255, 119, 89, 0.15);
+    outline: none;
+}
+
+.stagify-wrap .regular-text {
+    width: 360px;
+    max-width: 100%;
+}
+
+/* ----------------------------------------------------------------
+   4. Page header — title + action button inline
+   ---------------------------------------------------------------- */
+.stagify-page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+}
+
+.stagify-page-header h1 {
+    margin: 0;
+}
+
+.stagify-new-task-btn {
+    flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------
+   4b. Create task form — inline expand
+   ---------------------------------------------------------------- */
+.stagify-wrap form {
+    margin-top: 0;
+    width: 100%;
+}
+
+.stagify-create-form {
+    align-items: center;
+    gap: 8px;
+}
+
+.stagify-create-form input[type="text"] {
+    width: 260px !important;
+    flex-shrink: 0;
+}
+
+.stagify-create-form .button-primary,
+.stagify-create-form .stagify-create-cancel {
+    flex-shrink: 0;
+}
+
+.stagify-create-cancel {
+    color: #9e9e9e !important;
+}
+
+/* ----------------------------------------------------------------
+   5. Cards (setup page)
+   ---------------------------------------------------------------- */
+.stagify-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 22px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stagify-card:hover {
+    border-color: #212121;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stagify-card-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #ff7759;
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+.stagify-card h2 {
+    margin: 0 0 8px !important;
+    font-size: 17px;
+    color: #212121;
+    text-align: center;
+}
+
+.stagify-card p {
+    color: #757575;
+    min-height: 48px;
+    font-size: 13px;
+}
+
+/* ----------------------------------------------------------------
+   6. Active task banner
+   ---------------------------------------------------------------- */
+.stagify-active-banner {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #212121;
+    border-radius: 0 16px 16px 0;
+    padding: 14px 20px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stagify-active-banner strong {
+    color: #212121;
+    font-size: 14px;
+}
+
+.stagify-active-banner .stagify-change-count {
+    color: #757575;
+    font-size: 13px;
+}
+
+/* ----------------------------------------------------------------
+   7. Server badge
+   ---------------------------------------------------------------- */
+.stagify-server-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+}
+
+.stagify-server-badge--configured {
+    background: #f5f5f5;
+    color: #616161;
+    border: 1px solid #e0e0e0;
+}
+
+.stagify-server-badge--warning {
+    background: #fff3e0;
+    color: #ca492d;
+    border: 1px solid #ffd6cc;
+}
+
+/* ----------------------------------------------------------------
+   8. Form table overrides
+   ---------------------------------------------------------------- */
+.stagify-wrap .form-table {
+    max-width: 700px;
+}
+
+.stagify-wrap .form-table th {
+    font-weight: 600;
+    color: #424242;
+    font-size: 13px;
+    padding: 16px 10px 16px 0;
+    width: 160px;
+    vertical-align: middle;
+}
+
+.stagify-wrap .form-table td {
+    padding: 12px 10px;
+    vertical-align: middle;
+}
+
+/* ----------------------------------------------------------------
+   9. Status & type badges
+   ---------------------------------------------------------------- */
+.stagify-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+/* Status */
+.stagify-badge--active   { background: #fff3e0; color: #ca492d; }
+.stagify-badge--pending  { background: #f5f5f5; color: #9e9e9e; }
+.stagify-badge--pushing  { background: #fff3e0; color: #ca492d; }
+.stagify-badge--pushed   { background: #e8f0fe; color: #2d4cb9; }
+.stagify-badge--failed   { background: #fce4ec; color: #b20000; }
+
+/* Type */
+.stagify-badge--content     { background: #e8f0fe; color: #2d4cb9; }
+.stagify-badge--file        { background: #fff3e0; color: #ca492d; }
+.stagify-badge--database    { background: #f3e8ff; color: #9b60aa; }
+.stagify-badge--environment { background: #e8f5e9; color: #39594d; }
+
+/* Action */
+.stagify-action--create { color: #39594d; font-weight: 600; }
+.stagify-action--update { color: #ca492d; font-weight: 600; }
+.stagify-action--delete { color: #b20000; font-weight: 600; }
+
+/* ----------------------------------------------------------------
+   10. Tables — full width, clean
+   ---------------------------------------------------------------- */
+.stagify-wrap .wp-list-table {
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    overflow: hidden;
+    border-spacing: 0;
+    border-collapse: collapse;
+    width: 100% !important;
+    max-width: 100%;
+    table-layout: auto;
+    margin-top: 4px;
+}
+
+.stagify-wrap .wp-list-table thead th,
+.stagify-wrap .wp-list-table thead td {
+    background: #fafafa;
+    border-bottom: 2px solid #e0e0e0;
+    color: #616161;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 10px 16px;
+    line-height: 1.4;
+}
+
+.stagify-wrap .wp-list-table tfoot th,
+.stagify-wrap .wp-list-table tfoot td {
+    background: #fafafa;
+    border-top: 1px solid #e0e0e0;
+    color: #616161;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 10px 16px;
+    line-height: 1.4;
+}
+
+.stagify-wrap .wp-list-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+    color: #424242;
+    vertical-align: middle;
+}
+
+.stagify-wrap .wp-list-table tbody tr:hover td {
+    background: #fafafa;
+}
+
+.stagify-wrap .wp-list-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Make "no items" row span nicely */
+.stagify-wrap .wp-list-table .no-items td {
+    padding: 24px 16px;
+    text-align: center;
+    color: #9e9e9e;
+    font-size: 14px;
+}
+
+/* Column widths */
+.stagify-wrap .wp-list-table .column-cb {
+    width: 36px;
+    padding-left: 12px;
+}
+
+.stagify-wrap .wp-list-table .column-status {
+    width: 120px;
+}
+
+.stagify-wrap .wp-list-table .column-item_count {
+    width: 100px;
+}
+
+.stagify-wrap .wp-list-table .column-created_at {
+    width: 160px;
+}
+
+/* Tablenav (bulk actions bar) */
+.stagify-wrap .tablenav {
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stagify-wrap .tablenav br.clear {
+    display: none;
+}
+
+/* Minimize empty tablenav */
+.stagify-wrap .tablenav {
+    min-height: 0;
+    padding: 0;
+    height: auto;
+    overflow: hidden;
+}
+
+/* Hide completely when empty (modern browsers) */
+.stagify-wrap .tablenav:not(:has(.tablenav-pages .pagination-links, .alignleft option)) {
+    display: none;
+}
+
+.stagify-wrap .tablenav .actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stagify-wrap .tablenav select {
+    height: 36px;
+    border: 1px solid #d9d9dd;
+    border-radius: 8px;
+    padding: 0 8px;
+    font-size: 13px;
+    color: #424242;
+    background: #fff;
+    vertical-align: middle;
+}
+
+.stagify-wrap .tablenav .tablenav-pages {
+    margin-left: auto;
+}
+
+/* Item count pill */
+.stagify-pill {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 20px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    font-weight: 600;
+    font-size: 12px;
+    color: #616161;
+}
+
+/* ----------------------------------------------------------------
+   11. Pulsing dot
+   ---------------------------------------------------------------- */
+@keyframes stagify-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.stagify-pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff7759;
+    margin-right: 6px;
+    animation: stagify-pulse 1.5s infinite;
+    vertical-align: middle;
+}
+
+/* ----------------------------------------------------------------
+   12. Setup page layout
+   ---------------------------------------------------------------- */
+.stagify-setup {
+    max-width: 720px;
+    margin: 48px auto;
+}
+
+.stagify-setup h1 {
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.stagify-setup .stagify-subtitle {
+    text-align: center;
+    color: #757575;
+    margin-bottom: 36px;
+    font-size: 15px;
+}
+
+.stagify-setup-cards {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}
+
+/* ----------------------------------------------------------------
+   13. Detail page
+   ---------------------------------------------------------------- */
+.stagify-back-link {
+    color: #ff7759;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.stagify-back-link:hover {
+    color: #ca492d;
+    text-decoration: underline;
+}
+
+.stagify-meta {
+    color: #9e9e9e;
+    font-size: 13px;
+    margin: 0 0 4px;
+}
+
+.stagify-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0 20px;
+}
+
+/* Discard link */
+.stagify-link-danger,
+.stagify-wrap .stagify-link-danger {
+    color: #b20000 !important;
+}
+
+.stagify-link-danger:hover,
+.stagify-wrap .stagify-link-danger:hover {
+    color: #5a0000 !important;
+}
+
+/* Retry link */
+.stagify-link-warning,
+.stagify-wrap .stagify-link-warning {
+    color: #ca492d !important;
+}
+
+/* ----------------------------------------------------------------
+   14. Payload viewer
+   ---------------------------------------------------------------- */
+.stagify-payload-pre {
+    display: none;
+    max-height: 200px;
+    overflow: auto;
+    font-size: 11px;
+    margin-top: 6px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+    color: #424242;
+}
+
+/* ----------------------------------------------------------------
+   15. Checkbox / tracking section
+   ---------------------------------------------------------------- */
+.stagify-wrap fieldset {
+    margin-top: 8px;
+}
+
+.stagify-wrap fieldset label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #424242;
+}
+
+.stagify-wrap fieldset label code {
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #757575;
+}
+
+/* ----------------------------------------------------------------
+   16. Notices
+   ---------------------------------------------------------------- */
+.stagify-wrap .notice {
+    border-radius: 8px;
+    border-left-width: 4px;
+}
+
+/* Custom Stagify notices */
+.stagify-notice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 24px;
+    border-radius: 16px;
+    margin: 16px 0;
+}
+
+.stagify-notice p {
+    margin: 2px 0 0;
+    font-size: 13px;
+}
+
+.stagify-notice strong {
+    font-size: 13px;
+    display: block;
+}
+
+.stagify-notice .dashicons {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.stagify-notice div {
+    flex: 1;
+}
+
+.stagify-notice .button {
+    flex-shrink: 0;
+}
+
+.stagify-notice--warning {
+    background: #fff8f0;
+    border: 1px solid #ffd6cc;
+}
+
+.stagify-notice--warning .dashicons {
+    color: #ca492d;
+}
+
+.stagify-notice--warning strong {
+    color: #511d12;
+}
+
+/* ----------------------------------------------------------------
+   17. Admin bar overrides
+   ---------------------------------------------------------------- */
+#wp-admin-bar-stagify .stagify-ab-separator > .ab-item {
+    height: 1px !important;
+    min-height: 1px !important;
+    padding: 0 !important;
+    margin: 4px 12px !important;
+    background: #464b50 !important;
+    cursor: default !important;
+}
+
+#wp-admin-bar-stagify .stagify-ab-item > .ab-item {
+    font-size: 12px !important;
+    opacity: 0.85;
+}
+
+#wp-admin-bar-stagify .stagify-ab-item > .ab-item:hover {
+    opacity: 1;
+}
+
+#wp-admin-bar-stagify .stagify-ab-push > .ab-item {
+    color: #ff7759 !important;
+    font-weight: 600 !important;
+}
+
+#wp-admin-bar-stagify .stagify-ab-no-server > .ab-item {
+    color: #ca492d !important;
+    font-style: italic !important;
+}
+
+#wp-admin-bar-stagify .stagify-ab-discard > .ab-item {
+    color: #b20000 !important;
+}
+
+/* ----------------------------------------------------------------
+   18. Row actions
+   ---------------------------------------------------------------- */
+.stagify-wrap .row-actions a {
+    color: #ff7759;
+}
+
+.stagify-wrap .row-actions a:hover {
+    color: #ca492d;
+}
+
+/* ----------------------------------------------------------------
+   19. Links
+   ---------------------------------------------------------------- */
+.stagify-wrap a {
+    color: #ff7759;
+}
+
+.stagify-wrap a:hover {
+    color: #ca492d;
+}
+
+/* ----------------------------------------------------------------
+   20. Submit button wrapper cleanup
+   ---------------------------------------------------------------- */
+.stagify-wrap p.submit {
+    margin: 16px 0 8px;
+    padding: 0;
+}
+
+/* WP checkbox styling — override colors only */
+.stagify-wrap input[type="checkbox"]:checked {
+    background-color: #ff7759 !important;
+    border-color: #ca492d !important;
+    /* WP 5.3+ uses SVG mask for the checkmark — color it white */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M14.83 4.89l1.34.94-5.81 8.38H9.02L5.78 9.67l1.34-1.25 2.57 2.4z'/%3E%3C/svg%3E") !important;
+    background-size: 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.stagify-wrap input[type="checkbox"]:checked::before {
+    content: none !important;
+}
+
+.stagify-wrap input[type="checkbox"]:focus {
+    border-color: #ff7759;
+    box-shadow: 0 0 0 2px rgba(255, 119, 89, 0.15);
+    outline: none;
+}
+
+/* ----------------------------------------------------------------
+   21. Responsive
+   ---------------------------------------------------------------- */
+@media screen and (max-width: 782px) {
+    .stagify-wrap {
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    .stagify-setup-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stagify-active-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .stagify-wrap .regular-text {
+        width: 100%;
+    }
+}

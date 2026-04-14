@@ -45,7 +45,7 @@ final class TaskDetailPage {
 		$task = $this->task_repository->find_by_id( $task_id );
 
 		if ( null === $task ) {
-			echo '<div class="wrap"><p>' . esc_html__( 'Task not found.', 'stagify' ) . '</p></div>';
+			echo '<div class="wrap stagify-wrap"><p>' . esc_html__( 'Task not found.', 'stagify' ) . '</p></div>';
 			return;
 		}
 
@@ -53,7 +53,7 @@ final class TaskDetailPage {
 		$active_task_id  = $this->task_repository->get_active_task_id();
 		$base_action_url = wp_nonce_url( admin_url( 'admin.php?page=stagify' ), 'stagify_task_action' );
 
-		echo '<div class="wrap">';
+		echo '<div class="wrap stagify-wrap">';
 		$this->render_header( $task, $active_task_id, $base_action_url );
 		$this->render_items_table( $items );
 		echo '</div>';
@@ -71,10 +71,10 @@ final class TaskDetailPage {
 	private function render_header( Task $task, ?int $active_task_id, string $base_action_url ): void {
 		$back_url = admin_url( 'admin.php?page=stagify' );
 
-		echo '<a href="' . esc_url( $back_url ) . '">&larr; ' . esc_html__( 'All tasks', 'stagify' ) . '</a>';
+		echo '<a href="' . esc_url( $back_url ) . '" class="stagify-back-link">&larr; ' . esc_html__( 'All tasks', 'stagify' ) . '</a>';
 		echo '<h1 style="margin-top:8px;">' . esc_html( $task->title ) . ' ' . $this->status_badge( $task->status ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		printf(
-			'<p style="color:#666;">%s &nbsp;|&nbsp; %s</p>',
+			'<p class="stagify-meta">%s &nbsp;|&nbsp; %s</p>',
 			esc_html(
 				sprintf(
 				/* translators: %s: formatted date and time */
@@ -102,10 +102,10 @@ final class TaskDetailPage {
 	 * @return void
 	 */
 	private function render_action_buttons( Task $task, ?int $active_task_id, string $base_action_url ): void {
-		echo '<p>';
+		echo '<div class="stagify-actions">';
 		$this->render_push_button( $task->id );
 		$this->render_secondary_buttons( $task, $active_task_id, $base_action_url );
-		echo '</p>';
+		echo '</div>';
 	}
 
 	/**
@@ -185,7 +185,7 @@ final class TaskDetailPage {
 		);
 
 		return sprintf(
-			'<a href="%s" class="button" style="color:#b32d2e;" data-cy="discard-task" onclick="return confirm(\'%s\');">%s</a>',
+			'<a href="%s" class="button stagify-link-danger" data-cy="discard-task" onclick="return confirm(\'%s\');">%s</a>',
 			esc_url( $url ),
 			esc_js( __( 'Discard this task and all its tracked changes?', 'stagify' ) ),
 			esc_html__( 'Discard task', 'stagify' )
@@ -211,7 +211,7 @@ final class TaskDetailPage {
 		);
 
 		return sprintf(
-			'<a href="%s" class="button" style="color:#f0b849;" data-cy="retry-task">%s</a> ',
+			'<a href="%s" class="button stagify-link-warning" data-cy="retry-task">%s</a> ',
 			esc_url( $url ),
 			esc_html__( 'Retry', 'stagify' )
 		);
@@ -288,7 +288,7 @@ final class TaskDetailPage {
 
 		return sprintf(
 			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s">%s</button>'
-			. '<pre id="%s" style="display:none;max-height:200px;overflow:auto;font-size:11px;margin-top:6px;">%s</pre>',
+			. '<pre id="%s" class="stagify-payload-pre">%s</pre>',
 			esc_attr( $id ),
 			esc_html__( 'Show payload', 'stagify' ),
 			esc_attr( $id ),
@@ -304,10 +304,10 @@ final class TaskDetailPage {
 	 */
 	private function type_badge( TaskItemType $type ): string {
 		return match ( $type ) {
-			TaskItemType::Content  => '<span style="background:#e8f0fe;color:#1a56db;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Content', 'stagify' ) . '</span>',
-			TaskItemType::File     => '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'File', 'stagify' ) . '</span>',
-			TaskItemType::Database    => '<span style="background:#f3e8ff;color:#6b21a8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Database', 'stagify' ) . '</span>',
-			TaskItemType::Environment => '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Environment', 'stagify' ) . '</span>',
+			TaskItemType::Content     => '<span class="stagify-badge stagify-badge--content">' . esc_html__( 'Content', 'stagify' ) . '</span>',
+			TaskItemType::File        => '<span class="stagify-badge stagify-badge--file">' . esc_html__( 'File', 'stagify' ) . '</span>',
+			TaskItemType::Database    => '<span class="stagify-badge stagify-badge--database">' . esc_html__( 'Database', 'stagify' ) . '</span>',
+			TaskItemType::Environment => '<span class="stagify-badge stagify-badge--environment">' . esc_html__( 'Environment', 'stagify' ) . '</span>',
 		};
 	}
 
@@ -319,9 +319,9 @@ final class TaskDetailPage {
 	 */
 	private function action_badge( TaskAction $action ): string {
 		return match ( $action ) {
-			TaskAction::Create => '<span style="color:#46b450;font-weight:600;">' . esc_html__( 'Create', 'stagify' ) . '</span>',
-			TaskAction::Update => '<span style="color:#f0b849;font-weight:600;">' . esc_html__( 'Update', 'stagify' ) . '</span>',
-			TaskAction::Delete => '<span style="color:#dc3232;font-weight:600;">' . esc_html__( 'Delete', 'stagify' ) . '</span>',
+			TaskAction::Create => '<span class="stagify-action--create">' . esc_html__( 'Create', 'stagify' ) . '</span>',
+			TaskAction::Update => '<span class="stagify-action--update">' . esc_html__( 'Update', 'stagify' ) . '</span>',
+			TaskAction::Delete => '<span class="stagify-action--delete">' . esc_html__( 'Delete', 'stagify' ) . '</span>',
 		};
 	}
 
@@ -333,10 +333,10 @@ final class TaskDetailPage {
 	 */
 	private function status_badge( TaskStatus $status ): string {
 		return match ( $status ) {
-			TaskStatus::Pending => '<span style="color:#a0a5aa;font-weight:600;">' . esc_html__( 'Pending', 'stagify' ) . '</span>',
-			TaskStatus::Pushing => '<span style="color:#f0b849;font-weight:600;">' . esc_html__( 'Pushing', 'stagify' ) . '</span>',
-			TaskStatus::Pushed  => '<span style="color:#00a0d2;font-weight:600;">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
-			TaskStatus::Failed  => '<span style="color:#dc3232;font-weight:600;">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
+			TaskStatus::Pending => '<span class="stagify-badge stagify-badge--pending">' . esc_html__( 'Pending', 'stagify' ) . '</span>',
+			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing', 'stagify' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
+			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};
 	}
 

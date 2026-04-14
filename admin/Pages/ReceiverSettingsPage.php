@@ -52,6 +52,18 @@ final class ReceiverSettingsPage {
 				$this->handle_save();
 			}
 		);
+
+		add_action(
+			'admin_enqueue_scripts',
+			function (): void {
+				wp_enqueue_style(
+					'stagify-admin',
+					STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
+					array(),
+					STAGIFY_VERSION
+				);
+			}
+		);
 	}
 
 	/**
@@ -104,7 +116,7 @@ final class ReceiverSettingsPage {
 		$has_key  = '' !== $api_key;
 		$ping_url = rest_url( 'stagify/v1/ping' );
 
-		echo '<div class="wrap">';
+		echo '<div class="wrap stagify-wrap">';
 		echo '<h1>' . esc_html__( 'Stagify — Production (Receiver)', 'stagify' ) . '</h1>';
 
 		settings_errors( 'stagify' );
@@ -128,12 +140,12 @@ final class ReceiverSettingsPage {
 
 		if ( $has_key ) {
 			printf(
-				'<p><span style="color:#46b450;font-weight:600;">&#10003; %s</span></p>',
+				'<p><span style="color:#39594d;font-weight:600;">&#10003; %s</span></p>',
 				esc_html__( 'Receiver is active and ready to accept pushes.', 'stagify' )
 			);
 		} else {
 			printf(
-				'<p><span style="color:#f0b849;font-weight:600;">&#9888; %s</span></p>',
+				'<p><span style="color:#ca492d;font-weight:600;">&#9888; %s</span></p>',
 				esc_html__( 'No API key configured. Generate or set one below to start receiving pushes.', 'stagify' )
 			);
 		}

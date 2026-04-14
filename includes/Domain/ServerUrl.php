@@ -10,8 +10,12 @@ declare(strict_types=1);
 namespace Stagify\Domain;
 
 /**
- * Represents a validated server URL.
- * Construction fails fast if the URL is not syntactically valid.
+ * The production site's URL (e.g. "https://example.com").
+ *
+ * Used by PushService to build the full receive endpoint:
+ *   {ServerUrl}/wp-json/stagify/v1/receive
+ *
+ * Construction throws if the URL is not syntactically valid.
  */
 final readonly class ServerUrl extends ValueObject {
 
