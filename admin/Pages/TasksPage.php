@@ -90,10 +90,6 @@ final class TasksPage {
 			$this->render_active_guide( $active_task->title );
 		}
 
-		if ( null === $active_task ) {
-			$this->render_no_active_prompt();
-		}
-
 		$this->render_list_table();
 		$this->render_push_history();
 
