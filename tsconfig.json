@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ES2020",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "outDir": "./assets/dist",
+        "rootDir": "./assets/src",
+        "sourceMap": true
+    },
+    "include": [
+        "assets/src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "assets/dist"
+    ]
+}
