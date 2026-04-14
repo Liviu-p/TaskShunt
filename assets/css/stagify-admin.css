@@ -374,16 +374,16 @@
 
 /* Status — GitHub style: solid bg, white text */
 .stagify-badge--active   { background: #ff7759; color: #fff; }
-.stagify-badge--pending  { background: #6e7681; color: #fff; }
-.stagify-badge--pushing  { background: #d29922; color: #fff; }
+.stagify-badge--pending  { background: #f0f0f0; color: #616161; }
+.stagify-badge--pushing  { background: #f0f0f0; color: #616161; }
 .stagify-badge--pushed   { background: #238636; color: #fff; }
 .stagify-badge--failed   { background: #da3633; color: #fff; }
 
 /* Type */
-.stagify-badge--content     { background: #e8f0fe; color: #2d4cb9; }
-.stagify-badge--file        { background: #fff3e0; color: #ca492d; }
-.stagify-badge--database    { background: #f3e8ff; color: #9b60aa; }
-.stagify-badge--environment { background: #e8f5e9; color: #39594d; }
+.stagify-badge--content     { background: #f0f0f0; color: #616161; }
+.stagify-badge--file        { background: #f0f0f0; color: #616161; }
+.stagify-badge--database    { background: #f0f0f0; color: #616161; }
+.stagify-badge--environment { background: #f0f0f0; color: #616161; }
 
 /* Action */
 .stagify-action--create { color: #39594d; font-weight: 600; }

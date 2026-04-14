@@ -265,7 +265,7 @@ final class TaskDetailPage {
 
 		echo '<table class="wp-list-table widefat fixed striped" style="margin-top:16px;">';
 		echo '<thead><tr>';
-		foreach ( array( __( 'Type', 'stagify' ), __( 'Item', 'stagify' ), __( 'Action', 'stagify' ), __( 'Status', 'stagify' ), '' ) as $col ) {
+		foreach ( array( __( 'Type', 'stagify' ), __( 'Item', 'stagify' ), __( 'Action', 'stagify' ), '' ) as $col ) {
 			echo '<th>' . esc_html( $col ) . '</th>';
 		}
 		echo '</tr></thead><tbody>';
@@ -288,7 +288,6 @@ final class TaskDetailPage {
 		echo '<td>' . $this->type_badge( $item->type ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->render_object_cell( $item ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->action_badge( $item->action ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<td>' . $this->status_badge( $item->status ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->render_payload_cell( $item->id, $item->payload ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</tr>';
 	}
