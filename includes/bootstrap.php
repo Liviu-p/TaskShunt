@@ -25,6 +25,7 @@ use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
+use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
 use Stagify\Admin\Ajax\TestConnectionAction;
@@ -89,6 +90,7 @@ $builder->addDefinitions(
 		ReceiverSettingsPage::class            => \DI\autowire(),
 		SetupPage::class                       => \DI\autowire(),
 		ActivateTaskAction::class              => \DI\autowire(),
+		AjaxCreateTaskAction::class            => \DI\autowire(),
 		AjaxDiscardTaskAction::class           => \DI\autowire(),
 		AjaxPushTaskAction::class              => \DI\autowire(),
 		TestConnectionAction::class            => \DI\autowire(),

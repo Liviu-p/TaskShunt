@@ -17,6 +17,7 @@ use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
+use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
 use Stagify\Admin\Ajax\PreviewTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
@@ -257,6 +258,12 @@ final class Plugin {
 			'wp_ajax_stagify_activate_task',
 			function (): void {
 				$this->container->get( ActivateTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_create_task',
+			function (): void {
+				$this->container->get( AjaxCreateTaskAction::class )->handle();
 			}
 		);
 		add_action(

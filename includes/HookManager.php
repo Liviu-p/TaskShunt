@@ -815,13 +815,31 @@ final class HookManager {
 	}
 
 	/**
-	 * Return the active task ID, or null if no task is active.
+	 * Return the active task ID, auto-creating a task if none exists.
 	 *
-	 * Hook callbacks call this first and bail early when null is returned.
+	 * This enables "quick push" — users don't need to manually create a task
+	 * before making changes. A task named with today's date is created automatically.
 	 *
 	 * @return int|null
 	 */
 	private function get_active_task_id(): ?int {
-		return $this->task_repository->get_active_task_id();
+		$id = $this->task_repository->get_active_task_id();
+
+		if ( null !== $id ) {
+			return $id;
+		}
+
+		// Auto-create a task so changes are never lost.
+		/* translators: %s: date and time, e.g. "Apr 16, 2026 · 14:35" */
+		$title   = sprintf( __( 'Quick changes · %s', 'stagify' ), wp_date( 'M j, Y · H:i' ) );
+		$task_id = $this->task_repository->create( $title );
+		$this->task_repository->set_active( $task_id );
+
+		$task = $this->task_repository->find_by_id( $task_id );
+		if ( null !== $task ) {
+			$this->event_dispatcher->dispatch( new TaskActivated( $task ) );
+		}
+
+		return $task_id;
 	}
 }

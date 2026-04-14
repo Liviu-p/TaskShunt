@@ -74,14 +74,19 @@ final class TasksPage {
 	public function render(): void {
 		$active_task = $this->task_repository->find_active();
 		$server      = $this->server_repository->find();
+		$all_tasks   = $this->task_repository->find_all();
 
 		echo '<div class="wrap stagify-wrap">';
 
 		echo '<div class="stagify-page-header">';
 		echo '<h1>' . esc_html__( 'Tasks', 'stagify' ) . '</h1>';
-		$this->render_create_form();
+		if ( ! empty( $all_tasks ) ) {
+			$this->render_create_form();
+		}
 		echo '</div>';
-		echo '<p class="stagify-subheading">' . esc_html__( 'Group your changes into tasks and push them to production when ready.', 'stagify' ) . '</p>';
+		if ( ! empty( $all_tasks ) ) {
+			echo '<p class="stagify-subheading">' . esc_html__( 'Group your changes into tasks and push them to production when ready.', 'stagify' ) . '</p>';
+		}
 
 		OnboardingChecklist::render_sender( $this->server_repository );
 		$this->render_server_badge( $server );
@@ -90,8 +95,12 @@ final class TasksPage {
 			$this->render_active_guide( $active_task->title );
 		}
 
-		$this->render_list_table();
-		$this->render_push_history();
+		if ( empty( $all_tasks ) ) {
+			$this->render_welcome_state();
+		} else {
+			$this->render_list_table();
+			$this->render_push_history();
+		}
 
 		echo '</div>';
 	}
@@ -289,7 +298,7 @@ final class TasksPage {
 			. '<span><strong>"%s"</strong> %s</span>'
 			. '</div>',
 			esc_html( $title ),
-			esc_html__( 'is active — edit pages, posts, or media as usual. Changes are tracked automatically. Push when done.', 'stagify' )
+			esc_html__( 'is active — just work on your site as usual. Content edits, media uploads, plugin and theme changes are all tracked automatically.', 'stagify' )
 		);
 	}
 
@@ -442,6 +451,60 @@ final class TasksPage {
 			. 'cancel.addEventListener("click",function(){form.style.display="none";btn.style.display="inline-flex";});'
 			. '})();'
 			. '</script>';
+	}
+
+	/**
+	 * Render the welcome state when no tasks exist yet.
+	 *
+	 * @return void
+	 */
+	private function render_welcome_state(): void {
+		echo '<div class="stagify-welcome">';
+
+		echo '<div class="stagify-welcome-steps">';
+
+		echo '<div class="stagify-welcome-step">';
+		printf( '<span class="stagify-welcome-number">1</span>' );
+		printf( '<strong>%s</strong>', esc_html__( 'Create a task', 'stagify' ) );
+		printf( '<p>%s</p>', esc_html__( 'Give it a name like "Homepage update" or "New blog posts".', 'stagify' ) );
+		printf(
+			'<form method="post" style="margin-top:12px;">'
+		);
+		wp_nonce_field( 'stagify_create_task' );
+		printf(
+			'<div style="display:flex;gap:8px;justify-content:center;">'
+			. '<input type="text" name="stagify_task_title" placeholder="%s" maxlength="%d" class="regular-text" required style="max-width:200px;">'
+			. '<button type="submit" class="button button-primary">%s</button>'
+			. '</div>'
+			. '</form>',
+			esc_attr__( 'Task name…', 'stagify' ),
+			200,
+			esc_html__( 'Create', 'stagify' )
+		);
+		echo '</div>';
+
+		printf(
+			'<div class="stagify-welcome-step">'
+			. '<span class="stagify-welcome-number">2</span>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>',
+			esc_html__( 'Make your changes', 'stagify' ),
+			esc_html__( 'Edit content, upload media, activate plugins — everything is tracked automatically.', 'stagify' )
+		);
+
+		printf(
+			'<div class="stagify-welcome-step">'
+			. '<span class="stagify-welcome-number">3</span>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>',
+			esc_html__( 'Push to production', 'stagify' ),
+			esc_html__( 'Review your changes and send them to your live site in one click.', 'stagify' )
+		);
+
+		echo '</div>';
+		echo '</div>';
 	}
 
 	/**
