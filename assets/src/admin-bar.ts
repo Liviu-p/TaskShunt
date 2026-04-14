@@ -108,15 +108,25 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				return;
 			}
 
-			// Handle new task click.
+			// Handle new task click — opens the styled modal with an input field.
 			if ( clicked.closest( `#${ NEW_TASK_ID }` ) ) {
 				e.preventDefault();
 				if ( busy ) {
 					return;
 				}
-				const title = window.prompt( stagifyAdminBar.newTaskPrompt );
-				if ( title && title.trim() ) {
-					createTask( title.trim(), root );
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( {
+						title: stagifyAdminBar.newTaskLabel,
+						message: stagifyAdminBar.newTaskPrompt,
+						confirm: stagifyAdminBar.creatingLabel.replace( '…', '' ),
+						prompt: true,
+						promptPlaceholder: 'e.g. Homepage update',
+					} ).then( ( result: string | false ) => {
+						if ( result && typeof result === 'string' ) {
+							createTask( result, root );
+						}
+					} );
 				}
 				return;
 			}

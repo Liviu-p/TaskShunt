@@ -21,6 +21,7 @@ use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
 use Stagify\Admin\Ajax\PreviewTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
+use Stagify\Admin\Ajax\RenameTaskAction;
 use Stagify\Admin\Ajax\TestConnectionAction;
 use Stagify\Admin\AdminMenu;
 use Stagify\Admin\DashboardWidget;
@@ -282,6 +283,12 @@ final class Plugin {
 			'wp_ajax_stagify_preview_task',
 			function (): void {
 				$this->container->get( PreviewTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_rename_task',
+			function (): void {
+				$this->container->get( RenameTaskAction::class )->handle();
 			}
 		);
 	}

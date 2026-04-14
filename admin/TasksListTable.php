@@ -55,7 +55,7 @@ final class TasksListTable extends \WP_List_Table {
 			'title'      => __( 'Title', 'stagify' ),
 			'status'     => __( 'Status', 'stagify' ),
 			'item_count' => __( 'Changes', 'stagify' ),
-			'created_at' => __( 'Created', 'stagify' ),
+			'created_at' => __( 'Activity', 'stagify' ),
 		);
 	}
 
@@ -128,13 +128,29 @@ final class TasksListTable extends \WP_List_Table {
 	}
 
 	/**
-	 * Render the created_at column as a human-readable date.
+	 * Render the activity column as relative time.
+	 *
+	 * Shows pushed_at if pushed, otherwise created_at.
 	 *
 	 * @param Task $item Current row task.
 	 * @return string
 	 */
 	public function column_created_at( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		return esc_html( $item->created_at->format( 'Y-m-d H:i' ) );
+		$date = null !== $item->pushed_at ? $item->pushed_at : $item->created_at;
+		$timestamp = $date->getTimestamp();
+		$diff = human_time_diff( $timestamp, current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+		$label = null !== $item->pushed_at
+			/* translators: %s: relative time */
+			? sprintf( __( 'Pushed %s ago', 'stagify' ), $diff )
+			/* translators: %s: relative time */
+			: sprintf( __( '%s ago', 'stagify' ), $diff );
+
+		return sprintf(
+			'<span title="%s">%s</span>',
+			esc_attr( $date->format( 'Y-m-d H:i:s' ) ),
+			esc_html( $label )
+		);
 	}
 
 	/**
@@ -150,6 +166,15 @@ final class TasksListTable extends \WP_List_Table {
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
 		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
+
+		if ( TaskStatus::Pending === $item->status ) {
+			$actions['rename'] = sprintf(
+				'<a href="#" class="stagify-rename-trigger" data-task-id="%d" data-title="%s">%s</a>',
+				(int) $item->id,
+				esc_attr( $item->title ),
+				esc_html__( 'Rename', 'stagify' )
+			);
+		}
 
 		if ( $is_active ) {
 			$actions['push'] = $this->push_form( $item->id );
@@ -271,7 +296,7 @@ final class TasksListTable extends \WP_List_Table {
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
 		if ( $is_active ) {
-			return '<span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Active', 'stagify' ) . '</span>';
+			return '<span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
 		}
 
 		return match ( $item->status ) {

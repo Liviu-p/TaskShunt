@@ -293,12 +293,14 @@ final class TasksPage {
 	 */
 	private function render_active_guide( string $title ): void {
 		printf(
-			'<div class="stagify-guide-inline">'
+			'<div class="stagify-guide-inline" id="stagify-guide">'
 			. '<span class="stagify-pulse-dot"></span>'
 			. '<span><strong>"%s"</strong> %s</span>'
+			. '<button type="button" class="stagify-guide-close" onclick="this.parentElement.remove();" aria-label="%s">&times;</button>'
 			. '</div>',
 			esc_html( $title ),
-			esc_html__( 'is active — just work on your site as usual. Content edits, media uploads, plugin and theme changes are all tracked automatically.', 'stagify' )
+			esc_html__( 'is active — just work on your site as usual. Content edits, media uploads, plugin and theme changes are all tracked automatically.', 'stagify' ),
+			esc_attr__( 'Dismiss', 'stagify' )
 		);
 	}
 
@@ -374,7 +376,7 @@ final class TasksPage {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$logs = $wpdb->get_results(
-			"SELECT l.*, t.title as task_title FROM {$table} l LEFT JOIN {$tasks} t ON l.task_id = t.id ORDER BY l.pushed_at DESC LIMIT 10" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT l.*, t.title as task_title FROM {$table} l LEFT JOIN {$tasks} t ON l.task_id = t.id ORDER BY l.pushed_at DESC LIMIT 5" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
 		if ( empty( $logs ) ) {

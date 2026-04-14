@@ -89,7 +89,7 @@ final class TaskDetailPage {
 		echo '<div class="stagify-page-header" style="margin-top:8px;">';
 		echo '<h1>' . esc_html( $task->title );
 		if ( $is_active ) {
-			echo ' <span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Active', 'stagify' ) . '</span>';
+			echo ' <span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
 		} elseif ( TaskStatus::Pushed === $task->status ) {
 			echo ' <span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>';
 		} elseif ( TaskStatus::Failed === $task->status ) {
