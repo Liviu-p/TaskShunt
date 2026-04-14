@@ -349,15 +349,6 @@ final class TasksPage {
 			);
 		}
 
-		if ( $has_pushed ) {
-			return array(
-				'icon'    => 'dashicons-yes-alt',
-				'title'   => __( 'All changes pushed!', 'stagify' ),
-				'message' => __( 'Your changes are live on production. Create a new task to keep going.', 'stagify' ),
-				'class'   => ' stagify-prompt--success',
-			);
-		}
-
 		return array(
 			'icon'    => 'dashicons-info-outline',
 			'title'   => __( 'No active task', 'stagify' ),
