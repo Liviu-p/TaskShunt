@@ -193,6 +193,24 @@ final class AdminMenu {
 			. 'var el=e.target.closest(".stagify-confirm-submit");if(!el)return;e.preventDefault();'
 			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)el.closest("form").submit();});'
 			. '});'
+			// Confetti function — called on first-time milestones.
+			. 'window.stagifyConfetti=function(){'
+			. 'var c=document.createElement("div");c.className="stagify-confetti-container";'
+			. 'document.body.appendChild(c);'
+			. 'var colors=["#ff7759","#39594d","#4c6ee6","#d18ee2","#f0b849","#212121","#ca492d"];'
+			. 'for(var i=0;i<80;i++){'
+			. 'var p=document.createElement("div");p.className="stagify-confetti-piece";'
+			. 'p.style.left=Math.random()*100+"%";'
+			. 'p.style.background=colors[Math.floor(Math.random()*colors.length)];'
+			. 'p.style.width=(Math.random()*8+6)+"px";'
+			. 'p.style.height=(Math.random()*4+4)+"px";'
+			. 'p.style.animationDuration=(Math.random()*2+1.5)+"s";'
+			. 'p.style.animationDelay=(Math.random()*0.8)+"s";'
+			. 'p.style.borderRadius=Math.random()>0.5?"50%":"2px";'
+			. 'c.appendChild(p);'
+			. '}'
+			. 'setTimeout(function(){c.remove();},4000);'
+			. '};'
 			. '</script>';
 	}
 
@@ -318,6 +336,9 @@ final class AdminMenu {
 			'pushedLabel'    => __( 'Pushed!', 'stagify' ),
 			'noActiveLabel'  => __( 'No active task', 'stagify' ),
 			'activeTaskId'   => $this->task_repository->get_active_task_id() ?? 0,
+			'newTaskLabel'   => __( '+ New task', 'stagify' ),
+			'newTaskPrompt'  => __( 'Task name:', 'stagify' ),
+			'creatingLabel'  => __( 'Creating…', 'stagify' ),
 			/* translators: %d: number of additional changes not shown in admin bar */
 			'moreLabel'      => __( '+ %d more…', 'stagify' ),
 		);
@@ -398,6 +419,16 @@ final class AdminMenu {
 		}
 
 		$this->add_switch_task_nodes( $wp_admin_bar, $active_task_id );
+
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => 'stagify',
+				'id'     => 'stagify-new-task',
+				'title'  => esc_html__( '+ New task', 'stagify' ),
+				'href'   => '#',
+				'meta'   => array( 'class' => 'stagify-ab-new-task' ),
+			)
+		);
 
 		$wp_admin_bar->add_node(
 			array(

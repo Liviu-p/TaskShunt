@@ -16,6 +16,9 @@ interface StagifyAdminBarData {
 	pushedLabel: string;
 	noActiveLabel: string;
 	activeTaskId: number;
+	newTaskLabel: string;
+	newTaskPrompt: string;
+	creatingLabel: string;
 	moreLabel: string;
 }
 
@@ -53,6 +56,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 	const PUSH_ID = 'wp-admin-bar-stagify-push';
 	const DISCARD_ID = 'wp-admin-bar-stagify-discard';
 	const MORE_ID = 'wp-admin-bar-stagify-items-more';
+	const NEW_TASK_ID = 'wp-admin-bar-stagify-new-task';
 
 	let busy = false;
 	let activeTaskId = 0;
@@ -100,6 +104,19 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 					} );
 				} else if ( window.confirm( stagifyAdminBar.discardConfirm ) ) {
 					discardTask( activeTaskId, root );
+				}
+				return;
+			}
+
+			// Handle new task click.
+			if ( clicked.closest( `#${ NEW_TASK_ID }` ) ) {
+				e.preventDefault();
+				if ( busy ) {
+					return;
+				}
+				const title = window.prompt( stagifyAdminBar.newTaskPrompt );
+				if ( title && title.trim() ) {
+					createTask( title.trim(), root );
 				}
 				return;
 			}
@@ -169,6 +186,51 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 		}
 	}
 
+	async function createTask(
+		title: string,
+		root: HTMLElement
+	): Promise< void > {
+		busy = true;
+
+		const newTaskLink = root.querySelector< HTMLElement >( `#${ NEW_TASK_ID } .ab-item` );
+		const originalLabel = newTaskLink?.textContent ?? '';
+		if ( newTaskLink ) {
+			newTaskLink.textContent = stagifyAdminBar.creatingLabel;
+		}
+
+		try {
+			const body = new URLSearchParams( {
+				action: 'stagify_create_task',
+				_ajax_nonce: stagifyAdminBar.nonce,
+				title,
+			} );
+
+			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body,
+			} );
+
+			const data = ( await response.json() ) as AjaxResponse;
+
+			if ( ! data.success ) {
+				if ( newTaskLink ) {
+					newTaskLink.textContent = originalLabel;
+				}
+				return;
+			}
+
+			activeTaskId = data.data.task_id;
+			rebuildDropdown( root, data.data );
+		} catch {
+			if ( newTaskLink ) {
+				newTaskLink.textContent = originalLabel;
+			}
+		} finally {
+			busy = false;
+		}
+	}
+
 	async function pushTask(
 		taskId: number,
 		root: HTMLElement
@@ -213,6 +275,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 					activeTaskId = 0;
 
 					showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+					triggerFirstTimeConfetti( 'push' );
 				} else {
 					pushLink.innerHTML = originalLabel;
 					showPageBanner( 'error', data.data?.message ?? 'Push failed.' );
@@ -341,6 +404,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				ref
 			);
 		}
+
+		// "+ New task" button.
+		submenu.insertBefore(
+			makeNode( NEW_TASK_ID, stagifyAdminBar.newTaskLabel, '#', 'stagify-ab-new-task' ),
+			ref
+		);
 	}
 
 	function makeNode(
@@ -394,6 +463,18 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				pagePush( taskId, btn );
 			}
 		} );
+	}
+
+	function triggerFirstTimeConfetti( milestone: string ): void {
+		const key = 'stagify_confetti_' + milestone;
+		if ( localStorage.getItem( key ) ) {
+			return;
+		}
+		localStorage.setItem( key, '1' );
+		const confettiFn = ( window as any ).stagifyConfetti;
+		if ( confettiFn ) {
+			confettiFn();
+		}
 	}
 
 	function showPageBanner( type: 'success' | 'error', message: string ): void {
@@ -479,6 +560,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				activeTaskId = 0;
 
 				showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+				triggerFirstTimeConfetti( 'push' );
 			} else {
 				btn.textContent = originalText;
 				btn.style.pointerEvents = '';
