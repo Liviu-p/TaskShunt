@@ -369,6 +369,7 @@
     text-transform: uppercase;
     line-height: 1.4;
     white-space: nowrap;
+    vertical-align: middle;
 }
 
 /* Status — GitHub style: solid bg, white text */
@@ -744,8 +745,10 @@
 /* ----------------------------------------------------------------
    13. Detail page
    ---------------------------------------------------------------- */
-.stagify-back-link {
-    color: #ff7759;
+.stagify-back-link,
+.stagify-back-link:visited,
+.stagify-back-link:active {
+    color: #616161 !important;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
@@ -754,7 +757,7 @@
 }
 
 .stagify-back-link:hover {
-    color: #ca492d;
+    color: #212121 !important;
     text-decoration: underline;
 }
 

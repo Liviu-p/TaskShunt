@@ -98,7 +98,7 @@ final class TasksListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		$detail_url = admin_url( 'admin.php?page=stagify&task_id=' . (int) $item->id );
+		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
 		$title      = '<a href="' . esc_url( $detail_url ) . '"><strong>' . esc_html( $item->title ) . '</strong></a>';
 
 		return $title . $this->row_actions( $this->build_row_actions( $item ) );
