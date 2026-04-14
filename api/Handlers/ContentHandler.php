@@ -99,7 +99,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => sprintf( 'Post %s successfully.', null !== $local_id ? 'updated' : 'created' ),
+			'message'   => sprintf( __( 'Post %s successfully.', 'stagify' ), null !== $local_id ? __( 'updated', 'stagify' ) : __( 'created', 'stagify' ) ),
 			'object_id' => $result,
 		);
 	}
@@ -140,7 +140,7 @@ final class ContentHandler {
 		$tmp_file = download_url( $attachment_url );
 
 		if ( is_wp_error( $tmp_file ) ) {
-			return array( 'error' => sprintf( 'Failed to download attachment: %s', $tmp_file->get_error_message() ) );
+			return array( 'error' => sprintf( __( 'Failed to download attachment: %s', 'stagify' ), $tmp_file->get_error_message() ) );
 		}
 
 		$filename = basename( wp_parse_url( $attachment_url, PHP_URL_PATH ) ?? 'file' );
@@ -166,7 +166,7 @@ final class ContentHandler {
 
 		if ( isset( $upload['error'] ) ) {
 			wp_delete_file( $file_array['tmp_name'] );
-			return $this->error( sprintf( 'Sideload failed: %s', $upload['error'] ) );
+			return $this->error( sprintf( __( 'Sideload failed: %s', 'stagify' ), $upload['error'] ) );
 		}
 
 		update_attached_file( $local_id, $upload['file'] );
@@ -185,7 +185,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => 'Attachment updated successfully.',
+			'message'   => __( 'Attachment updated successfully.', 'stagify' ),
 			'object_id' => $local_id,
 		);
 	}
@@ -216,7 +216,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => 'Attachment created successfully.',
+			'message'   => __( 'Attachment created successfully.', 'stagify' ),
 			'object_id' => $post_id,
 		);
 	}

@@ -47,7 +47,7 @@ final class SerializerRegistry {
 		}
 
 		throw new \RuntimeException(
-			esc_html( sprintf( 'No serializer registered for object type "%s".', $object_type ) )
+			esc_html( sprintf( __( 'No serializer registered for object type "%s".', 'stagify' ), $object_type ) )
 		);
 	}
 }
