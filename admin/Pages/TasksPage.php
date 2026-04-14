@@ -371,7 +371,7 @@ final class TasksPage {
 	 *
 	 * @return void
 	 */
-	private function render_push_history(): void {
+	private function render_push_history(): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		global $wpdb;
 		$table = $wpdb->prefix . 'stagify_push_log';
 		$tasks = $wpdb->prefix . 'stagify_tasks';
@@ -393,7 +393,8 @@ final class TasksPage {
 			$is_success = (int) $log->http_code >= 200 && (int) $log->http_code < 300;
 			$icon_class = $is_success ? 'stagify-history-icon--success' : 'stagify-history-icon--failed';
 			$icon       = $is_success ? 'dashicons-yes-alt' : 'dashicons-warning';
-			$title      = ! empty( $log->task_title ) ? $log->task_title : sprintf( __( 'Task #%d', 'stagify' ), $log->task_id );
+			/* translators: %d: task ID */
+			$title = ! empty( $log->task_title ) ? $log->task_title : sprintf( __( 'Task #%d', 'stagify' ), $log->task_id );
 
 			printf(
 				'<div class="stagify-history-item">'

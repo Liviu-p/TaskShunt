@@ -99,6 +99,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
+			/* translators: %s: action (created/updated) */
 			'message'   => sprintf( __( 'Post %s successfully.', 'stagify' ), null !== $local_id ? __( 'updated', 'stagify' ) : __( 'created', 'stagify' ) ),
 			'object_id' => $result,
 		);
@@ -140,6 +141,7 @@ final class ContentHandler {
 		$tmp_file = download_url( $attachment_url );
 
 		if ( is_wp_error( $tmp_file ) ) {
+			/* translators: %s: error message */
 			return array( 'error' => sprintf( __( 'Failed to download attachment: %s', 'stagify' ), $tmp_file->get_error_message() ) );
 		}
 
@@ -166,6 +168,7 @@ final class ContentHandler {
 
 		if ( isset( $upload['error'] ) ) {
 			wp_delete_file( $file_array['tmp_name'] );
+			/* translators: %s: error message */
 			return $this->error( sprintf( __( 'Sideload failed: %s', 'stagify' ), $upload['error'] ) );
 		}
 

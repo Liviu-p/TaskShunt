@@ -33,20 +33,20 @@ final class ReceiverSettingsPage {
 		add_action(
 			'admin_menu',
 			function (): void {
-				$icon_svg = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				$icon_svg     = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 					$icon_uri = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 					$this->hook = (string) add_menu_page(
-					__( 'Stagify', 'stagify' ),
-					__( 'Stagify', 'stagify' ),
-					'manage_options',
-					'stagify',
-					function (): void {
-						$this->render();
-					},
-					$icon_uri,
-					80
-				);
+						__( 'Stagify', 'stagify' ),
+						__( 'Stagify', 'stagify' ),
+						'manage_options',
+						'stagify',
+						function (): void {
+							$this->render();
+						},
+						$icon_uri,
+						80
+					);
 			} 
 		);
 		add_action(

@@ -38,6 +38,7 @@ final class EnvironmentHandler {
 		return match ( $object_type ) {
 			'plugin' => $this->handle_plugin( $env_action, $slug, $payload ),
 			'theme'  => $this->handle_theme( $env_action, $slug, $payload ),
+			/* translators: %s: object type */
 			default  => $this->error( sprintf( __( 'Unknown environment object type: %s.', 'stagify' ), $object_type ) ),
 		};
 	}
@@ -57,6 +58,7 @@ final class EnvironmentHandler {
 			'install'    => $this->install_plugin_from_wporg( $slug, $payload ),
 			'update'     => $this->update_plugin_from_wporg( $slug, $payload ),
 			'delete'     => $this->delete_plugin( $slug, $payload ),
+			/* translators: %s: action name */
 			default      => $this->error( sprintf( __( 'Unknown plugin action: %s.', 'stagify' ), $env_action ) ),
 		};
 	}
@@ -72,6 +74,7 @@ final class EnvironmentHandler {
 		$name = $payload['name'] ?? $slug;
 
 		if ( is_plugin_active( $slug ) ) {
+			/* translators: %s: plugin name */
 			return $this->success( sprintf( __( 'Plugin "%s" is already active.', 'stagify' ), $name ) );
 		}
 
@@ -84,9 +87,11 @@ final class EnvironmentHandler {
 
 		$result = activate_plugin( $slug, '', false, true );
 		if ( is_wp_error( $result ) ) {
-			return $this->error( sprintf( __( 'Failed to activate "%s": %s', 'stagify' ), $name, $result->get_error_message() ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to activate "%1$s": %2$s', 'stagify' ), $name, $result->get_error_message() ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Plugin "%s" activated.', 'stagify' ), $name ) );
 	}
 
@@ -101,10 +106,12 @@ final class EnvironmentHandler {
 		$name = $payload['name'] ?? $slug;
 
 		if ( ! is_plugin_active( $slug ) ) {
+			/* translators: %s: name */
 			return $this->success( sprintf( __( 'Plugin "%s" is already inactive.', 'stagify' ), $name ) );
 		}
 
 		deactivate_plugins( $slug, true );
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Plugin "%s" deactivated.', 'stagify' ), $name ) );
 	}
 
@@ -124,9 +131,11 @@ final class EnvironmentHandler {
 
 		$result = delete_plugins( array( $slug ) );
 		if ( is_wp_error( $result ) ) {
-			return $this->error( sprintf( __( 'Failed to delete "%s": %s', 'stagify' ), $name, $result->get_error_message() ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to delete "%1$s": %2$s', 'stagify' ), $name, $result->get_error_message() ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Plugin "%s" deleted.', 'stagify' ), $name ) );
 	}
 
@@ -155,6 +164,7 @@ final class EnvironmentHandler {
 
 				switch_theme( $slug );
 
+				/* translators: %s: name */
 				return $this->success( sprintf( __( 'Theme "%s" installed and activated.', 'stagify' ), $name ) );
 
 			case 'install':
@@ -166,17 +176,21 @@ final class EnvironmentHandler {
 			case 'delete':
 				$active_theme = get_stylesheet();
 				if ( $active_theme === $slug ) {
+					/* translators: %s: name */
 					return $this->error( sprintf( __( 'Cannot delete theme "%s" because it is the active theme.', 'stagify' ), $name ) );
 				}
 
 				$result = delete_theme( $slug );
 				if ( is_wp_error( $result ) ) {
-					return $this->error( sprintf( __( 'Failed to delete theme "%s": %s', 'stagify' ), $name, $result->get_error_message() ) );
+					/* translators: 1: name, 2: error message */
+					return $this->error( sprintf( __( 'Failed to delete theme "%1$s": %2$s', 'stagify' ), $name, $result->get_error_message() ) );
 				}
 
+				/* translators: %s: name */
 				return $this->success( sprintf( __( 'Theme "%s" deleted.', 'stagify' ), $name ) );
 
 			default:
+				/* translators: %s: name */
 				return $this->error( sprintf( __( 'Unknown theme action: %s.', 'stagify' ), $env_action ) );
 		}
 	}
@@ -220,6 +234,7 @@ final class EnvironmentHandler {
 		if ( is_wp_error( $api_result ) ) {
 			return $this->error(
 				sprintf(
+					/* translators: %s: plugin name */
 					__( 'Plugin "%s" is not available on WordPress.org and must be installed manually.', 'stagify' ),
 					$name
 				)
@@ -232,18 +247,22 @@ final class EnvironmentHandler {
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
 			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : __( 'Unknown error.', 'stagify' ) ) );
-			return $this->error( sprintf( __( 'Failed to install plugin "%s" from WordPress.org: %s', 'stagify' ), $name, $error_msg ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to install plugin "%1$s" from WordPress.org: %2$s', 'stagify' ), $name, $error_msg ) );
 		}
 
 		// If the sender flagged activate_after, activate the plugin now.
 		if ( ! empty( $payload['activate_after'] ) ) {
 			$activate_result = activate_plugin( $slug, '', false, true );
 			if ( is_wp_error( $activate_result ) ) {
-				return $this->error( sprintf( __( 'Plugin "%s" installed but activation failed: %s', 'stagify' ), $name, $activate_result->get_error_message() ) );
+				/* translators: 1: name, 2: error message */
+				return $this->error( sprintf( __( 'Plugin "%1$s" installed but activation failed: %2$s', 'stagify' ), $name, $activate_result->get_error_message() ) );
 			}
+			/* translators: %s: name */
 			return $this->success( sprintf( __( 'Plugin "%s" installed and activated from WordPress.org.', 'stagify' ), $name ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Plugin "%s" installed from WordPress.org.', 'stagify' ), $name ) );
 	}
 
@@ -271,6 +290,7 @@ final class EnvironmentHandler {
 		if ( is_wp_error( $api_result ) ) {
 			return $this->error(
 				sprintf(
+					/* translators: %s: plugin name */
 					__( 'Plugin "%s" is not available on WordPress.org and must be updated manually.', 'stagify' ),
 					$name
 				)
@@ -283,9 +303,11 @@ final class EnvironmentHandler {
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
 			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : __( 'Unknown error.', 'stagify' ) ) );
-			return $this->error( sprintf( __( 'Failed to update plugin "%s": %s', 'stagify' ), $name, $error_msg ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to update plugin "%1$s": %2$s', 'stagify' ), $name, $error_msg ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Plugin "%s" updated from WordPress.org.', 'stagify' ), $name ) );
 	}
 
@@ -312,6 +334,7 @@ final class EnvironmentHandler {
 		if ( is_wp_error( $api_result ) ) {
 			return $this->error(
 				sprintf(
+					/* translators: %s: theme name */
 					__( 'Theme "%s" is not available on WordPress.org and must be installed manually.', 'stagify' ),
 					$name
 				)
@@ -324,15 +347,18 @@ final class EnvironmentHandler {
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
 			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : __( 'Unknown error.', 'stagify' ) ) );
-			return $this->error( sprintf( __( 'Failed to install theme "%s" from WordPress.org: %s', 'stagify' ), $name, $error_msg ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to install theme "%1$s" from WordPress.org: %2$s', 'stagify' ), $name, $error_msg ) );
 		}
 
 		// If the sender flagged activate_after, switch to the theme now.
 		if ( ! empty( $payload['activate_after'] ) ) {
 			switch_theme( $slug );
+			/* translators: %s: name */
 			return $this->success( sprintf( __( 'Theme "%s" installed and activated from WordPress.org.', 'stagify' ), $name ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Theme "%s" installed from WordPress.org.', 'stagify' ), $name ) );
 	}
 
@@ -359,6 +385,7 @@ final class EnvironmentHandler {
 		if ( is_wp_error( $api_result ) ) {
 			return $this->error(
 				sprintf(
+					/* translators: %s: theme name */
 					__( 'Theme "%s" is not available on WordPress.org and must be updated manually.', 'stagify' ),
 					$name
 				)
@@ -371,9 +398,11 @@ final class EnvironmentHandler {
 
 		if ( is_wp_error( $result ) || false === $result || null === $result ) {
 			$error_msg = is_wp_error( $result ) ? $result->get_error_message() : ( ( $skin->get_errors()->get_error_message() !== '' ? $skin->get_errors()->get_error_message() : __( 'Unknown error.', 'stagify' ) ) );
-			return $this->error( sprintf( __( 'Failed to update theme "%s": %s', 'stagify' ), $name, $error_msg ) );
+			/* translators: 1: name, 2: error message */
+			return $this->error( sprintf( __( 'Failed to update theme "%1$s": %2$s', 'stagify' ), $name, $error_msg ) );
 		}
 
+		/* translators: %s: name */
 		return $this->success( sprintf( __( 'Theme "%s" updated from WordPress.org.', 'stagify' ), $name ) );
 	}
 

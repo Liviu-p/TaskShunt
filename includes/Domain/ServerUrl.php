@@ -36,6 +36,7 @@ final readonly class ServerUrl extends ValueObject {
 	public function __construct( string $value ) {
 		if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
 			throw new \InvalidArgumentException(
+				/* translators: %s: URL value */
 				esc_html( sprintf( __( '"%s" is not a valid URL.', 'stagify' ), $value ) )
 			);
 		}

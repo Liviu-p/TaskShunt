@@ -47,6 +47,7 @@ final class SerializerRegistry {
 		}
 
 		throw new \RuntimeException(
+			/* translators: %s: WordPress object type slug */
 			esc_html( sprintf( __( 'No serializer registered for object type "%s".', 'stagify' ), $object_type ) )
 		);
 	}

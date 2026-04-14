@@ -31,23 +31,25 @@ final readonly class RelativePath extends ValueObject {
 	 */
 	public function __construct( string $value ) {
 		if ( '' === $value ) {
-			throw new \InvalidArgumentException( __( 'Path must not be empty.', 'stagify' ) );
+			throw new \InvalidArgumentException( esc_html__( 'Path must not be empty.', 'stagify' ) );
 		}
 
 		if ( str_starts_with( $value, '/' ) || str_starts_with( $value, '\\' ) ) {
 			throw new \InvalidArgumentException(
+				/* translators: %s: file path */
 				esc_html( sprintf( __( '"%s" must be a relative path.', 'stagify' ), $value ) )
 			);
 		}
 
 		if ( str_contains( $value, '..' ) ) {
 			throw new \InvalidArgumentException(
+				/* translators: %s: file path */
 				esc_html( sprintf( __( '"%s" contains illegal traversal sequence.', 'stagify' ), $value ) )
 			);
 		}
 
 		if ( str_contains( $value, "\0" ) ) {
-			throw new \InvalidArgumentException( __( 'Path must not contain null bytes.', 'stagify' ) );
+			throw new \InvalidArgumentException( esc_html__( 'Path must not contain null bytes.', 'stagify' ) );
 		}
 
 		$this->value = $value;

@@ -119,7 +119,7 @@ final class AdminMenu {
 	 *
 	 * @return void
 	 */
-	private static function render_modal_script(): void {
+	private static function render_modal_script(): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		$action_labels = wp_json_encode(
 			array(
 				'create' => __( 'Create', 'stagify' ),
@@ -127,7 +127,7 @@ final class AdminMenu {
 				'delete' => __( 'Delete', 'stagify' ),
 			)
 		);
-		$type_labels = wp_json_encode(
+		$type_labels   = wp_json_encode(
 			array(
 				'content'     => __( 'Content', 'stagify' ),
 				'file'        => __( 'File', 'stagify' ),

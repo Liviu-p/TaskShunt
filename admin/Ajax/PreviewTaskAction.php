@@ -53,39 +53,7 @@ final class PreviewTaskAction {
 		}
 
 		$items   = $this->task_item_repository->find_by_task( $task_id );
-		$summary = array();
-
-		foreach ( $items as $item ) {
-			$payload = json_decode( $item->payload, true );
-			$entry   = array(
-				'type'        => $item->type->value,
-				'action'      => $item->action->value,
-				'object_type' => $item->object_type,
-				'object_id'   => $item->object_id,
-			);
-
-			if ( TaskItemType::Content === $item->type ) {
-				$post_title = get_the_title( (int) $item->object_id );
-				$entry['title']   = '' !== $post_title ? $post_title : $item->object_type . ' #' . $item->object_id;
-				$entry['excerpt'] = '';
-				if ( is_array( $payload ) && isset( $payload['post']['post_content'] ) ) {
-					$entry['excerpt'] = wp_trim_words( wp_strip_all_tags( $payload['post']['post_content'] ), 20, '…' );
-				}
-				$entry['meta_count'] = is_array( $payload ) && isset( $payload['meta'] ) ? count( $payload['meta'] ) : 0;
-			} elseif ( TaskItemType::File === $item->type ) {
-				$entry['title'] = basename( $item->object_id );
-				$entry['path']  = $item->object_id;
-			} elseif ( TaskItemType::Environment === $item->type ) {
-				$entry['title'] = is_array( $payload ) && isset( $payload['name'] ) ? $payload['name'] : $item->object_id;
-				if ( is_array( $payload ) && isset( $payload['version'] ) ) {
-					$entry['version'] = $payload['version'];
-				}
-			} else {
-				$entry['title'] = $item->object_type . ' #' . $item->object_id;
-			}
-
-			$summary[] = $entry;
-		}
+		$summary = array_map( array( $this, 'build_item_entry' ), $items );
 
 		wp_send_json_success(
 			array(
@@ -97,5 +65,70 @@ final class PreviewTaskAction {
 				'items' => $summary,
 			)
 		);
+	}
+
+	/**
+	 * Build a summary entry for a single task item.
+	 *
+	 * @param object $item Task item object.
+	 * @return array<string, mixed>
+	 */
+	private function build_item_entry( object $item ): array {
+		$payload = json_decode( $item->payload, true );
+		$entry   = array(
+			'type'        => $item->type->value,
+			'action'      => $item->action->value,
+			'object_type' => $item->object_type,
+			'object_id'   => $item->object_id,
+		);
+
+		return match ( $item->type ) {
+			TaskItemType::Content     => $this->enrich_content_entry( $entry, $item, $payload ),
+			TaskItemType::File        => $entry + array(
+				'title' => basename( $item->object_id ),
+				'path'  => $item->object_id,
+			),
+			TaskItemType::Environment => $this->enrich_env_entry( $entry, $item, $payload ),
+			default                   => $entry + array( 'title' => $item->object_type . ' #' . $item->object_id ),
+		};
+	}
+
+	/**
+	 * Enrich a content item entry with post title and excerpt.
+	 *
+	 * @param array<string, mixed> $entry   Base entry.
+	 * @param object               $item    Task item.
+	 * @param mixed                $payload Decoded payload.
+	 * @return array<string, mixed>
+	 */
+	private function enrich_content_entry( array $entry, object $item, mixed $payload ): array {
+		$post_title       = get_the_title( (int) $item->object_id );
+		$entry['title']   = '' !== $post_title ? $post_title : $item->object_type . ' #' . $item->object_id;
+		$entry['excerpt'] = '';
+
+		if ( is_array( $payload ) && isset( $payload['post']['post_content'] ) ) {
+			$entry['excerpt'] = wp_trim_words( wp_strip_all_tags( $payload['post']['post_content'] ), 20, '…' );
+		}
+
+		$entry['meta_count'] = is_array( $payload ) && isset( $payload['meta'] ) ? count( $payload['meta'] ) : 0;
+		return $entry;
+	}
+
+	/**
+	 * Enrich an environment item entry with name and version.
+	 *
+	 * @param array<string, mixed> $entry   Base entry.
+	 * @param object               $item    Task item.
+	 * @param mixed                $payload Decoded payload.
+	 * @return array<string, mixed>
+	 */
+	private function enrich_env_entry( array $entry, object $item, mixed $payload ): array {
+		$entry['title'] = is_array( $payload ) && isset( $payload['name'] ) ? $payload['name'] : $item->object_id;
+
+		if ( is_array( $payload ) && isset( $payload['version'] ) ) {
+			$entry['version'] = $payload['version'];
+		}
+
+		return $entry;
 	}
 }

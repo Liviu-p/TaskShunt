@@ -120,16 +120,19 @@ final class DashboardWidget {
 			. '</div>',
 			esc_url( $detail_url ),
 			esc_html( $task->title ),
-			esc_html( sprintf(
-				_n( '%d change tracked', '%d changes tracked', $task->item_count, 'stagify' ),
-				$task->item_count
-			) )
+			esc_html(
+				sprintf(
+					/* translators: %d: number of changes */
+					_n( '%d change tracked', '%d changes tracked', $task->item_count, 'stagify' ),
+					$task->item_count
+				) 
+			)
 		);
 
 		if ( $task->item_count > 0 ) {
 			printf(
 				'<a href="#" class="button stagify-push-btn stagify-widget-push" data-task-id="%d">%s</a>',
-				$task->id,
+				(int) $task->id,
 				esc_html__( 'Push to production', 'stagify' )
 			);
 		}
@@ -177,9 +180,9 @@ final class DashboardWidget {
 			. '<div class="stagify-widget-stat"><span>%d</span> %s</div>'
 			. '<div class="stagify-widget-stat"><span>%d</span> %s</div>'
 			. '</div>',
-			$pushed,
+			(int) $pushed,
 			esc_html__( 'pushed', 'stagify' ),
-			$pending,
+			(int) $pending,
 			esc_html__( 'pending', 'stagify' )
 		);
 	}

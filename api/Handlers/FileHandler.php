@@ -28,7 +28,8 @@ final class FileHandler {
 	public function handle( TaskAction $action, string $object_type, int $object_id, mixed $payload ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return array(
 			'success' => true,
-			'message' => sprintf( __( 'File %s queued for object %d.', 'stagify' ), $action->value, $object_id ),
+			/* translators: 1: action name, 2: object ID */
+			'message' => sprintf( __( 'File %1$s queued for object %2$d.', 'stagify' ), $action->value, $object_id ),
 		);
 	}
 }
