@@ -79,7 +79,7 @@ final class ContentHandler {
 		}
 
 		// Attachments need special handling — sideload the file first.
-		if ( 'attachment' === $object_type && ! empty( $payload['attachment_url'] ) ) {
+		if ( 'attachment' === $object_type && ( ! empty( $payload['attachment_data'] ) || ! empty( $payload['attachment_url'] ) ) ) {
 			return $this->handle_attachment_upsert( $payload, $sender_url );
 		}
 
@@ -121,7 +121,13 @@ final class ContentHandler {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		$download = $this->download_attachment( (string) $payload['attachment_url'] );
+		// Prefer embedded file data (works across networks/localhost); fall back to URL download.
+		if ( ! empty( $payload['attachment_data'] ) ) {
+			$download = $this->decode_attachment_data( $payload );
+		} else {
+			$download = $this->download_attachment( (string) $payload['attachment_url'] );
+		}
+
 		if ( isset( $download['error'] ) ) {
 			return $this->error( $download['error'] );
 		}
@@ -154,6 +160,40 @@ final class ContentHandler {
 		return array(
 			'file_array' => array(
 				'name'     => sanitize_file_name( $filename ),
+				'tmp_name' => $tmp_file,
+			),
+		);
+	}
+
+	/**
+	 * Decode base64-encoded attachment data from the payload into a temp file.
+	 *
+	 * @param array<string, mixed> $payload Decoded payload data.
+	 * @return array{file_array: array{name: string, tmp_name: string}}|array{error: string}
+	 */
+	private function decode_attachment_data( array $payload ): array {
+		$data = base64_decode( (string) $payload['attachment_data'], true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+
+		if ( false === $data ) {
+			return array( 'error' => __( 'Failed to decode attachment data.', 'stagify' ) );
+		}
+
+		$tmp_file = wp_tempnam( $payload['attachment_filename'] ?? 'file' );
+
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+		if ( ! $wp_filesystem->put_contents( $tmp_file, $data ) ) {
+			return array( 'error' => __( 'Failed to write attachment to temp file.', 'stagify' ) );
+		}
+
+		$filename = sanitize_file_name( $payload['attachment_filename'] ?? 'file' );
+
+		return array(
+			'file_array' => array(
+				'name'     => $filename,
 				'tmp_name' => $tmp_file,
 			),
 		);

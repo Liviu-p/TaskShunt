@@ -47,6 +47,20 @@ final class PostSerializer implements PayloadSerializerInterface {
 
 		if ( 'attachment' === $post->post_type ) {
 			$payload['attachment_url'] = wp_get_attachment_url( $object_id );
+
+			$file_path = get_attached_file( $object_id );
+			if ( $file_path && file_exists( $file_path ) ) {
+				global $wp_filesystem;
+				if ( ! $wp_filesystem ) {
+					require_once ABSPATH . 'wp-admin/includes/file.php';
+					WP_Filesystem();
+				}
+				$contents = $wp_filesystem->get_contents( $file_path );
+				if ( false !== $contents ) {
+					$payload['attachment_data']     = base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+					$payload['attachment_filename'] = basename( $file_path );
+				}
+			}
 		}
 
 		return (string) wp_json_encode( $payload, JSON_UNESCAPED_UNICODE );
