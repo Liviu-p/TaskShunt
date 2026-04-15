@@ -162,12 +162,21 @@ final class TaskRepository implements TaskRepositoryInterface {
 	}
 
 	/**
-	 * Delete all Pushed tasks older than 30 days.
+	 * Delete all Pushed tasks older than the configured retention period.
+	 *
+	 * Respects the stagify_cleanup option: if disabled, does nothing.
 	 *
 	 * @return void
 	 */
 	public function purge_old(): void {
-		$cutoff = gmdate( 'Y-m-d H:i:s', (int) strtotime( '-30 days' ) );
+		$settings = (array) get_option( 'stagify_cleanup', array() );
+
+		if ( empty( $settings['enabled'] ) ) {
+			return;
+		}
+
+		$days   = max( 1, (int) ( $settings['days'] ?? 30 ) );
+		$cutoff = gmdate( 'Y-m-d H:i:s', (int) strtotime( "-{$days} days" ) );
 		$this->wpdb->query(
 			$this->wpdb->prepare( "DELETE FROM `{$this->table}` WHERE status = %s AND pushed_at < %s", TaskStatus::Pushed->value, $cutoff ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);

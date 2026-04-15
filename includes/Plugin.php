@@ -19,6 +19,7 @@ use Stagify\Admin\Actions\PushTaskAction;
 use Stagify\Admin\Actions\RetryTaskAction;
 use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
+use Stagify\Admin\Actions\SaveCleanupAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
 use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
@@ -243,6 +244,12 @@ final class Plugin {
 			'admin_post_stagify_save_tracking',
 			function (): void {
 				$this->container->get( SaveTrackingAction::class )->handle();
+			}
+		);
+		add_action(
+			'admin_post_stagify_save_cleanup',
+			function (): void {
+				$this->container->get( SaveCleanupAction::class )->handle();
 			}
 		);
 		add_action(

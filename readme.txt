@@ -39,7 +39,7 @@ It tracks every content and file change you make while a task is active, bundles
 * **Media transfer** — Attachment files are embedded directly in the push payload, so media works across any network topology (localhost, private networks, cloud).
 * **URL rewriting** — Content URLs are automatically rewritten from the staging domain to the production domain.
 * **Retry failed pushes** — If a push fails partway through, retry it without duplicating already-applied changes.
-* **Auto-cleanup** — Completed tasks older than 30 days are automatically purged.
+* **Configurable auto-cleanup** — Optionally delete pushed tasks after a custom number of days (1–365). Disabled by default — enable it in Settings.
 * **Dashboard widget** — Quick status overview right on your WordPress dashboard.
 
 = Two Modes =
@@ -93,3 +93,4 @@ All push requests are authenticated with an API key sent in the request header. 
 * Task management with create, preview, push, retry, and discard.
 * Dashboard widget and admin bar integration.
 * Automatic URL rewriting and smart deduplication.
+* Configurable auto-cleanup for pushed tasks.

@@ -49,9 +49,65 @@ final class SettingsPage {
 
 		$this->render_server_section( $server );
 		$this->render_tracking_section();
+		$this->render_cleanup_section();
 		$this->render_mode_section();
 
 		echo '</div>';
+	}
+
+	/**
+	 * Render the auto-cleanup section with enable toggle and days input.
+	 *
+	 * @return void
+	 */
+	private function render_cleanup_section(): void {
+		$settings = (array) get_option( 'stagify_cleanup', array() );
+		$enabled  = ! empty( $settings['enabled'] );
+		$days     = (int) ( $settings['days'] ?? 30 );
+
+		echo '<div class="stagify-section-card">';
+		echo '<h2>' . esc_html__( 'Auto-cleanup', 'stagify' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Automatically delete pushed tasks after a set number of days.', 'stagify' ) . '</p>';
+
+		printf( '<form method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
+		echo '<input type="hidden" name="action" value="stagify_save_cleanup">';
+		wp_nonce_field( 'stagify_save_cleanup' );
+
+		$this->render_cleanup_fields( $enabled, $days );
+
+		printf(
+			'<button type="submit" class="button button-primary" style="margin-top:16px;">%s</button>',
+			esc_html__( 'Save', 'stagify' )
+		);
+		echo '</form>';
+		echo '</div>';
+	}
+
+	/**
+	 * Render the cleanup form fields.
+	 *
+	 * @param bool $enabled Whether auto-cleanup is enabled.
+	 * @param int  $days    Retention period in days.
+	 * @return void
+	 */
+	private function render_cleanup_fields( bool $enabled, int $days ): void {
+		printf(
+			'<fieldset style="margin-top:8px;">'
+			. '<label style="display:block;margin-bottom:12px;">'
+			. '<input type="checkbox" name="stagify_cleanup_enabled" value="1"%s> %s'
+			. '</label>'
+			. '<label style="display:block;">'
+			. '%s '
+			. '<input type="number" name="stagify_cleanup_days" value="%d" min="1" max="365" style="width:70px;"> '
+			. '%s'
+			. '</label>'
+			. '</fieldset>',
+			$enabled ? ' checked' : '',
+			esc_html__( 'Enable auto-cleanup', 'stagify' ),
+			esc_html__( 'Delete pushed tasks older than', 'stagify' ),
+			esc_attr( (string) $days ),
+			esc_html__( 'days', 'stagify' )
+		);
 	}
 
 	/**

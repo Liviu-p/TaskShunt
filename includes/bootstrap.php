@@ -27,6 +27,7 @@ use Stagify\Admin\Actions\PushTaskAction;
 use Stagify\Admin\Actions\RetryTaskAction;
 use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
+use Stagify\Admin\Actions\SaveCleanupAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
 use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
@@ -90,6 +91,7 @@ $builder->addDefinitions(
 		RetryTaskAction::class                 => \DI\autowire(),
 		SaveModeAction::class                  => \DI\autowire(),
 		SaveServerAction::class                => \DI\autowire(),
+		SaveCleanupAction::class               => \DI\autowire(),
 		SaveTrackingAction::class              => \DI\autowire(),
 		ReceiverSettingsPage::class            => \DI\autowire(),
 		SetupPage::class                       => \DI\autowire(),

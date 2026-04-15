@@ -65,7 +65,7 @@ add_action(
 		Container::set_instance( $di_container );
 
 		/**
-		 * WP-Cron callback: delete pushed tasks older than 30 days.
+		 * WP-Cron callback: delete pushed tasks older than the configured retention period.
 		 * The cron event itself is scheduled in the activation hook above.
 		 */
 		add_action(
