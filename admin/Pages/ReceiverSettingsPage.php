@@ -186,7 +186,6 @@ final class ReceiverSettingsPage {
 		}
 
 		echo '</div>';
-		$this->render_copy_script();
 	}
 
 	/**
@@ -199,10 +198,11 @@ final class ReceiverSettingsPage {
 		printf(
 			'<div class="stagify-apikey-display">'
 			. '<code id="stagify-key-value">%s</code>'
-			. '<button type="button" class="button button-small" id="stagify-copy-key" title="%s">%s</button>'
+			. '<button type="button" class="button button-small" id="stagify-copy-key" title="%s" data-copied="%s">%s</button>'
 			. '</div>',
 			esc_html( $api_key ),
 			esc_attr__( 'Copy to clipboard', 'stagify' ),
+			esc_attr__( 'Copied!', 'stagify' ),
 			esc_html__( 'Copy', 'stagify' )
 		);
 
@@ -236,28 +236,6 @@ final class ReceiverSettingsPage {
 	}
 
 	/**
-	 * Output the inline JS for the copy button.
-	 *
-	 * @return void
-	 */
-	private function render_copy_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-copy-key");'
-			. 'var code=document.getElementById("stagify-key-value");'
-			. 'if(!btn||!code)return;'
-			. 'btn.addEventListener("click",function(){'
-			. 'navigator.clipboard.writeText(code.textContent).then(function(){'
-			. 'var orig=btn.textContent;'
-			. 'btn.textContent="' . esc_js( __( 'Copied!', 'stagify' ) ) . '";'
-			. 'setTimeout(function(){btn.textContent=orig;},1500);'
-			. '});'
-			. '});'
-			. '})();'
-			. '</script>';
-	}
-
-	/**
 	 * Render the mode switch section.
 	 *
 	 * @return void
@@ -274,7 +252,6 @@ final class ReceiverSettingsPage {
 		);
 
 		$this->render_receiver_mode_confirm();
-		$this->render_receiver_mode_script();
 	}
 
 	/**
@@ -300,21 +277,4 @@ final class ReceiverSettingsPage {
 		);
 	}
 
-	/**
-	 * Output the mode toggle inline JS for receiver.
-	 *
-	 * @return void
-	 */
-	private function render_receiver_mode_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-switch-mode-btn");'
-			. 'var panel=document.getElementById("stagify-mode-confirm");'
-			. 'var cancel=document.getElementById("stagify-switch-mode-cancel");'
-			. 'if(!btn||!panel||!cancel)return;'
-			. 'btn.addEventListener("click",function(){panel.style.display="block";btn.style.display="none";});'
-			. 'cancel.addEventListener("click",function(){panel.style.display="none";btn.style.display="inline-flex";});'
-			. '})();'
-			. '</script>';
-	}
 }

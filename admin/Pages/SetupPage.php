@@ -135,7 +135,6 @@ final class SetupPage {
 
 		echo '</div>';
 
-		$this->render_select_script();
 	}
 
 	/**
@@ -206,29 +205,4 @@ final class SetupPage {
 		);
 	}
 
-	/**
-	 * Output the card selection JS.
-	 *
-	 * @return void
-	 */
-	private function render_select_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var cards=document.querySelectorAll(".stagify-card--selectable");'
-			. 'var input=document.getElementById("stagify-mode-input");'
-			. 'var submit=document.getElementById("stagify-setup-submit");'
-			. 'var btn=document.getElementById("stagify-setup-go");'
-			. 'if(!cards.length||!input||!submit||!btn)return;'
-			. 'cards.forEach(function(card){'
-			. 'card.addEventListener("click",function(){'
-			. 'cards.forEach(function(c){c.classList.remove("stagify-card--selected");});'
-			. 'card.classList.add("stagify-card--selected");'
-			. 'input.value=card.dataset.mode;'
-			. 'btn.textContent=card.dataset.label;'
-			. 'submit.style.display="block";'
-			. '});'
-			. '});'
-			. '})();'
-			. '</script>';
-	}
 }

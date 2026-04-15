@@ -69,7 +69,6 @@ final class TaskDetailPage {
 		$this->render_items_table( $items );
 		$this->render_footer_actions( $task, $active_task_id, $base_action_url );
 		echo '</div>';
-		$this->render_payload_toggle_script();
 	}
 
 	/**
@@ -335,9 +334,11 @@ final class TaskDetailPage {
 		$id        = 'stagify-payload-' . $item_id;
 
 		return sprintf(
-			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s">%s</button>'
+			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s" data-label-show="%s" data-label-hide="%s">%s</button>'
 			. '<pre id="%s" class="stagify-payload-pre">%s</pre>',
 			esc_attr( $id ),
+			esc_attr__( 'Details', 'stagify' ),
+			esc_attr__( 'Hide', 'stagify' ),
 			esc_html__( 'Details', 'stagify' ),
 			esc_attr( $id ),
 			esc_html( false !== $formatted ? $formatted : $payload )
@@ -388,19 +389,4 @@ final class TaskDetailPage {
 		};
 	}
 
-	/**
-	 * Output the inline JS for the payload toggle buttons.
-	 *
-	 * @return void
-	 */
-	private function render_payload_toggle_script(): void {
-		echo '<script>document.querySelectorAll(".stagify-payload-toggle").forEach(function(btn){'
-			. 'btn.addEventListener("click",function(){'
-			. 'var pre=document.getElementById(btn.dataset.target);'
-			. 'if(!pre)return;'
-			. 'var hidden=pre.style.display==="none";'
-			. 'pre.style.display=hidden?"block":"none";'
-			. 'btn.textContent=hidden?"' . esc_js( __( 'Hide', 'stagify' ) ) . '":"' . esc_js( __( 'Details', 'stagify' ) ) . '";'
-			. '});});</script>';
-	}
 }

@@ -5,6 +5,7 @@ module.exports = {
 	entry: {
 		admin: './assets/src/admin.ts',
 		'admin-bar': './assets/src/admin-bar.ts',
+		modal: './assets/src/modal.ts',
 		settings: './assets/src/settings.ts',
 	},
 	output: {

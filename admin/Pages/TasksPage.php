@@ -443,16 +443,6 @@ final class TasksPage {
 			esc_html__( 'Cancel', 'stagify' )
 		);
 		echo '</form>';
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-new-task-toggle");'
-			. 'var form=document.getElementById("stagify-create-form");'
-			. 'var cancel=document.getElementById("stagify-create-cancel");'
-			. 'if(!btn||!form||!cancel)return;'
-			. 'btn.addEventListener("click",function(){btn.style.display="none";form.style.display="flex";form.querySelector("input").focus();});'
-			. 'cancel.addEventListener("click",function(){form.style.display="none";btn.style.display="inline-flex";});'
-			. '})();'
-			. '</script>';
 	}
 
 	/**

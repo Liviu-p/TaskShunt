@@ -88,21 +88,11 @@ final class AdminMenu {
 	}
 
 	/**
-	 * Render the global confirm modal HTML and JS.
+	 * Render the global confirm modal HTML.
 	 *
 	 * @return void
 	 */
 	private static function render_confirm_modal(): void {
-		self::render_modal_html();
-		self::render_modal_script();
-	}
-
-	/**
-	 * Output the confirm modal HTML.
-	 *
-	 * @return void
-	 */
-	private static function render_modal_html(): void {
 		echo '<div class="stagify-modal-overlay" id="stagify-modal-overlay">'
 			. '<div class="stagify-modal">'
 			. '<strong id="stagify-modal-title"></strong>'
@@ -115,151 +105,6 @@ final class AdminMenu {
 			. '<button type="button" class="button" id="stagify-modal-cancel">' . esc_html__( 'Cancel', 'stagify' ) . '</button>'
 			. '<button type="button" class="button button-primary" id="stagify-modal-ok"></button>'
 			. '</div></div></div>';
-	}
-
-	/**
-	 * Output the confirm modal inline JS.
-	 *
-	 * @return void
-	 */
-	private static function render_modal_script(): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
-		$action_labels = wp_json_encode(
-			array(
-				'create' => __( 'Create', 'stagify' ),
-				'update' => __( 'Update', 'stagify' ),
-				'delete' => __( 'Delete', 'stagify' ),
-			)
-		);
-		$type_labels   = wp_json_encode(
-			array(
-				'content'     => __( 'Content', 'stagify' ),
-				'file'        => __( 'File', 'stagify' ),
-				'environment' => __( 'Plugin/Theme', 'stagify' ),
-				'database'    => __( 'Database', 'stagify' ),
-			)
-		);
-		echo '<script>'
-			. 'var stagifyActionLabels=' . $action_labels . ';' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			. 'var stagifyTypeLabels=' . $type_labels . ';' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			. 'window.stagifyConfirm=function(opts){'
-			. 'return new Promise(function(resolve){'
-			. 'var ov=document.getElementById("stagify-modal-overlay");'
-			. 'var ti=document.getElementById("stagify-modal-title");'
-			. 'var msg=document.getElementById("stagify-modal-message");'
-			. 'var pv=document.getElementById("stagify-modal-preview");'
-			. 'var ok=document.getElementById("stagify-modal-ok");'
-			. 'var cn=document.getElementById("stagify-modal-cancel");'
-			. 'if(!ov)return resolve(false);'
-			. 'var pr=document.getElementById("stagify-modal-prompt");'
-			. 'var inp=document.getElementById("stagify-modal-input");'
-			. 'ti.textContent=opts.title||"";'
-			. 'msg.textContent=opts.message||"";'
-			. 'pv.innerHTML="";pv.style.display="none";'
-			. 'if(opts.prompt){pr.style.display="block";inp.value=opts.promptDefault||"";inp.placeholder=opts.promptPlaceholder||"";}else{pr.style.display="none";}'
-			. 'ok.textContent=opts.confirm||"OK";'
-			. 'ok.className="button button-primary"+(opts.danger?" stagify-modal-confirm--danger":"");'
-			. 'ov.classList.add("stagify-modal--open");'
-			. 'if(opts.prompt)setTimeout(function(){inp.focus();},50);'
-			// Fetch preview if taskId provided.
-			. 'if(opts.previewTaskId&&window.stagifyAdminBar){'
-			. 'pv.style.display="block";pv.innerHTML="<div class=\"stagify-preview-loading\">' . esc_js( __( 'Loading preview…', 'stagify' ) ) . '</div>";'
-			. 'fetch(stagifyAdminBar.ajaxUrl+"?action=stagify_preview_task&task_id="+opts.previewTaskId+"&_ajax_nonce="+stagifyAdminBar.nonce)'
-			. '.then(function(r){return r.json();})'
-			. '.then(function(d){'
-			. 'if(!d.success){pv.innerHTML="";pv.style.display="none";return;}'
-			. 'var items=d.data.items;if(!items.length){pv.innerHTML="";pv.style.display="none";return;}'
-			. 'var html="<div class=\"stagify-preview-list\">";'
-			. 'items.forEach(function(item){'
-			. 'var actionCls="stagify-action--"+item.action;'
-			. 'var actionLabel=stagifyActionLabels[item.action]||item.action;'
-			. 'var typeLabel=stagifyTypeLabels[item.type]||item.type;'
-			. 'html+="<div class=\"stagify-preview-item\">";'
-			. 'html+="<span class=\"stagify-preview-action "+actionCls+"\">"+actionLabel+"</span> ";'
-			. 'html+="<strong>"+(item.title||item.object_id)+"</strong>";'
-			. 'html+="<span class=\"stagify-preview-type\">"+typeLabel+"</span>";'
-			. 'if(item.excerpt)html+="<p class=\"stagify-preview-excerpt\">"+item.excerpt+"</p>";'
-			. 'html+="</div>";'
-			. '});'
-			. 'html+="</div>";'
-			. 'pv.innerHTML=html;'
-			. '}).catch(function(){pv.innerHTML="";pv.style.display="none";});'
-			. '}'
-			. 'function close(val){ov.classList.remove("stagify-modal--open");ok.onclick=null;cn.onclick=null;pv.innerHTML="";pv.style.display="none";pr.style.display="none";resolve(val);}'
-			. 'ok.onclick=function(){if(opts.prompt){var v=inp.value.trim();if(!v)return;close(v);}else{close(true);}};'
-			. 'if(opts.prompt){inp.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();ok.click();}};}'
-			. 'cn.onclick=function(){close(false);};'
-			. 'ov.addEventListener("click",function(e){if(e.target===ov)close(false);},{once:true});'
-			. '});'
-			. '};'
-			// Links with data-confirm attributes.
-			. 'document.addEventListener("click",function(e){'
-			. 'var el=e.target.closest(".stagify-confirm-link");if(!el)return;e.preventDefault();'
-			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)window.location.href=el.href;});'
-			. '});'
-			// Submit buttons with data-confirm attributes.
-			. 'document.addEventListener("click",function(e){'
-			. 'var el=e.target.closest(".stagify-confirm-submit");if(!el)return;e.preventDefault();'
-			. 'stagifyConfirm({title:el.dataset.confirmTitle,message:el.dataset.confirmMessage,confirm:el.dataset.confirmLabel,danger:el.dataset.confirmDanger==="1"}).then(function(ok){if(ok)el.closest("form").submit();});'
-			. '});'
-			// Confetti function — called on first-time milestones.
-			. 'window.stagifyConfetti=function(){'
-			. 'var c=document.createElement("div");c.className="stagify-confetti-container";'
-			. 'document.body.appendChild(c);'
-			. 'var colors=["#ff7759","#39594d","#4c6ee6","#d18ee2","#f0b849","#212121","#ca492d"];'
-			. 'for(var i=0;i<80;i++){'
-			. 'var p=document.createElement("div");p.className="stagify-confetti-piece";'
-			. 'p.style.left=Math.random()*100+"%";'
-			. 'p.style.background=colors[Math.floor(Math.random()*colors.length)];'
-			. 'p.style.width=(Math.random()*8+6)+"px";'
-			. 'p.style.height=(Math.random()*4+4)+"px";'
-			. 'p.style.animationDuration=(Math.random()*2+1.5)+"s";'
-			. 'p.style.animationDelay=(Math.random()*0.8)+"s";'
-			. 'p.style.borderRadius=Math.random()>0.5?"50%":"2px";'
-			. 'c.appendChild(p);'
-			. '}'
-			. 'setTimeout(function(){c.remove();},4000);'
-			. '};'
-			// Inline rename handler.
-			. 'document.addEventListener("click",function(e){'
-			. 'var el=e.target.closest(".stagify-rename-trigger");'
-			. 'if(!el)return;'
-			. 'e.preventDefault();'
-			. 'var id=el.dataset.taskId;'
-			. 'var current=el.dataset.title;'
-			. 'var row=el.closest("tr");'
-			. 'var titleCell=row&&row.querySelector(".column-title");'
-			. 'if(!titleCell)return;'
-			. 'var link=titleCell.querySelector("a");'
-			. 'var origHtml=titleCell.innerHTML;'
-			. 'var input=document.createElement("input");'
-			. 'input.type="text";input.value=current;input.className="stagify-rename-input";'
-			. 'input.style.cssText="width:100%;height:32px;border:1px solid #d9d9dd;border-radius:8px;padding:0 10px;font-size:13px;";'
-			. 'titleCell.innerHTML="";titleCell.appendChild(input);input.focus();input.select();'
-			. 'function save(){'
-			. 'var val=input.value.trim();'
-			. 'if(!val||val===current){titleCell.innerHTML=origHtml;return;}'
-			. 'fetch(window.stagifyAdminBar.ajaxUrl,{method:"POST",credentials:"same-origin",'
-			. 'body:new URLSearchParams({action:"stagify_rename_task",_ajax_nonce:window.stagifyAdminBar.nonce,task_id:id,title:val})})'
-			. '.then(function(r){return r.json();})'
-			. '.then(function(d){'
-			. 'if(d.success&&link){'
-			. 'link.innerHTML="<strong>"+d.data.title+"</strong>";'
-			. 'titleCell.innerHTML="";titleCell.appendChild(link);'
-			. 'var acts=document.createElement("div");acts.innerHTML=origHtml;'
-			. 'var ra=acts.querySelector(".row-actions");'
-			. 'if(ra)titleCell.appendChild(ra);'
-			. 'var trigger=titleCell.querySelector(".stagify-rename-trigger");'
-			. 'if(trigger)trigger.dataset.title=d.data.title;'
-			. '}else{titleCell.innerHTML=origHtml;}'
-			. '}).catch(function(){titleCell.innerHTML=origHtml;});'
-			. '}'
-			. 'input.addEventListener("keydown",function(ev){'
-			. 'if(ev.key==="Enter"){ev.preventDefault();save();}'
-			. 'if(ev.key==="Escape"){titleCell.innerHTML=origHtml;}'
-			. '});'
-			. 'input.addEventListener("blur",function(){save();});'
-			. '});'
-			. '</script>';
 	}
 
 	/**
@@ -356,7 +201,29 @@ final class AdminMenu {
 	 */
 	private function enqueue_admin_bar_script(): void {
 		wp_enqueue_style( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css', array(), STAGIFY_VERSION );
-		wp_enqueue_script( 'stagify-admin-bar', STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js', array(), STAGIFY_VERSION, true );
+
+		wp_enqueue_script( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/dist/admin.js', array(), STAGIFY_VERSION, true );
+		wp_enqueue_script( 'stagify-modal', STAGIFY_PLUGIN_URL . 'assets/dist/modal.js', array(), STAGIFY_VERSION, true );
+		wp_localize_script(
+			'stagify-modal',
+			'stagifyModal',
+			array(
+				'actionLabels'   => array(
+					'create' => __( 'Create', 'stagify' ),
+					'update' => __( 'Update', 'stagify' ),
+					'delete' => __( 'Delete', 'stagify' ),
+				),
+				'typeLabels'     => array(
+					'content'     => __( 'Content', 'stagify' ),
+					'file'        => __( 'File', 'stagify' ),
+					'environment' => __( 'Plugin/Theme', 'stagify' ),
+					'database'    => __( 'Database', 'stagify' ),
+				),
+				'loadingPreview' => __( 'Loading preview…', 'stagify' ),
+			)
+		);
+
+		wp_enqueue_script( 'stagify-admin-bar', STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js', array( 'stagify-modal' ), STAGIFY_VERSION, true );
 		wp_localize_script( 'stagify-admin-bar', 'stagifyAdminBar', $this->get_admin_bar_data() );
 	}
 

@@ -48,7 +48,6 @@ final class SettingsPage {
 		$this->render_mode_section();
 
 		echo '</div>';
-		$this->render_api_key_toggle_script();
 	}
 
 	/**
@@ -70,7 +69,6 @@ final class SettingsPage {
 		);
 
 		$this->render_mode_confirm_panel();
-		$this->render_mode_toggle_script();
 	}
 
 	/**
@@ -94,24 +92,6 @@ final class SettingsPage {
 			esc_html__( 'Continue', 'stagify' ),
 			esc_html__( 'Cancel', 'stagify' )
 		);
-	}
-
-	/**
-	 * Output the mode toggle inline JS.
-	 *
-	 * @return void
-	 */
-	private function render_mode_toggle_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-switch-mode-btn");'
-			. 'var panel=document.getElementById("stagify-mode-confirm");'
-			. 'var cancel=document.getElementById("stagify-switch-mode-cancel");'
-			. 'if(!btn||!panel||!cancel)return;'
-			. 'btn.addEventListener("click",function(){panel.style.display="block";btn.style.display="none";});'
-			. 'cancel.addEventListener("click",function(){panel.style.display="none";btn.style.display="inline-flex";});'
-			. '})();'
-			. '</script>';
 	}
 
 	/**
@@ -344,32 +324,14 @@ final class SettingsPage {
 			. '<label for="stagify_api_key">%s</label>'
 			. '<div class="stagify-field-row">'
 			. '<input type="password" id="stagify_api_key" name="stagify_api_key" autocomplete="new-password" placeholder="%s" required>'
-			. '<button type="button" id="stagify-toggle-key" class="button button-small">%s</button>'
+			. '<button type="button" id="stagify-toggle-key" class="button button-small" data-label-show="%s" data-label-hide="%s">%s</button>'
 			. '</div>'
 			. '</div>',
 			esc_html__( 'API Key', 'stagify' ),
 			esc_attr__( 'Paste from production site', 'stagify' ),
+			esc_attr__( 'Show', 'stagify' ),
+			esc_attr__( 'Hide', 'stagify' ),
 			esc_html__( 'Show', 'stagify' )
 		);
-	}
-
-	/**
-	 * Output the inline JS for the API key show/hide toggle.
-	 *
-	 * @return void
-	 */
-	private function render_api_key_toggle_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-toggle-key");'
-			. 'var inp=document.getElementById("stagify_api_key");'
-			. 'if(!btn||!inp)return;'
-			. 'btn.addEventListener("click",function(){'
-			. 'var shown=inp.type==="text";'
-			. 'inp.type=shown?"password":"text";'
-			. 'btn.textContent=shown?"' . esc_js( __( 'Show', 'stagify' ) ) . '":"' . esc_js( __( 'Hide', 'stagify' ) ) . '";'  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			. '});'
-			. '})();'
-			. '</script>';
 	}
 }
