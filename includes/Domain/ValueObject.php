@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Base marker for domain value objects.
  * Value objects are immutable; use readonly properties.

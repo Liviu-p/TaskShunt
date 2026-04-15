@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 enum Status: string {
 
 	case Draft     = 'draft';

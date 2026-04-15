@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Stagify\Api\Handlers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Domain\TaskAction;
 
 /**

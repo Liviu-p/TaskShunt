@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * A Task is like a "deployment batch" — a named container that groups related changes together.
  *

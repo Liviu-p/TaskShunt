@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\Container;
 use Stagify\Admin\Actions\DiscardTaskAction;
 use Stagify\Admin\Actions\PushTaskAction;

@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\ServerRepositoryInterface;
 use Stagify\Contracts\TaskRepositoryInterface;
 

@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Pages;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Admin\OnboardingChecklist;
 use Stagify\Api\ReceiverApi;
 

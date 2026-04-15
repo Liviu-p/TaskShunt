@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Repository;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\FileSnapshotRepositoryInterface;
 use Stagify\Domain\RelativePath;
 

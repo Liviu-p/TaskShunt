@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * What happened to the tracked object:
  *  Create — a new post/file/plugin was added.

@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Admin\Pages\SetupPage;
 use Stagify\Api\ReceiverApi;
 use Stagify\Contracts\ServerRepositoryInterface;

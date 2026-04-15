@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Events;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Domain\TaskAction;
 
 /**

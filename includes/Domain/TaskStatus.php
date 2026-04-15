@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Lifecycle of a task:
  *  Pending → the task is open and collecting changes (only pending tasks can be active).

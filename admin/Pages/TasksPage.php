@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Pages;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\Container;
 use Stagify\Admin\Notices;
 use Stagify\Admin\OnboardingChecklist;

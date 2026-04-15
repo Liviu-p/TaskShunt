@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Actions;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Admin\Notices;
 use Stagify\Contracts\ServerRepositoryInterface;
 use Stagify\Domain\ApiKey;

@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Ajax;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\TaskItemRepositoryInterface;
 use Stagify\Contracts\TaskRepositoryInterface;

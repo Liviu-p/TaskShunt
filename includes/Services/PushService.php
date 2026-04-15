@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\ServerRepositoryInterface;
 use Stagify\Contracts\TaskItemRepositoryInterface;

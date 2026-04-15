@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Resolves the set of public post types Stagify should monitor.
  *

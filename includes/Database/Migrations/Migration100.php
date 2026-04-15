@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Database\Migrations;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\MigrationInterface;
 
 /**

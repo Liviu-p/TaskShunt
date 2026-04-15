@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Stagify\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\FileSnapshotRepositoryInterface;
 use Stagify\Contracts\TaskItemRepositoryInterface;
 use Stagify\Contracts\TaskRepositoryInterface;

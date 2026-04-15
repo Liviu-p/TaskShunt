@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Contracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Domain\ApiKey;
 use Stagify\Domain\Server;
 use Stagify\Domain\ServerUrl;

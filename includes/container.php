@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\Container as DIContainer;
 
 /**

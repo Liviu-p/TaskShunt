@@ -12,6 +12,10 @@
 
 declare(strict_types=1);
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\ContainerBuilder;
 use Stagify\Api\Handlers\ContentHandler;
 use Stagify\Api\Handlers\EnvironmentHandler;

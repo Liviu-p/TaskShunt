@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Serializers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\PayloadSerializerInterface;
 
 /**

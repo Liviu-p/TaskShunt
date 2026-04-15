@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Api;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Api\Handlers\ContentHandler;
 use Stagify\Api\Handlers\EnvironmentHandler;
 use Stagify\Api\Handlers\FileHandler;
