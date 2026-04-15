@@ -3,4 +3,5 @@ vendor/
 .phpunit.cache/
 .claude/
 .vscode/
+.DS_Store
 stagify
