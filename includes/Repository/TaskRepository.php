@@ -171,7 +171,7 @@ final class TaskRepository implements TaskRepositoryInterface {
 	public function purge_old(): void {
 		$settings = (array) get_option( 'stagify_cleanup', array() );
 
-		if ( empty( $settings['enabled'] ) ) {
+		if ( ! ( $settings['enabled'] ?? true ) ) {
 			return;
 		}
 

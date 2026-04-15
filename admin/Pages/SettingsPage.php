@@ -62,7 +62,7 @@ final class SettingsPage {
 	 */
 	private function render_cleanup_section(): void {
 		$settings = (array) get_option( 'stagify_cleanup', array() );
-		$enabled  = ! empty( $settings['enabled'] );
+		$enabled  = ( $settings['enabled'] ?? true );
 		$days     = (int) ( $settings['days'] ?? 30 );
 
 		echo '<div class="stagify-section-card">';

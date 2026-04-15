@@ -39,7 +39,7 @@ It tracks every content and file change you make while a task is active, bundles
 * **Media transfer** — Attachment files are embedded directly in the push payload, so media works across any network topology (localhost, private networks, cloud).
 * **URL rewriting** — Content URLs are automatically rewritten from the staging domain to the production domain.
 * **Retry failed pushes** — If a push fails partway through, retry it without duplicating already-applied changes.
-* **Configurable auto-cleanup** — Optionally delete pushed tasks after a custom number of days (1–365). Disabled by default — enable it in Settings.
+* **Configurable auto-cleanup** — Automatically delete pushed tasks after a custom number of days (1–365, default 30). Can be disabled in Settings.
 * **Dashboard widget** — Quick status overview right on your WordPress dashboard.
 
 = Two Modes =
