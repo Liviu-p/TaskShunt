@@ -49,21 +49,6 @@ Stagify operates in one of two modes, chosen on first activation:
 * **Sender (Staging)** — Tracks changes and pushes them to the connected production site.
 * **Receiver (Production)** — Accepts incoming pushes and applies the changes.
 
-== Installation ==
-
-= From WordPress.org =
-
-1. Go to **Plugins > Add New** in your WordPress admin.
-2. Search for **Stagify**.
-3. Click **Install Now**, then **Activate**.
-4. Repeat on both your staging and production sites.
-
-= Manual Installation =
-
-1. Download the plugin ZIP file.
-2. Go to **Plugins > Add New > Upload Plugin** and upload the ZIP.
-3. Activate the plugin on both your staging and production sites.
-
 = Setup =
 
 1. On your **production site**, go to **Stagify > Settings** and select **Receiver** mode. Copy the generated API key.
