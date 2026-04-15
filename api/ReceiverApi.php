@@ -83,7 +83,7 @@ final class ReceiverApi {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'handle_ping' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'check_api_key' ),
 			)
 		);
 

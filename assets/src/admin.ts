@@ -55,13 +55,32 @@
 
 	if ( copyBtn && keyValue ) {
 		copyBtn.addEventListener( 'click', () => {
-			navigator.clipboard.writeText( keyValue.textContent || '' ).then( () => {
+			const key = keyValue.dataset.key || keyValue.textContent || '';
+			navigator.clipboard.writeText( key ).then( () => {
 				const orig = copyBtn.textContent;
 				copyBtn.textContent = copyBtn.dataset.copied || 'Copied!';
 				setTimeout( () => {
 					copyBtn.textContent = orig;
 				}, 1500 );
 			} );
+		} );
+	}
+
+	// Show/hide API key toggle (ReceiverSettingsPage).
+	const toggleReceiverKey = document.getElementById( 'stagify-toggle-receiver-key' );
+
+	if ( toggleReceiverKey && keyValue ) {
+		toggleReceiverKey.addEventListener( 'click', () => {
+			const isHidden = ! keyValue.dataset.visible;
+			if ( isHidden ) {
+				keyValue.textContent = keyValue.dataset.key || '';
+				keyValue.dataset.visible = '1';
+				toggleReceiverKey.textContent = toggleReceiverKey.dataset.labelHide || 'Hide';
+			} else {
+				keyValue.innerHTML = '\u2022'.repeat( 20 );
+				delete keyValue.dataset.visible;
+				toggleReceiverKey.textContent = toggleReceiverKey.dataset.labelShow || 'Show';
+			}
 		} );
 	}
 

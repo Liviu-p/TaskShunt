@@ -76,7 +76,7 @@ final class TestConnectionAction {
 			$url,
 			array(
 				'timeout' => self::TIMEOUT,
-				'headers' => array( 'X-Stagify-Key' => $api_key ),
+				'headers' => array( 'X-Stagify-API-Key' => $api_key ),
 			)
 		);
 

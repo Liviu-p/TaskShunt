@@ -34,36 +34,36 @@ final class ReceiverSettingsPage {
 	 * @return void
 	 */
 	public function register(): void {
-		add_action(
-			'admin_menu',
-			function (): void {
-				$icon_svg     = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-					$icon_uri = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-
-					$this->hook = (string) add_menu_page(
-						__( 'Stagify', 'stagify' ),
-						__( 'Stagify', 'stagify' ),
-						'manage_options',
-						'stagify',
-						function (): void {
-							$this->render();
-						},
-						$icon_uri,
-						80
-					);
-			} 
-		);
-		add_action(
-			'admin_init',
-			function (): void {
-				$this->handle_save();
-			} 
-		);
+		add_action( 'admin_menu', fn() => $this->register_menu() );
+		add_action( 'admin_init', fn() => $this->handle_save() );
 		add_action(
 			'admin_enqueue_scripts',
 			static function (): void {
 				wp_enqueue_style( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css', array(), STAGIFY_VERSION );
-			} 
+				wp_enqueue_script( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/dist/admin.js', array(), STAGIFY_VERSION, true );
+			}
+		);
+	}
+
+	/**
+	 * Register the admin menu page.
+	 *
+	 * @return void
+	 */
+	private function register_menu(): void {
+		$icon_svg = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$icon_uri = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+
+		$this->hook = (string) add_menu_page(
+			__( 'Stagify', 'stagify' ),
+			__( 'Stagify', 'stagify' ),
+			'manage_options',
+			'stagify',
+			function (): void {
+				$this->render();
+			},
+			$icon_uri,
+			80
 		);
 	}
 
@@ -201,10 +201,15 @@ final class ReceiverSettingsPage {
 	private function render_existing_key( string $api_key ): void {
 		printf(
 			'<div class="stagify-apikey-display">'
-			. '<code id="stagify-key-value">%s</code>'
+			. '<code id="stagify-key-value" data-key="%s">%s</code>'
+			. '<button type="button" class="button button-small" id="stagify-toggle-receiver-key" data-label-show="%s" data-label-hide="%s">%s</button>'
 			. '<button type="button" class="button button-small" id="stagify-copy-key" title="%s" data-copied="%s">%s</button>'
 			. '</div>',
-			esc_html( $api_key ),
+			esc_attr( $api_key ),
+			esc_html( str_repeat( "\u{2022}", 20 ) ),
+			esc_attr__( 'Show', 'stagify' ),
+			esc_attr__( 'Hide', 'stagify' ),
+			esc_html__( 'Show', 'stagify' ),
 			esc_attr__( 'Copy to clipboard', 'stagify' ),
 			esc_attr__( 'Copied!', 'stagify' ),
 			esc_html__( 'Copy', 'stagify' )
