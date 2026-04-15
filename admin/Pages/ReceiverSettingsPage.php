@@ -115,7 +115,7 @@ final class ReceiverSettingsPage {
 	private function render(): void {
 		$api_key  = get_option( ReceiverApi::API_KEY_OPTION, '' );
 		$has_key  = '' !== $api_key;
-		$ping_url = rest_url( 'stagify/v1/ping' );
+		$site_url = site_url();
 
 		echo '<div class="wrap stagify-wrap">';
 
@@ -128,7 +128,7 @@ final class ReceiverSettingsPage {
 
 		OnboardingChecklist::render_receiver();
 
-		$this->render_status_section( $has_key, $ping_url );
+		$this->render_status_section( $has_key, $site_url );
 		$this->render_api_key_section( $api_key, $has_key );
 		$this->render_mode_section();
 
@@ -139,10 +139,10 @@ final class ReceiverSettingsPage {
 	 * Render the connection status section.
 	 *
 	 * @param bool   $has_key  Whether an API key is configured.
-	 * @param string $ping_url The ping endpoint URL.
+	 * @param string $site_url The site URL to display.
 	 * @return void
 	 */
-	private function render_status_section( bool $has_key, string $ping_url ): void {
+	private function render_status_section( bool $has_key, string $site_url ): void {
 		if ( $has_key ) {
 			printf(
 				'<div class="stagify-status-card stagify-status-card--ready">'
@@ -153,8 +153,8 @@ final class ReceiverSettingsPage {
 				. '</div>'
 				. '</div>',
 				esc_html__( 'Ready to receive', 'stagify' ),
-				esc_html__( 'Ping endpoint:', 'stagify' ),
-				esc_html( $ping_url )
+				esc_html__( 'Site URL:', 'stagify' ),
+				esc_html( $site_url )
 			);
 		} else {
 			printf(

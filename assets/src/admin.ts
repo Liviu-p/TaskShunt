@@ -56,14 +56,39 @@
 	if ( copyBtn && keyValue ) {
 		copyBtn.addEventListener( 'click', () => {
 			const key = keyValue.dataset.key || keyValue.textContent || '';
-			navigator.clipboard.writeText( key ).then( () => {
+			const onCopied = () => {
 				const orig = copyBtn.textContent;
 				copyBtn.textContent = copyBtn.dataset.copied || 'Copied!';
 				setTimeout( () => {
 					copyBtn.textContent = orig;
 				}, 1500 );
-			} );
+			};
+
+			if ( navigator.clipboard?.writeText ) {
+				navigator.clipboard.writeText( key ).then( onCopied ).catch( () => {
+					fallbackCopy( key ) && onCopied();
+				} );
+			} else {
+				fallbackCopy( key ) && onCopied();
+			}
 		} );
+	}
+
+	function fallbackCopy( text: string ): boolean {
+		const textarea = document.createElement( 'textarea' );
+		textarea.value = text;
+		textarea.style.position = 'fixed';
+		textarea.style.opacity = '0';
+		document.body.appendChild( textarea );
+		textarea.select();
+		let ok = false;
+		try {
+			ok = document.execCommand( 'copy' );
+		} catch {
+			// Ignore.
+		}
+		document.body.removeChild( textarea );
+		return ok;
 	}
 
 	// Show/hide API key toggle (ReceiverSettingsPage).

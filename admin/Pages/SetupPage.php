@@ -57,21 +57,23 @@ final class SetupPage {
 			}
 		);
 
-		add_action(
-			'admin_enqueue_scripts',
-			static function (): void {
-				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
-				if ( 'stagify-setup' === $page ) {
-					wp_enqueue_style(
-						'stagify-admin',
-						STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
-						array(),
-						STAGIFY_VERSION
-					);
-				}
-			}
-		);
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	/**
+	 * Enqueue setup page assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		if ( 'stagify-setup' !== $page ) {
+			return;
+		}
+
+		wp_enqueue_style( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css', array(), STAGIFY_VERSION );
+		wp_enqueue_script( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/dist/admin.js', array(), STAGIFY_VERSION, true );
 	}
 
 	/**

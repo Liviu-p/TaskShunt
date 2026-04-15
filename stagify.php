@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace Stagify;
 
+use Stagify\Container;
 use Stagify\Contracts\TaskRepositoryInterface;
 use Stagify\Database\Migrator;
 

@@ -28,7 +28,7 @@ use Stagify\Events\TaskPushed;
  *
  *  1. Loads the task and all its items from the database.
  *  2. Serializes everything into a JSON payload.
- *  3. Sends an HTTP POST to {server_url}/wp-json/stagify/v1/receive with the API key header.
+ *  3. Sends an HTTP POST to the stagify/v1/receive REST route with the API key header.
  *  4. Reads the receiver's response — checks if each item succeeded or failed.
  *  5. Updates the task status to Pushed (success) or Failed (error).
  */
@@ -37,7 +37,7 @@ final class PushService {
 	/**
 	 * Receive endpoint path appended to the server URL.
 	 */
-	private const RECEIVE_PATH = '/wp-json/stagify/v1/receive';
+	private const RECEIVE_ROUTE = '/stagify/v1/receive';
 
 	/**
 	 * Request timeout in seconds.
@@ -80,7 +80,7 @@ final class PushService {
 
 		$this->task_repository->update_status( $task_id, TaskStatus::Pushing );
 
-		$url      = rtrim( $server->url->get_value(), '/' ) . self::RECEIVE_PATH;
+		$url      = rtrim( $server->url->get_value(), '/' ) . '/?rest_route=' . rawurlencode( self::RECEIVE_ROUTE );
 		$body     = $this->build_request_body( $task );
 		$response = $this->send_request( $url, $server->api_key->get_value(), $body );
 

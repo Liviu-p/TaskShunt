@@ -25,7 +25,7 @@ final class TestConnectionAction {
 	/**
 	 * Ping endpoint path appended to the server URL.
 	 */
-	private const PING_PATH = '/wp-json/stagify/v1/ping';
+	private const PING_ROUTE = '/stagify/v1/ping';
 
 	/**
 	 * Request timeout in seconds.
@@ -59,7 +59,7 @@ final class TestConnectionAction {
 			wp_send_json_error( array( 'message' => __( 'No server configured.', 'stagify' ) ), 400 );
 		}
 
-		$url = rtrim( $server->url->get_value(), '/' ) . self::PING_PATH;
+		$url = rtrim( $server->url->get_value(), '/' ) . '/?rest_route=' . rawurlencode( self::PING_ROUTE );
 		wp_send_json( $this->ping( $url, $server->api_key->get_value() ) );
 	}
 

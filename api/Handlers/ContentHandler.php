@@ -208,6 +208,8 @@ final class ContentHandler {
 	 * @return array{success: bool, message: string, object_id?: int}
 	 */
 	private function update_existing_attachment( int $local_id, array $file_array, array $payload ): array {
+		$this->delete_attachment_files( $local_id );
+
 		$upload = wp_handle_sideload( $file_array, array( 'test_form' => false ) );
 
 		if ( isset( $upload['error'] ) ) {
@@ -238,6 +240,35 @@ final class ContentHandler {
 	}
 
 	/**
+	 * Delete an attachment's physical files (original + thumbnails).
+	 *
+	 * Called before sideloading a replacement so wp_unique_filename
+	 * does not append -1, -2, etc. to the new file.
+	 *
+	 * @param int $attachment_id Local attachment post ID.
+	 * @return void
+	 */
+	private function delete_attachment_files( int $attachment_id ): void {
+		$file = get_attached_file( $attachment_id );
+		if ( ! $file || ! file_exists( $file ) ) {
+			return;
+		}
+
+		$meta = wp_get_attachment_metadata( $attachment_id );
+		if ( ! empty( $meta['sizes'] ) ) {
+			$dir = dirname( $file );
+			foreach ( $meta['sizes'] as $size ) {
+				$thumb = $dir . '/' . $size['file'];
+				if ( file_exists( $thumb ) ) {
+					wp_delete_file( $thumb );
+				}
+			}
+		}
+
+		wp_delete_file( $file );
+	}
+
+	/**
 	 * Create a new attachment via media_handle_sideload.
 	 *
 	 * @param array<string, mixed> $file_array File array for sideloading.
@@ -245,6 +276,13 @@ final class ContentHandler {
 	 * @return array{success: bool, message: string, object_id?: int}
 	 */
 	private function create_new_attachment( array $file_array, array $payload ): array {
+		// Force the original filename — remove any existing file that would cause -1 suffix.
+		$upload_dir = wp_upload_dir();
+		$existing   = $upload_dir['path'] . '/' . $file_array['name'];
+		if ( file_exists( $existing ) ) {
+			wp_delete_file( $existing );
+		}
+
 		$post_id = media_handle_sideload( $file_array, 0, $payload['post']['post_title'] ?? '' );
 
 		if ( is_wp_error( $post_id ) ) {
