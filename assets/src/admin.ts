@@ -23,7 +23,7 @@
 			if ( ! pre ) {
 				return;
 			}
-			const hidden = pre.style.display === 'none';
+			const hidden = getComputedStyle( pre ).display === 'none';
 			pre.style.display = hidden ? 'block' : 'none';
 			btn.textContent = hidden
 				? ( btn.dataset.labelHide || 'Hide' )
