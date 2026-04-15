@@ -134,7 +134,6 @@ final class SetupPage {
 			. '</p>';
 
 		echo '</div>';
-
 	}
 
 	/**
@@ -204,5 +203,4 @@ final class SetupPage {
 			esc_html( $desc )
 		);
 	}
-
 }

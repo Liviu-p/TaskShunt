@@ -337,15 +337,7 @@ final class TasksPage {
 	 * @return array{icon: string, title: string, message: string, class: string}
 	 */
 	private function resolve_prompt_data(): array {
-		$all_tasks  = $this->task_repository->find_all();
-		$has_pushed = false;
-
-		foreach ( $all_tasks as $task ) {
-			if ( \Stagify\Domain\TaskStatus::Pushed === $task->status ) {
-				$has_pushed = true;
-				break;
-			}
-		}
+		$all_tasks = $this->task_repository->find_all();
 
 		if ( empty( $all_tasks ) ) {
 			return array(
@@ -452,29 +444,44 @@ final class TasksPage {
 	 */
 	private function render_welcome_state(): void {
 		echo '<div class="stagify-welcome">';
-
 		echo '<div class="stagify-welcome-steps">';
+		$this->render_welcome_step_create();
+		$this->render_welcome_step_change();
+		$this->render_welcome_step_push();
+		echo '</div>';
+		echo '</div>';
+	}
 
+	/**
+	 * Render the "Create a task" welcome step with inline form.
+	 *
+	 * @return void
+	 */
+	private function render_welcome_step_create(): void {
 		echo '<div class="stagify-welcome-step">';
 		printf( '<span class="stagify-welcome-number">1</span>' );
 		printf( '<strong>%s</strong>', esc_html__( 'Create a task', 'stagify' ) );
 		printf( '<p>%s</p>', esc_html__( 'Give it a name like "Homepage update" or "New blog posts".', 'stagify' ) );
-		printf(
-			'<form method="post" style="margin-top:12px;">'
-		);
+		echo '<form method="post" style="margin-top:12px;">';
 		wp_nonce_field( 'stagify_create_task' );
 		printf(
 			'<div style="display:flex;gap:8px;justify-content:center;">'
 			. '<input type="text" name="stagify_task_title" placeholder="%s" maxlength="%d" class="regular-text" required style="max-width:200px;">'
 			. '<button type="submit" class="button button-primary">%s</button>'
-			. '</div>'
-			. '</form>',
+			. '</div></form>',
 			esc_attr__( 'Task name…', 'stagify' ),
 			200,
 			esc_html__( 'Create', 'stagify' )
 		);
 		echo '</div>';
+	}
 
+	/**
+	 * Render the "Make your changes" welcome step.
+	 *
+	 * @return void
+	 */
+	private function render_welcome_step_change(): void {
 		printf(
 			'<div class="stagify-welcome-step">'
 			. '<span class="stagify-welcome-number">2</span>'
@@ -484,7 +491,14 @@ final class TasksPage {
 			esc_html__( 'Make your changes', 'stagify' ),
 			esc_html__( 'Edit content, upload media, activate plugins — everything is tracked automatically.', 'stagify' )
 		);
+	}
 
+	/**
+	 * Render the "Push to production" welcome step.
+	 *
+	 * @return void
+	 */
+	private function render_welcome_step_push(): void {
 		printf(
 			'<div class="stagify-welcome-step">'
 			. '<span class="stagify-welcome-number">3</span>'
@@ -494,9 +508,6 @@ final class TasksPage {
 			esc_html__( 'Push to production', 'stagify' ),
 			esc_html__( 'Review your changes and send them to your live site in one click.', 'stagify' )
 		);
-
-		echo '</div>';
-		echo '</div>';
 	}
 
 	/**

@@ -100,16 +100,19 @@ final class TaskDetailPage {
 		echo '</div>';
 		echo '</div>';
 
-		$meta_parts = array( esc_html( $task->created_at->format( 'M j, Y H:i' ) ) );
-		$meta_parts[] = esc_html( sprintf(
-			_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
-			$task->item_count
-		) );
+		$meta_parts   = array( esc_html( $task->created_at->format( 'M j, Y H:i' ) ) );
+		$meta_parts[] = esc_html(
+			sprintf(
+				/* translators: %d: number of changes */
+				_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
+				$task->item_count
+			)
+		);
 		if ( TaskStatus::Pushed === $task->status && null !== $task->pushed_at ) {
 			/* translators: %s: relative time like "2 hours ago" */
 			$meta_parts[] = esc_html( sprintf( __( 'Pushed %s', 'stagify' ), human_time_diff( $task->pushed_at->getTimestamp(), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'stagify' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 		}
-		echo '<p class="stagify-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>';
+		echo '<p class="stagify-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each part is pre-escaped via esc_html()
 	}
 
 	/**
@@ -388,5 +391,4 @@ final class TaskDetailPage {
 			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};
 	}
-
 }

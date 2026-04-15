@@ -276,5 +276,4 @@ final class ReceiverSettingsPage {
 			esc_html__( 'Cancel', 'stagify' )
 		);
 	}
-
 }

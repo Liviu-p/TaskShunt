@@ -136,9 +136,9 @@ final class TasksListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	public function column_created_at( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		$date = null !== $item->pushed_at ? $item->pushed_at : $item->created_at;
+		$date      = null !== $item->pushed_at ? $item->pushed_at : $item->created_at;
 		$timestamp = $date->getTimestamp();
-		$diff = human_time_diff( $timestamp, current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$diff      = human_time_diff( $timestamp, current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 
 		$label = null !== $item->pushed_at
 			/* translators: %s: relative time */
@@ -240,7 +240,8 @@ final class TasksListTable extends \WP_List_Table {
 	/**
 	 * Build a nonce-protected link for the discard row action.
 	 *
-	 * @param int $task_id Task ID to discard.
+	 * @param int    $task_id Task ID to discard.
+	 * @param string $label   Optional button label override.
 	 * @return string HTML link.
 	 */
 	private function discard_form( int $task_id, string $label = '' ): string {

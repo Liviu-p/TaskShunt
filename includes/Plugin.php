@@ -255,6 +255,16 @@ final class Plugin {
 	 * @return void
 	 */
 	private function register_ajax_actions(): void {
+		$this->register_task_ajax_actions();
+		$this->register_utility_ajax_actions();
+	}
+
+	/**
+	 * Register AJAX handlers for task CRUD operations.
+	 *
+	 * @return void
+	 */
+	private function register_task_ajax_actions(): void {
 		add_action(
 			'wp_ajax_stagify_activate_task',
 			function (): void {
@@ -273,6 +283,14 @@ final class Plugin {
 				$this->container->get( AjaxDiscardTaskAction::class )->handle();
 			}
 		);
+	}
+
+	/**
+	 * Register AJAX handlers for push, preview, and rename.
+	 *
+	 * @return void
+	 */
+	private function register_utility_ajax_actions(): void {
 		add_action(
 			'wp_ajax_stagify_push_task_ajax',
 			function (): void {
