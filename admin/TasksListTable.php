@@ -105,7 +105,7 @@ final class TasksListTable extends \WP_List_Table {
 		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
 		$title      = '<a href="' . esc_url( $detail_url ) . '"><strong>' . esc_html( $item->title ) . '</strong></a>';
 
-		return $title . $this->row_actions( $this->build_row_actions( $item ) );
+		return $title . $this->row_actions( $this->build_row_actions( $item ), true );
 	}
 
 	/**
