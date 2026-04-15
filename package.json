@@ -7,6 +7,7 @@
         "build": "webpack --mode production",
         "dev": "webpack --mode development --watch",
         "zip": "npm run build && bash scripts/zip.sh",
+        "zip:review": "npm run build && bash scripts/zip-review.sh",
         "test:e2e": "cypress open",
         "test:e2e:run": "cypress run"
     },

@@ -94,7 +94,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 */
 	public function find_by_task( int $task_id ): array {
 		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare( "SELECT * FROM `{$this->table}` WHERE task_id = %d ORDER BY id ASC", $task_id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'SELECT * FROM `' . $this->table . '` WHERE task_id = %d ORDER BY id ASC', $task_id ),
 			ARRAY_A
 		);
 		return array_map( array( TaskItem::class, 'from_db_row' ), is_array( $rows ) ? $rows : array() );
@@ -111,7 +112,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 */
 	public function item_exists( int $task_id, TaskItemType $type, string $object_type, string $object_id ): bool {
 		$count = $this->wpdb->get_var(
-			$this->wpdb->prepare( "SELECT COUNT(*) FROM `{$this->table}` WHERE task_id = %d AND type = %s AND object_type = %s AND object_id = %s LIMIT 1", $task_id, $type->value, $object_type, $object_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'SELECT COUNT(*) FROM `' . $this->table . '` WHERE task_id = %d AND type = %s AND object_type = %s AND object_id = %s LIMIT 1', $task_id, $type->value, $object_type, $object_id )
 		);
 		return (int) $count > 0;
 	}
@@ -126,9 +128,10 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 * @return TaskItem|null
 	 */
 	public function find_item( int $task_id, TaskItemType $type, string $object_type, string $object_id ): ?TaskItem {
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
 		$row = $this->wpdb->get_row(
 			$this->wpdb->prepare(
-				"SELECT * FROM `{$this->table}` WHERE task_id = %d AND type = %s AND object_type = %s AND object_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'SELECT * FROM `' . $this->table . '` WHERE task_id = %d AND type = %s AND object_type = %s AND object_id = %s LIMIT 1',
 				$task_id,
 				$type->value,
 				$object_type,
@@ -136,6 +139,7 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		return is_array( $row ) ? TaskItem::from_db_row( $row ) : null;
 	}
 
@@ -176,7 +180,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 */
 	public function count_by_task( int $task_id ): int {
 		$count = $this->wpdb->get_var(
-			$this->wpdb->prepare( "SELECT COUNT(*) FROM `{$this->table}` WHERE task_id = %d", $task_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'SELECT COUNT(*) FROM `' . $this->table . '` WHERE task_id = %d', $task_id )
 		);
 		return (int) $count;
 	}
@@ -199,7 +204,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 */
 	private function increment_item_count( int $task_id ): void {
 		$this->wpdb->query(
-			$this->wpdb->prepare( "UPDATE `{$this->tasks_table}` SET item_count = item_count + 1 WHERE id = %d", $task_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'UPDATE `' . esc_sql( $this->tasks_table ) . '` SET item_count = item_count + 1 WHERE id = %d', $task_id )
 		);
 	}
 
@@ -211,7 +217,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 */
 	private function decrement_item_count( int $task_id ): void {
 		$this->wpdb->query(
-			$this->wpdb->prepare( "UPDATE `{$this->tasks_table}` SET item_count = GREATEST(item_count - 1, 0) WHERE id = %d", $task_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'UPDATE `' . esc_sql( $this->tasks_table ) . '` SET item_count = GREATEST(item_count - 1, 0) WHERE id = %d', $task_id )
 		);
 	}
 }

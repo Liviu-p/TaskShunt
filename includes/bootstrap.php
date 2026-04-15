@@ -58,9 +58,9 @@ use Stagify\Services\PostTypeRegistry;
 use Stagify\Services\FileScanner;
 use Stagify\Services\PushService;
 
-$builder = new ContainerBuilder();
+$stagify_builder = new ContainerBuilder();
 
-$builder->addDefinitions(
+$stagify_builder->addDefinitions(
 	array(
 		// WordPress global — provides wpdb to any class that type-hints \wpdb.
 		\wpdb::class                           => \DI\factory(
@@ -124,4 +124,4 @@ $builder->addDefinitions(
 	)
 );
 
-return $builder->build();
+return $stagify_builder->build();

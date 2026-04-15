@@ -45,7 +45,8 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 	 */
 	public function get_hash( RelativePath $path ): ?string {
 		$hash = $this->wpdb->get_var(
-			$this->wpdb->prepare( "SELECT hash FROM `{$this->table}` WHERE path = %s LIMIT 1", $path->get_value() ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'SELECT hash FROM `' . $this->table . '` WHERE path = %s LIMIT 1', $path->get_value() )
 		);
 		return is_string( $hash ) ? $hash : null;
 	}
@@ -59,9 +60,10 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 	 */
 	public function upsert_hash( RelativePath $path, string $hash ): void {
 		$now = gmdate( 'Y-m-d H:i:s' );
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
 		$this->wpdb->query(
 			$this->wpdb->prepare(
-				"INSERT INTO `{$this->table}` (path, hash, file_size, scanned_at) VALUES (%s, %s, 0, %s) ON DUPLICATE KEY UPDATE hash = %s, scanned_at = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'INSERT INTO `' . $this->table . '` (path, hash, file_size, scanned_at) VALUES (%s, %s, 0, %s) ON DUPLICATE KEY UPDATE hash = %s, scanned_at = %s',
 				$path->get_value(),
 				$hash,
 				$now,
@@ -69,6 +71,7 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 				$now
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -87,7 +90,7 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 	 * @return list<string>
 	 */
 	public function get_all_paths(): array {
-		$results = $this->wpdb->get_col( "SELECT path FROM `{$this->table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $this->wpdb->get_col( 'SELECT path FROM `' . $this->table . '`' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
 		return is_array( $results ) ? $results : array();
 	}
 
@@ -97,6 +100,6 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 	 * @return void
 	 */
 	public function delete_all(): void {
-		$this->wpdb->query( "DELETE FROM `{$this->table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->wpdb->query( 'DELETE FROM `' . $this->table . '`' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
 	}
 }

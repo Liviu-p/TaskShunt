@@ -35,7 +35,7 @@ final class SaveTrackingAction {
 			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
 		}
 
-		$raw   = isset( $_POST['stagify_post_types'] ) && is_array( $_POST['stagify_post_types'] ) ? $_POST['stagify_post_types'] : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$raw   = isset( $_POST['stagify_post_types'] ) && is_array( $_POST['stagify_post_types'] ) ? wp_unslash( $_POST['stagify_post_types'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$types = array_map( 'sanitize_key', $raw );
 		$valid = array_values( array_intersect( $types, $this->get_public_types() ) );
 

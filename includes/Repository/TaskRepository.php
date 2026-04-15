@@ -56,7 +56,8 @@ final class TaskRepository implements TaskRepositoryInterface {
 	 */
 	public function find_by_id( int $id ): ?Task {
 		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare( "SELECT * FROM `{$this->table}` WHERE id = %d LIMIT 1", $id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'SELECT * FROM `' . $this->table . '` WHERE id = %d LIMIT 1', $id ),
 			ARRAY_A
 		);
 		return is_array( $row ) ? Task::from_db_row( $row ) : null;
@@ -68,7 +69,7 @@ final class TaskRepository implements TaskRepositoryInterface {
 	 * @return array<int, Task>
 	 */
 	public function find_all(): array {
-		$rows = $this->wpdb->get_results( "SELECT * FROM `{$this->table}` ORDER BY created_at DESC", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $this->wpdb->get_results( 'SELECT * FROM `' . $this->table . '` ORDER BY created_at DESC', ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
 		return array_map( array( Task::class, 'from_db_row' ), is_array( $rows ) ? $rows : array() );
 	}
 
@@ -178,7 +179,8 @@ final class TaskRepository implements TaskRepositoryInterface {
 		$days   = max( 1, (int) ( $settings['days'] ?? 30 ) );
 		$cutoff = gmdate( 'Y-m-d H:i:s', (int) strtotime( "-{$days} days" ) );
 		$this->wpdb->query(
-			$this->wpdb->prepare( "DELETE FROM `{$this->table}` WHERE status = %s AND pushed_at < %s", TaskStatus::Pushed->value, $cutoff ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is safe, built from $wpdb->prefix.
+			$this->wpdb->prepare( 'DELETE FROM `' . $this->table . '` WHERE status = %s AND pushed_at < %s', TaskStatus::Pushed->value, $cutoff )
 		);
 	}
 }

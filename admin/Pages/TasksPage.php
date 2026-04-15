@@ -141,7 +141,7 @@ final class TasksPage {
 			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
 		}
 
-		$raw_ids        = isset( $_POST['task'] ) && is_array( $_POST['task'] ) ? $_POST['task'] : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$raw_ids        = isset( $_POST['task'] ) && is_array( $_POST['task'] ) ? wp_unslash( $_POST['task'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$task_ids       = array_map( 'intval', $raw_ids );
 		$active_task_id = $this->task_repository->get_active_task_id();
 		$discarded      = 0;
@@ -367,8 +367,8 @@ final class TasksPage {
 	 */
 	private function render_push_history(): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		global $wpdb;
-		$table = $wpdb->prefix . 'stagify_push_log';
-		$tasks = $wpdb->prefix . 'stagify_tasks';
+		$table = esc_sql( $wpdb->prefix . 'stagify_push_log' );
+		$tasks = esc_sql( $wpdb->prefix . 'stagify_tasks' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$logs = $wpdb->get_results(
