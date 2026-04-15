@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Pages;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Admin\Pages\SetupPage;
 use Stagify\Contracts\ServerRepositoryInterface;
 use Stagify\Domain\Server;
@@ -36,15 +40,18 @@ final class SettingsPage {
 	public function render(): void {
 		$server = $this->server_repository->find();
 
-		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'Stagify Settings', 'stagify' ) . '</h1>';
+		echo '<div class="wrap stagify-wrap">';
 
-		$this->render_mode_section();
+		echo '<div class="stagify-page-header">';
+		echo '<h1>' . esc_html__( 'Settings', 'stagify' ) . '</h1>';
+		echo '</div>';
+		echo '<p class="stagify-subheading">' . esc_html__( 'Configure your staging server and content tracking.', 'stagify' ) . '</p>';
+
 		$this->render_server_section( $server );
 		$this->render_tracking_section();
+		$this->render_mode_section();
 
 		echo '</div>';
-		$this->render_api_key_toggle_script();
 	}
 
 	/**
@@ -55,13 +62,39 @@ final class SettingsPage {
 	private function render_mode_section(): void {
 		$mode = SetupPage::get_mode();
 
-		echo '<h2>' . esc_html__( 'Plugin mode', 'stagify' ) . '</h2>';
 		printf(
-			'<p><strong>%s</strong> &mdash; <a href="%s" onclick="return confirm(\'%s\');">%s</a></p>',
+			'<div class="stagify-mode-bar">'
+			. '<span>%s <strong>%s</strong></span>'
+			. '<button type="button" class="button button-small" id="stagify-switch-mode-btn">%s</button>'
+			. '</div>',
+			esc_html__( 'Mode:', 'stagify' ),
 			null !== $mode ? esc_html( $mode->label() ) : esc_html__( 'Not set', 'stagify' ),
+			esc_html__( 'Switch mode', 'stagify' )
+		);
+
+		$this->render_mode_confirm_panel();
+	}
+
+	/**
+	 * Render the mode-switch confirmation panel (hidden by default).
+	 *
+	 * @return void
+	 */
+	private function render_mode_confirm_panel(): void {
+		printf(
+			'<div class="stagify-mode-confirm" id="stagify-mode-confirm" style="display:none;">'
+			. '<div class="stagify-mode-confirm-inner">'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '<div class="stagify-mode-confirm-actions">'
+			. '<a href="%s" class="button button-primary stagify-btn-danger">%s</a>'
+			. '<button type="button" class="button" id="stagify-switch-mode-cancel">%s</button>'
+			. '</div></div></div>',
+			esc_html__( 'Change plugin mode?', 'stagify' ),
+			esc_html__( 'You will be redirected to choose a new mode. This will change which features are active on this site.', 'stagify' ),
 			esc_url( admin_url( 'admin.php?page=stagify-setup' ) ),
-			esc_js( __( 'Changing the mode will alter which features are active. Continue?', 'stagify' ) ),
-			esc_html__( 'Change', 'stagify' )
+			esc_html__( 'Continue', 'stagify' ),
+			esc_html__( 'Cancel', 'stagify' )
 		);
 	}
 
@@ -74,14 +107,17 @@ final class SettingsPage {
 	 * @return void
 	 */
 	private function render_server_section( ?Server $server ): void {
-		echo '<h2>' . esc_html__( 'Target server', 'stagify' ) . '</h2>';
+		echo '<div class="stagify-section-card">';
+		echo '<h2>' . esc_html__( 'Production server', 'stagify' ) . '</h2>';
 
 		if ( null !== $server ) {
 			$this->render_server_card( $server );
-			return;
+		} else {
+			echo '<p>' . esc_html__( 'Connect the production site where changes will be pushed.', 'stagify' ) . '</p>';
+			$this->render_server_form();
 		}
 
-		$this->render_server_form();
+		echo '</div>';
 	}
 
 	/**
@@ -94,8 +130,9 @@ final class SettingsPage {
 		$tracked    = get_option( PostTypeRegistry::OPTION_KEY, false );
 		$tracked    = false !== $tracked ? (array) $tracked : array_keys( $post_types );
 
+		echo '<div class="stagify-section-card">';
 		echo '<h2>' . esc_html__( 'Content tracking', 'stagify' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Select which post types Stagify should track.', 'stagify' ) . '</p>';
+		echo '<p>' . esc_html__( 'Choose which post types to track for changes.', 'stagify' ) . '</p>';
 
 		printf( '<form method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
 		echo '<input type="hidden" name="action" value="stagify_save_tracking">';
@@ -103,8 +140,12 @@ final class SettingsPage {
 
 		$this->render_post_type_checkboxes( $post_types, $tracked );
 
-		submit_button( __( 'Save tracking settings', 'stagify' ) );
+		printf(
+			'<button type="submit" class="button button-primary" style="margin-top:16px;">%s</button>',
+			esc_html__( 'Save', 'stagify' )
+		);
 		echo '</form>';
+		echo '</div>';
 	}
 
 	/**
@@ -172,7 +213,7 @@ final class SettingsPage {
 	 * @param Server $server The configured server entity.
 	 * @return void
 	 */
-	private function render_server_card( Server $server ): void {
+	private function render_server_card( Server $server ): void { // phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 		$delete_url = wp_nonce_url(
 			add_query_arg(
 				array(
@@ -185,27 +226,26 @@ final class SettingsPage {
 		);
 
 		printf(
-			'<table class="form-table" role="presentation"><tbody>'
-			. '<tr><th>%s</th><td><strong>%s</strong></td></tr>'
-			. '<tr><th>%s</th><td><code>%s</code></td></tr>'
-			. '<tr><th>%s</th><td><code>%s</code></td></tr>'
-			. '</tbody></table>',
-			esc_html__( 'Name', 'stagify' ),
+			'<div class="stagify-status-card stagify-status-card--ready" style="margin-top:0;">'
+			. '<span class="stagify-status-dot stagify-status-dot--ready"></span>'
+			. '<div>'
+			. '<strong>%s</strong>'
+			. '<p>%s</p>'
+			. '</div>'
+			. '<div class="stagify-server-actions">',
 			esc_html( $server->name ),
-			esc_html__( 'URL', 'stagify' ),
-			esc_html( $server->url->get_value() ),
-			esc_html__( 'API Key', 'stagify' ),
-			esc_html( str_repeat( '•', 16 ) )
+			esc_html( $server->url->get_value() )
 		);
-
 		$this->render_test_button();
-
 		printf(
-			'<p style="margin-top:12px;"><a href="%s" class="button button-link-delete" onclick="return confirm(\'%s\');">%s</a></p>',
+			'<a href="%s" class="button button-small stagify-link-danger stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $delete_url ),
-			esc_js( __( 'Remove this server?', 'stagify' ) ),
-			esc_html__( 'Remove server', 'stagify' )
+			esc_attr__( 'Disconnect server?', 'stagify' ),
+			esc_attr__( 'This will remove the production server connection. You can re-add it later.', 'stagify' ),
+			esc_attr__( 'Disconnect', 'stagify' ),
+			esc_html__( 'Disconnect', 'stagify' )
 		);
+		echo '</div></div>';
 	}
 
 	/**
@@ -215,10 +255,8 @@ final class SettingsPage {
 	 */
 	private function render_test_button(): void {
 		printf(
-			'<p>'
-			. '<button type="button" id="stagify-test-connection" class="button button-secondary">%s</button>'
-			. '<span id="stagify-test-result"></span>'
-			. '</p>',
+			'<button type="button" id="stagify-test-connection" class="button button-small">%s</button>'
+			. '<span id="stagify-test-result" class="stagify-test-result"></span>',
 			esc_html__( 'Test connection', 'stagify' )
 		);
 	}
@@ -230,19 +268,20 @@ final class SettingsPage {
 	 */
 	private function render_server_form(): void {
 		printf(
-			'<form method="post" action="%s">',
+			'<form method="post" action="%s" class="stagify-server-form">',
 			esc_url( admin_url( 'admin-post.php' ) )
 		);
 		echo '<input type="hidden" name="action" value="stagify_save_server">';
 		wp_nonce_field( 'stagify_save_server' );
 
-		echo '<table class="form-table" role="presentation"><tbody>';
 		$this->render_name_field();
 		$this->render_url_field();
 		$this->render_api_key_field();
-		echo '</tbody></table>';
 
-		submit_button( __( 'Save server', 'stagify' ) );
+		printf(
+			'<button type="submit" class="button button-primary">%s</button>',
+			esc_html__( 'Connect server', 'stagify' )
+		);
 		echo '</form>';
 	}
 
@@ -253,60 +292,50 @@ final class SettingsPage {
 	 */
 	private function render_name_field(): void {
 		printf(
-			'<tr><th scope="row"><label for="stagify_server_name">%s</label></th>'
-			. '<td><input type="text" id="stagify_server_name" name="stagify_server_name" class="regular-text" required></td></tr>',
-			esc_html__( 'Server name', 'stagify' )
+			'<div class="stagify-field">'
+			. '<label for="stagify_server_name">%s</label>'
+			. '<input type="text" id="stagify_server_name" name="stagify_server_name" placeholder="%s" required>'
+			. '</div>',
+			esc_html__( 'Name', 'stagify' ),
+			esc_attr__( 'e.g. Production', 'stagify' )
 		);
 	}
 
 	/**
-	 * Render the server URL table row.
+	 * Render the server URL field.
 	 *
 	 * @return void
 	 */
 	private function render_url_field(): void {
 		printf(
-			'<tr><th scope="row"><label for="stagify_server_url">%s</label></th>'
-			. '<td><input type="url" id="stagify_server_url" name="stagify_server_url" class="regular-text" placeholder="%s" required></td></tr>',
-			esc_html__( 'Server URL', 'stagify' ),
+			'<div class="stagify-field">'
+			. '<label for="stagify_server_url">%s</label>'
+			. '<input type="url" id="stagify_server_url" name="stagify_server_url" placeholder="%s" required>'
+			. '</div>',
+			esc_html__( 'URL', 'stagify' ),
 			esc_attr__( 'https://yoursite.com', 'stagify' )
 		);
 	}
 
 	/**
-	 * Render the API key table row with a show/hide toggle.
+	 * Render the API key field with show/hide toggle.
 	 *
 	 * @return void
 	 */
 	private function render_api_key_field(): void {
 		printf(
-			'<tr><th scope="row"><label for="stagify_api_key">%s</label></th>'
-			. '<td>'
-			. '<input type="password" id="stagify_api_key" name="stagify_api_key" class="regular-text" autocomplete="new-password" required>'
-			. ' <button type="button" id="stagify-toggle-key" class="button button-secondary">%s</button>'
-			. '</td></tr>',
+			'<div class="stagify-field">'
+			. '<label for="stagify_api_key">%s</label>'
+			. '<div class="stagify-field-row">'
+			. '<input type="password" id="stagify_api_key" name="stagify_api_key" autocomplete="new-password" placeholder="%s" required>'
+			. '<button type="button" id="stagify-toggle-key" class="button button-small" data-label-show="%s" data-label-hide="%s">%s</button>'
+			. '</div>'
+			. '</div>',
 			esc_html__( 'API Key', 'stagify' ),
+			esc_attr__( 'Paste from production site', 'stagify' ),
+			esc_attr__( 'Show', 'stagify' ),
+			esc_attr__( 'Hide', 'stagify' ),
 			esc_html__( 'Show', 'stagify' )
 		);
-	}
-
-	/**
-	 * Output the inline JS for the API key show/hide toggle.
-	 *
-	 * @return void
-	 */
-	private function render_api_key_toggle_script(): void {
-		echo '<script>'
-			. '(function(){'
-			. 'var btn=document.getElementById("stagify-toggle-key");'
-			. 'var inp=document.getElementById("stagify_api_key");'
-			. 'if(!btn||!inp)return;'
-			. 'btn.addEventListener("click",function(){'
-			. 'var shown=inp.type==="text";'
-			. 'inp.type=shown?"password":"text";'
-			. 'btn.textContent=shown?"' . esc_js( __( 'Show', 'stagify' ) ) . '":"' . esc_js( __( 'Hide', 'stagify' ) ) . '";'  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			. '});'
-			. '})();'
-			. '</script>';
 	}
 }

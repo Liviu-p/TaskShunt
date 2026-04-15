@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Events;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Abstract base class for all domain events.
  */

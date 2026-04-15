@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\TaskItemRepositoryInterface;
 use Stagify\Contracts\TaskRepositoryInterface;
 use Stagify\Domain\Task;
@@ -45,7 +49,7 @@ final class TaskDetailPage {
 		$task = $this->task_repository->find_by_id( $task_id );
 
 		if ( null === $task ) {
-			echo '<div class="wrap"><p>' . esc_html__( 'Task not found.', 'stagify' ) . '</p></div>';
+			echo '<div class="wrap stagify-wrap"><p>' . esc_html__( 'Task not found.', 'stagify' ) . '</p></div>';
 			return;
 		}
 
@@ -53,11 +57,22 @@ final class TaskDetailPage {
 		$active_task_id  = $this->task_repository->get_active_task_id();
 		$base_action_url = wp_nonce_url( admin_url( 'admin.php?page=stagify' ), 'stagify_task_action' );
 
-		echo '<div class="wrap">';
+		echo '<div class="wrap stagify-wrap">';
 		$this->render_header( $task, $active_task_id, $base_action_url );
+
+		if ( TaskStatus::Pushed === $task->status ) {
+			printf(
+				'<div class="stagify-readonly-banner">'
+				. '<span class="dashicons dashicons-yes-alt"></span>'
+				. '<span>%s</span>'
+				. '</div>',
+				esc_html__( 'This task has been pushed to production. Changes below are read-only.', 'stagify' )
+			);
+		}
+
 		$this->render_items_table( $items );
+		$this->render_footer_actions( $task, $active_task_id, $base_action_url );
 		echo '</div>';
-		$this->render_payload_toggle_script();
 	}
 
 	/**
@@ -69,28 +84,39 @@ final class TaskDetailPage {
 	 * @return void
 	 */
 	private function render_header( Task $task, ?int $active_task_id, string $base_action_url ): void {
-		$back_url = admin_url( 'admin.php?page=stagify' );
+		$back_url  = admin_url( 'admin.php?page=stagify' );
+		$is_active = TaskStatus::Pending === $task->status && $task->id === $active_task_id;
 
-		echo '<a href="' . esc_url( $back_url ) . '">&larr; ' . esc_html__( 'All tasks', 'stagify' ) . '</a>';
-		echo '<h1 style="margin-top:8px;">' . esc_html( $task->title ) . ' ' . $this->status_badge( $task->status ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		printf(
-			'<p style="color:#666;">%s &nbsp;|&nbsp; %s</p>',
-			esc_html(
-				sprintf(
-				/* translators: %s: formatted date and time */
-					__( 'Created %s', 'stagify' ),
-					$task->created_at->format( 'Y-m-d H:i' )
-				) 
-			),
-			esc_html(
-				sprintf(
-				/* translators: %d: number of items */
-					_n( '%d item', '%d items', $task->item_count, 'stagify' ),
-					$task->item_count
-				) 
+		echo '<a href="' . esc_url( $back_url ) . '" class="stagify-back-link">&larr; ' . esc_html__( 'Back to tasks', 'stagify' ) . '</a>';
+
+		echo '<div class="stagify-page-header" style="margin-top:8px;">';
+		echo '<h1>' . esc_html( $task->title );
+		if ( $is_active ) {
+			echo ' <span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
+		} elseif ( TaskStatus::Pushed === $task->status ) {
+			echo ' <span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>';
+		} elseif ( TaskStatus::Failed === $task->status ) {
+			echo ' <span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>';
+		}
+		echo '</h1>';
+		echo '<div class="stagify-actions" style="margin:0;">';
+		$this->render_action_buttons( $task, $active_task_id, $base_action_url, $is_active );
+		echo '</div>';
+		echo '</div>';
+
+		$meta_parts   = array( esc_html( $task->created_at->format( 'M j, Y H:i' ) ) );
+		$meta_parts[] = esc_html(
+			sprintf(
+				/* translators: %d: number of changes */
+				_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
+				$task->item_count
 			)
 		);
-		$this->render_action_buttons( $task, $active_task_id, $base_action_url );
+		if ( TaskStatus::Pushed === $task->status && null !== $task->pushed_at ) {
+			/* translators: %s: relative time like "2 hours ago" */
+			$meta_parts[] = esc_html( sprintf( __( 'Pushed %s', 'stagify' ), human_time_diff( $task->pushed_at->getTimestamp(), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'stagify' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		}
+		echo '<p class="stagify-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each part is pre-escaped via esc_html()
 	}
 
 	/**
@@ -99,13 +125,33 @@ final class TaskDetailPage {
 	 * @param Task     $task            The task entity.
 	 * @param int|null $active_task_id  Currently active task ID or null.
 	 * @param string   $base_action_url Base URL for action links (nonce included).
+	 * @param bool     $is_active       Whether this task is the active task.
 	 * @return void
 	 */
-	private function render_action_buttons( Task $task, ?int $active_task_id, string $base_action_url ): void {
-		echo '<p>';
-		$this->render_push_button( $task->id );
-		$this->render_secondary_buttons( $task, $active_task_id, $base_action_url );
-		echo '</p>';
+	private function render_action_buttons( Task $task, ?int $active_task_id, string $base_action_url, bool $is_active ): void {
+		if ( $is_active && $task->item_count > 0 ) {
+			$this->render_push_button( $task->id );
+		}
+
+		if ( TaskStatus::Pending === $task->status && ! $is_active ) {
+			printf(
+				'<a href="%s" class="button button-primary" data-cy="activate-task">%s</a> ',
+				esc_url(
+					add_query_arg(
+						array(
+							'stagify_action' => 'activate',
+							'task_id'        => $task->id,
+						),
+						$base_action_url
+					)
+				),
+				esc_html__( 'Work on this', 'stagify' )
+			);
+		}
+
+		if ( TaskStatus::Failed === $task->status ) {
+			echo $this->retry_form( $task->id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 	}
 
 	/**
@@ -133,37 +179,23 @@ final class TaskDetailPage {
 	}
 
 	/**
-	 * Render the conditional 'Set as active' and 'Discard task' buttons.
+	 * Render footer actions (discard) — subtle, at the bottom.
 	 *
 	 * @param Task     $task            The task entity.
 	 * @param int|null $active_task_id  Currently active task ID or null.
 	 * @param string   $base_action_url Base URL for action links.
 	 * @return void
 	 */
-	private function render_secondary_buttons( Task $task, ?int $active_task_id, string $base_action_url ): void {
-		if ( TaskStatus::Pending === $task->status && null === $active_task_id ) {
-			printf(
-				'<a href="%s" class="button" data-cy="activate-task">%s</a> ',
-				esc_url(
-					add_query_arg(
-						array(
-							'stagify_action' => 'activate',
-							'task_id'        => $task->id,
-						),
-						$base_action_url 
-					) 
-				),
-				esc_html__( 'Set as active', 'stagify' )
-			);
+	private function render_footer_actions( Task $task, ?int $active_task_id, string $base_action_url ): void { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$is_active = TaskStatus::Pending === $task->status && $task->id === $active_task_id;
+
+		if ( $is_active || ( TaskStatus::Pending !== $task->status && TaskStatus::Failed !== $task->status ) ) {
+			return;
 		}
 
-		if ( TaskStatus::Failed === $task->status ) {
-			echo $this->retry_form( $task->id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		}
-
-		if ( TaskStatus::Pending === $task->status || TaskStatus::Failed === $task->status ) {
-			echo $this->discard_form( $task->id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		}
+		echo '<div class="stagify-detail-footer">';
+		echo $this->discard_form( $task->id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '</div>';
 	}
 
 	/**
@@ -185,9 +217,11 @@ final class TaskDetailPage {
 		);
 
 		return sprintf(
-			'<a href="%s" class="button" style="color:#b32d2e;" data-cy="discard-task" onclick="return confirm(\'%s\');">%s</a>',
+			'<a href="%s" class="button stagify-link-danger stagify-confirm-link" data-cy="discard-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $url ),
-			esc_js( __( 'Discard this task and all its tracked changes?', 'stagify' ) ),
+			esc_attr__( 'Discard task?', 'stagify' ),
+			esc_attr__( 'This will permanently delete this task and all its tracked changes.', 'stagify' ),
+			esc_attr__( 'Discard', 'stagify' ),
 			esc_html__( 'Discard task', 'stagify' )
 		);
 	}
@@ -211,8 +245,11 @@ final class TaskDetailPage {
 		);
 
 		return sprintf(
-			'<a href="%s" class="button" style="color:#f0b849;" data-cy="retry-task">%s</a> ',
+			'<a href="%s" class="button stagify-link-warning stagify-confirm-link" data-cy="retry-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a> ',
 			esc_url( $url ),
+			esc_attr__( 'Retry push?', 'stagify' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
+			esc_attr__( 'Retry', 'stagify' ),
 			esc_html__( 'Retry', 'stagify' )
 		);
 	}
@@ -225,13 +262,16 @@ final class TaskDetailPage {
 	 */
 	private function render_items_table( array $items ): void {
 		if ( empty( $items ) ) {
-			echo '<p>' . esc_html__( 'No items in this task yet.', 'stagify' ) . '</p>';
+			echo '<div class="stagify-empty-state">';
+			printf( '<p><strong>%s</strong></p>', esc_html__( 'No changes recorded yet', 'stagify' ) );
+			printf( '<p>%s</p>', esc_html__( 'Just work on your site as usual — edit content, upload media, activate plugins, or switch themes. Every change is tracked automatically and will show up here.', 'stagify' ) );
+			echo '</div>';
 			return;
 		}
 
 		echo '<table class="wp-list-table widefat fixed striped" style="margin-top:16px;">';
 		echo '<thead><tr>';
-		foreach ( array( __( 'Type', 'stagify' ), __( 'Object', 'stagify' ), __( 'Action', 'stagify' ), __( 'Status', 'stagify' ), __( 'Payload', 'stagify' ) ) as $col ) {
+		foreach ( array( __( 'Type', 'stagify' ), __( 'Item', 'stagify' ), __( 'Action', 'stagify' ), '' ) as $col ) {
 			echo '<th>' . esc_html( $col ) . '</th>';
 		}
 		echo '</tr></thead><tbody>';
@@ -254,7 +294,6 @@ final class TaskDetailPage {
 		echo '<td>' . $this->type_badge( $item->type ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->render_object_cell( $item ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->action_badge( $item->action ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<td>' . $this->status_badge( $item->status ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<td>' . $this->render_payload_cell( $item->id, $item->payload ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</tr>';
 	}
@@ -267,9 +306,24 @@ final class TaskDetailPage {
 	 */
 	private function render_object_cell( TaskItem $item ): string {
 		if ( TaskItemType::File === $item->type ) {
-			$decoded = json_decode( $item->payload, true );
-			$hash    = is_array( $decoded ) && isset( $decoded['hash'] ) ? (string) $decoded['hash'] : '—';
-			return '<code>' . esc_html( $item->object_id ) . '</code><br><small style="color:#888;">' . esc_html( $hash ) . '</small>';
+			return '<code>' . esc_html( basename( $item->object_id ) ) . '</code>';
+		}
+
+		if ( TaskItemType::Content === $item->type ) {
+			$post_title = get_the_title( (int) $item->object_id );
+			if ( '' !== $post_title ) {
+				$edit_link = get_edit_post_link( (int) $item->object_id );
+				if ( $edit_link ) {
+					return '<a href="' . esc_url( $edit_link ) . '">' . esc_html( $post_title ) . '</a>';
+				}
+				return esc_html( $post_title );
+			}
+		}
+
+		if ( TaskItemType::Environment === $item->type ) {
+			$payload = json_decode( $item->payload, true );
+			$name    = is_array( $payload ) && isset( $payload['name'] ) ? $payload['name'] : $item->object_id;
+			return esc_html( $name );
 		}
 
 		return esc_html( $item->object_type ) . ' #' . esc_html( $item->object_id );
@@ -287,10 +341,12 @@ final class TaskDetailPage {
 		$id        = 'stagify-payload-' . $item_id;
 
 		return sprintf(
-			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s">%s</button>'
-			. '<pre id="%s" style="display:none;max-height:200px;overflow:auto;font-size:11px;margin-top:6px;">%s</pre>',
+			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s" data-label-show="%s" data-label-hide="%s">%s</button>'
+			. '<pre id="%s" class="stagify-payload-pre">%s</pre>',
 			esc_attr( $id ),
-			esc_html__( 'Show payload', 'stagify' ),
+			esc_attr__( 'Details', 'stagify' ),
+			esc_attr__( 'Hide', 'stagify' ),
+			esc_html__( 'Details', 'stagify' ),
 			esc_attr( $id ),
 			esc_html( false !== $formatted ? $formatted : $payload )
 		);
@@ -304,10 +360,10 @@ final class TaskDetailPage {
 	 */
 	private function type_badge( TaskItemType $type ): string {
 		return match ( $type ) {
-			TaskItemType::Content  => '<span style="background:#e8f0fe;color:#1a56db;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Content', 'stagify' ) . '</span>',
-			TaskItemType::File     => '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'File', 'stagify' ) . '</span>',
-			TaskItemType::Database    => '<span style="background:#f3e8ff;color:#6b21a8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Database', 'stagify' ) . '</span>',
-			TaskItemType::Environment => '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Environment', 'stagify' ) . '</span>',
+			TaskItemType::Content     => '<span class="stagify-badge stagify-badge--content">' . esc_html__( 'Content', 'stagify' ) . '</span>',
+			TaskItemType::File        => '<span class="stagify-badge stagify-badge--file">' . esc_html__( 'File', 'stagify' ) . '</span>',
+			TaskItemType::Database    => '<span class="stagify-badge stagify-badge--database">' . esc_html__( 'Database', 'stagify' ) . '</span>',
+			TaskItemType::Environment => '<span class="stagify-badge stagify-badge--environment">' . esc_html__( 'Environment', 'stagify' ) . '</span>',
 		};
 	}
 
@@ -319,9 +375,9 @@ final class TaskDetailPage {
 	 */
 	private function action_badge( TaskAction $action ): string {
 		return match ( $action ) {
-			TaskAction::Create => '<span style="color:#46b450;font-weight:600;">' . esc_html__( 'Create', 'stagify' ) . '</span>',
-			TaskAction::Update => '<span style="color:#f0b849;font-weight:600;">' . esc_html__( 'Update', 'stagify' ) . '</span>',
-			TaskAction::Delete => '<span style="color:#dc3232;font-weight:600;">' . esc_html__( 'Delete', 'stagify' ) . '</span>',
+			TaskAction::Create => '<span class="stagify-action--create">' . esc_html__( 'Create', 'stagify' ) . '</span>',
+			TaskAction::Update => '<span class="stagify-action--update">' . esc_html__( 'Update', 'stagify' ) . '</span>',
+			TaskAction::Delete => '<span class="stagify-action--delete">' . esc_html__( 'Delete', 'stagify' ) . '</span>',
 		};
 	}
 
@@ -333,26 +389,10 @@ final class TaskDetailPage {
 	 */
 	private function status_badge( TaskStatus $status ): string {
 		return match ( $status ) {
-			TaskStatus::Pending => '<span style="color:#a0a5aa;font-weight:600;">' . esc_html__( 'Pending', 'stagify' ) . '</span>',
-			TaskStatus::Pushing => '<span style="color:#f0b849;font-weight:600;">' . esc_html__( 'Pushing', 'stagify' ) . '</span>',
-			TaskStatus::Pushed  => '<span style="color:#00a0d2;font-weight:600;">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
-			TaskStatus::Failed  => '<span style="color:#dc3232;font-weight:600;">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
+			TaskStatus::Pending => '<span class="stagify-badge stagify-badge--pending">' . esc_html__( 'Ready', 'stagify' ) . '</span>',
+			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing…', 'stagify' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Done', 'stagify' ) . '</span>',
+			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};
-	}
-
-	/**
-	 * Output the inline JS for the payload toggle buttons.
-	 *
-	 * @return void
-	 */
-	private function render_payload_toggle_script(): void {
-		echo '<script>document.querySelectorAll(".stagify-payload-toggle").forEach(function(btn){'
-			. 'btn.addEventListener("click",function(){'
-			. 'var pre=document.getElementById(btn.dataset.target);'
-			. 'if(!pre)return;'
-			. 'var hidden=pre.style.display==="none";'
-			. 'pre.style.display=hidden?"block":"none";'
-			. 'btn.textContent=hidden?"' . esc_js( __( 'Hide payload', 'stagify' ) ) . '":"' . esc_js( __( 'Show payload', 'stagify' ) ) . '";'
-			. '});});</script>';
 	}
 }

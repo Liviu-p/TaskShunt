@@ -9,9 +9,16 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Represents a validated API key.
- * Construction fails fast if the key is shorter than 16 characters.
+ * A validated API key — the shared secret between sender and receiver.
+ *
+ * The sender includes this key in the X-Stagify-API-Key HTTP header when pushing.
+ * The receiver compares it against its stored key to authenticate the request.
+ * Must be at least 16 characters — construction throws if shorter.
  */
 final readonly class ApiKey extends ValueObject {
 
@@ -71,7 +78,7 @@ final readonly class ApiKey extends ValueObject {
 	/**
 	 * Check equality with another ApiKey.
 	 *
-	 * @param self $other The other value object to compare.
+	 * @param ValueObject $other The other value object to compare.
 	 * @return bool
 	 */
 	public function equals( ValueObject $other ): bool {

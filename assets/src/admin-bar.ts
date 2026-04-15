@@ -9,11 +9,16 @@ interface StagifyAdminBarData {
 	hasServer: boolean;
 	discardLabel: string;
 	discardConfirm: string;
+	discardMessage: string;
 	pushConfirm: string;
+	pushMessage: string;
 	pushingLabel: string;
 	pushedLabel: string;
 	noActiveLabel: string;
 	activeTaskId: number;
+	newTaskLabel: string;
+	newTaskPrompt: string;
+	creatingLabel: string;
 	moreLabel: string;
 }
 
@@ -51,6 +56,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 	const PUSH_ID = 'wp-admin-bar-stagify-push';
 	const DISCARD_ID = 'wp-admin-bar-stagify-discard';
 	const MORE_ID = 'wp-admin-bar-stagify-items-more';
+	const NEW_TASK_ID = 'wp-admin-bar-stagify-new-task';
 
 	let busy = false;
 	let activeTaskId = 0;
@@ -74,10 +80,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy || ! activeTaskId || ! stagifyAdminBar.hasServer ) {
 					return;
 				}
-				if ( ! window.confirm( stagifyAdminBar.pushConfirm ) ) {
-					return;
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: activeTaskId } ).then( ( ok: boolean ) => {
+						if ( ok ) pushTask( activeTaskId, root );
+					} );
+				} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+					pushTask( activeTaskId, root );
 				}
-				pushTask( activeTaskId, root );
 				return;
 			}
 
@@ -87,10 +97,37 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy || ! activeTaskId ) {
 					return;
 				}
-				if ( ! window.confirm( stagifyAdminBar.discardConfirm ) ) {
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( { title: stagifyAdminBar.discardConfirm, message: stagifyAdminBar.discardMessage, confirm: stagifyAdminBar.discardLabel, danger: true } ).then( ( ok: boolean ) => {
+						if ( ok ) discardTask( activeTaskId, root );
+					} );
+				} else if ( window.confirm( stagifyAdminBar.discardConfirm ) ) {
+					discardTask( activeTaskId, root );
+				}
+				return;
+			}
+
+			// Handle new task click — opens the styled modal with an input field.
+			if ( clicked.closest( `#${ NEW_TASK_ID }` ) ) {
+				e.preventDefault();
+				if ( busy ) {
 					return;
 				}
-				discardTask( activeTaskId, root );
+				const confirmFn = ( window as any ).stagifyConfirm;
+				if ( confirmFn ) {
+					confirmFn( {
+						title: stagifyAdminBar.newTaskLabel,
+						message: stagifyAdminBar.newTaskPrompt,
+						confirm: stagifyAdminBar.creatingLabel.replace( '…', '' ),
+						prompt: true,
+						promptPlaceholder: 'e.g. Homepage update',
+					} ).then( ( result: string | false ) => {
+						if ( result && typeof result === 'string' ) {
+							createTask( result, root );
+						}
+					} );
+				}
 				return;
 			}
 
@@ -159,6 +196,51 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 		}
 	}
 
+	async function createTask(
+		title: string,
+		root: HTMLElement
+	): Promise< void > {
+		busy = true;
+
+		const newTaskLink = root.querySelector< HTMLElement >( `#${ NEW_TASK_ID } .ab-item` );
+		const originalLabel = newTaskLink?.textContent ?? '';
+		if ( newTaskLink ) {
+			newTaskLink.textContent = stagifyAdminBar.creatingLabel;
+		}
+
+		try {
+			const body = new URLSearchParams( {
+				action: 'stagify_create_task',
+				_ajax_nonce: stagifyAdminBar.nonce,
+				title,
+			} );
+
+			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body,
+			} );
+
+			const data = ( await response.json() ) as AjaxResponse;
+
+			if ( ! data.success ) {
+				if ( newTaskLink ) {
+					newTaskLink.textContent = originalLabel;
+				}
+				return;
+			}
+
+			activeTaskId = data.data.task_id;
+			rebuildDropdown( root, data.data );
+		} catch {
+			if ( newTaskLink ) {
+				newTaskLink.textContent = originalLabel;
+			}
+		} finally {
+			busy = false;
+		}
+	}
+
 	async function pushTask(
 		taskId: number,
 		root: HTMLElement
@@ -190,27 +272,30 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 			if ( pushLink ) {
 				if ( data.success ) {
 					pushLink.textContent = stagifyAdminBar.pushedLabel;
-					pushLink.style.color = '#46b450';
+					pushLink.style.color = '#39594d';
 
 					// Update the title to show "Pushed" status.
 					const titleLink = root.querySelector< HTMLElement >( ':scope > .ab-item' );
 					if ( titleLink ) {
-						titleLink.innerHTML = '<span style="color:#00a0d2;">' + stagifyAdminBar.pushedLabel + '</span>';
+						titleLink.innerHTML = '<span style="color:#9e9e9e;">' + stagifyAdminBar.pushedLabel + '</span>';
 					}
 
 					// Remove discard button after successful push.
 					document.getElementById( DISCARD_ID )?.remove();
 					activeTaskId = 0;
+
+					showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+					triggerFirstTimeConfetti( 'push' );
 				} else {
 					pushLink.innerHTML = originalLabel;
-					window.alert( data.data?.message ?? 'Push failed.' );
+					showPageBanner( 'error', data.data?.message ?? 'Push failed.' );
 				}
 			}
 		} catch {
 			if ( pushLink ) {
 				pushLink.innerHTML = originalLabel;
 			}
-			window.alert( 'Push request failed. Check your network.' );
+			showPageBanner( 'error', 'Push request failed. Check your network.' );
 		} finally {
 			busy = false;
 		}
@@ -329,6 +414,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				ref
 			);
 		}
+
+		// "+ New task" button.
+		submenu.insertBefore(
+			makeNode( NEW_TASK_ID, stagifyAdminBar.newTaskLabel, '#', 'stagify-ab-new-task' ),
+			ref
+		);
 	}
 
 	function makeNode(
@@ -373,12 +464,66 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				return;
 			}
 
-			if ( ! window.confirm( stagifyAdminBar.pushConfirm ) ) {
-				return;
+			const confirmFn = ( window as any ).stagifyConfirm;
+			if ( confirmFn ) {
+				confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: taskId } ).then( ( ok: boolean ) => {
+					if ( ok ) pagePush( taskId, btn );
+				} );
+			} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+				pagePush( taskId, btn );
 			}
-
-			pagePush( taskId, btn );
 		} );
+	}
+
+	function triggerFirstTimeConfetti( milestone: string ): void {
+		const key = 'stagify_confetti_' + milestone;
+		if ( localStorage.getItem( key ) ) {
+			return;
+		}
+		localStorage.setItem( key, '1' );
+		const confettiFn = ( window as any ).stagifyConfetti;
+		if ( confettiFn ) {
+			confettiFn();
+		}
+	}
+
+	function showPageBanner( type: 'success' | 'error', message: string ): void {
+		// Remove any existing banner.
+		document.querySelector( '.stagify-push-status-banner' )?.remove();
+
+		const wrap = document.querySelector( '.stagify-wrap' );
+		if ( ! wrap ) return;
+
+		const banner = document.createElement( 'div' );
+		banner.className = 'stagify-push-status-banner stagify-push-status-banner--' + type;
+
+		const icon = type === 'success' ? 'dashicons-yes-alt' : 'dashicons-warning';
+		const link = type === 'success'
+			? ' <a href="' + window.location.href + '">Refresh page</a>'
+			: '';
+
+		banner.innerHTML = '<span class="dashicons ' + icon + '"></span>'
+			+ '<span>' + message + '</span>'
+			+ link;
+
+		wrap.insertBefore( banner, wrap.firstChild );
+	}
+
+	function showPushingOverlay(): HTMLElement | null {
+		const wrap = document.querySelector( '.stagify-wrap' );
+		if ( ! wrap ) return null;
+
+		const overlay = document.createElement( 'div' );
+		overlay.className = 'stagify-pushing-overlay';
+		overlay.innerHTML = '<div class="stagify-pushing-content">'
+			+ '<div class="stagify-pushing-spinner"></div>'
+			+ '<strong>' + stagifyAdminBar.pushingLabel + '</strong>'
+			+ '<p>Sending changes to production…</p>'
+			+ '</div>';
+
+		( wrap as HTMLElement ).style.position = 'relative';
+		wrap.appendChild( overlay );
+		return overlay;
 	}
 
 	async function pagePush( taskId: number, btn: HTMLElement ): Promise< void > {
@@ -387,6 +532,8 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 		btn.textContent = stagifyAdminBar.pushingLabel;
 		btn.classList.add( 'disabled' );
 		btn.style.pointerEvents = 'none';
+
+		const overlay = showPushingOverlay();
 
 		try {
 			const body = new URLSearchParams( {
@@ -403,12 +550,13 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 			const data = ( await response.json() ) as { success: boolean; data: { message: string } };
 
+			overlay?.remove();
+
 			if ( data.success ) {
 				btn.textContent = stagifyAdminBar.pushedLabel;
-				btn.style.color = '#00a0d2';
 				btn.style.pointerEvents = 'none';
 
-				// Update the admin bar title if present.
+				// Update the admin bar title.
 				const titleLink = document.querySelector< HTMLElement >(
 					`#${ ROOT_ID } > .ab-item`
 				);
@@ -417,57 +565,24 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 						'<span style="color:#a0a5aa;">' + stagifyAdminBar.noActiveLabel + '</span>';
 				}
 
-				// Remove admin bar push/discard nodes.
 				document.getElementById( PUSH_ID )?.remove();
 				document.getElementById( DISCARD_ID )?.remove();
 				activeTaskId = 0;
 
-				// Update status badge in the same table row.
-				const row = btn.closest( 'tr' );
-				if ( row ) {
-					const statusCell = row.querySelector( '.column-status' );
-					if ( statusCell ) {
-						statusCell.innerHTML =
-							'<span style="color:#00a0d2;font-weight:600;">Pushed</span>';
-					}
-					// Hide row actions for this pushed task.
-					const actions = row.querySelector( '.row-actions' );
-					if ( actions ) {
-						actions.innerHTML = '';
-					}
-				}
-
-				// Remove the active task banner.
-				const banner = btn.closest< HTMLElement >( '[style*="border-left"]' );
-				if ( banner && banner.querySelector( '.stagify-push-btn' ) ) {
-					banner.style.background = '#f0f6fc';
-					banner.style.borderLeftColor = '#00a0d2';
-					const bannerBtn = banner.querySelector( '.stagify-push-btn' );
-					if ( bannerBtn ) {
-						bannerBtn.textContent = stagifyAdminBar.pushedLabel;
-						( bannerBtn as HTMLElement ).style.pointerEvents = 'none';
-						( bannerBtn as HTMLElement ).style.color = '#00a0d2';
-						bannerBtn.classList.remove( 'button-primary' );
-					}
-				}
-
-				// Update detail page status badge if present.
-				const detailBadge = document.querySelector( '.wrap > h1 span[style]' );
-				if ( detailBadge ) {
-					detailBadge.outerHTML =
-						'<span style="color:#00a0d2;font-weight:600;">Pushed</span>';
-				}
+				showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+				triggerFirstTimeConfetti( 'push' );
 			} else {
 				btn.textContent = originalText;
 				btn.style.pointerEvents = '';
 				btn.classList.remove( 'disabled' );
-				window.alert( data.data?.message ?? 'Push failed.' );
+				showPageBanner( 'error', data.data?.message ?? 'Push failed.' );
 			}
 		} catch {
+			overlay?.remove();
 			btn.textContent = originalText;
 			btn.style.pointerEvents = '';
 			btn.classList.remove( 'disabled' );
-			window.alert( 'Push request failed. Check your network.' );
+			showPageBanner( 'error', 'Push request failed. Check your network.' );
 		} finally {
 			busy = false;
 		}

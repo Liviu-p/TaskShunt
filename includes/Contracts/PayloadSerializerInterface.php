@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Contracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Converts a WordPress object into a JSON payload string for a task item.
  */

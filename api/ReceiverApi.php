@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Api;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Api\Handlers\ContentHandler;
 use Stagify\Api\Handlers\EnvironmentHandler;
 use Stagify\Api\Handlers\FileHandler;
@@ -162,7 +166,7 @@ final class ReceiverApi {
 
 		$sender_url = isset( $body['site_url'] ) ? (string) $body['site_url'] : '';
 		$results    = $this->process_items( $body['items'], $sender_url );
-		$success = $this->all_succeeded( $results );
+		$success    = $this->all_succeeded( $results );
 
 		$this->log_operation( $body, $results, $success );
 

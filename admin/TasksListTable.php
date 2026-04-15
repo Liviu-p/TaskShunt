@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\TaskRepositoryInterface;
 use Stagify\Domain\Task;
 use Stagify\Domain\TaskStatus;
@@ -55,7 +59,7 @@ final class TasksListTable extends \WP_List_Table {
 			'title'      => __( 'Title', 'stagify' ),
 			'status'     => __( 'Status', 'stagify' ),
 			'item_count' => __( 'Changes', 'stagify' ),
-			'created_at' => __( 'Created', 'stagify' ),
+			'created_at' => __( 'Activity', 'stagify' ),
 		);
 	}
 
@@ -98,7 +102,7 @@ final class TasksListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		$detail_url = admin_url( 'admin.php?page=stagify&task_id=' . (int) $item->id );
+		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
 		$title      = '<a href="' . esc_url( $detail_url ) . '"><strong>' . esc_html( $item->title ) . '</strong></a>';
 
 		return $title . $this->row_actions( $this->build_row_actions( $item ) );
@@ -122,19 +126,35 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	public function column_item_count( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 		return sprintf(
-			'<span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e0e0e0;font-weight:600;">%d</span>',
+			'<span class="stagify-pill">%d</span>',
 			(int) $item->item_count
 		);
 	}
 
 	/**
-	 * Render the created_at column as a human-readable date.
+	 * Render the activity column as relative time.
+	 *
+	 * Shows pushed_at if pushed, otherwise created_at.
 	 *
 	 * @param Task $item Current row task.
 	 * @return string
 	 */
 	public function column_created_at( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		return esc_html( $item->created_at->format( 'Y-m-d H:i' ) );
+		$date      = null !== $item->pushed_at ? $item->pushed_at : $item->created_at;
+		$timestamp = $date->getTimestamp();
+		$diff      = human_time_diff( $timestamp, current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+		$label = null !== $item->pushed_at
+			/* translators: %s: relative time */
+			? sprintf( __( 'Pushed %s ago', 'stagify' ), $diff )
+			/* translators: %s: relative time */
+			: sprintf( __( '%s ago', 'stagify' ), $diff );
+
+		return sprintf(
+			'<span title="%s">%s</span>',
+			esc_attr( $date->format( 'Y-m-d H:i:s' ) ),
+			esc_html( $label )
+		);
 	}
 
 	/**
@@ -147,19 +167,33 @@ final class TasksListTable extends \WP_List_Table {
 		$actions    = array();
 		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
 
-		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
-		$actions['push'] = $this->push_form( $item->id );
+		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
-		if ( TaskStatus::Pending === $item->status && null === $this->active_task_id ) {
-			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Set as active', 'stagify' ) . '</a>';
+		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
+
+		if ( TaskStatus::Pending === $item->status ) {
+			$actions['rename'] = sprintf(
+				'<a href="#" class="stagify-rename-trigger" data-task-id="%d" data-title="%s">%s</a>',
+				(int) $item->id,
+				esc_attr( $item->title ),
+				esc_html__( 'Rename', 'stagify' )
+			);
+		}
+
+		if ( $is_active ) {
+			$actions['push'] = $this->push_form( $item->id );
+		}
+
+		if ( TaskStatus::Pending === $item->status && ! $is_active ) {
+			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Work on this', 'stagify' ) . '</a>';
 		}
 
 		if ( TaskStatus::Failed === $item->status ) {
 			$actions['retry'] = $this->retry_form( $item->id );
 		}
 
-		if ( TaskStatus::Pending === $item->status || TaskStatus::Failed === $item->status ) {
-			$actions['discard'] = $this->discard_form( $item->id );
+		if ( TaskStatus::Pushing !== $item->status ) {
+			$actions['discard'] = $this->discard_form( $item->id, esc_html__( 'Delete', 'stagify' ) );
 		}
 
 		return $actions;
@@ -198,8 +232,11 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" style="color:#f0b849;">%s</a>',
+			'<a href="%s" class="stagify-link-warning stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a>',
 			esc_url( $url ),
+			esc_attr__( 'Retry push?', 'stagify' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
+			esc_attr__( 'Retry', 'stagify' ),
 			esc_html__( 'Retry', 'stagify' )
 		);
 	}
@@ -207,10 +244,15 @@ final class TasksListTable extends \WP_List_Table {
 	/**
 	 * Build a nonce-protected link for the discard row action.
 	 *
-	 * @param int $task_id Task ID to discard.
+	 * @param int    $task_id Task ID to discard.
+	 * @param string $label   Optional button label override.
 	 * @return string HTML link.
 	 */
-	private function discard_form( int $task_id ): string {
+	private function discard_form( int $task_id, string $label = '' ): string {
+		if ( '' === $label ) {
+			$label = esc_html__( 'Discard', 'stagify' );
+		}
+
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
@@ -223,9 +265,12 @@ final class TasksListTable extends \WP_List_Table {
 		);
 
 		return sprintf(
-			'<a href="%s" style="color:#b32d2e;">%s</a>',
+			'<a href="%s" class="stagify-link-danger stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $url ),
-			esc_html__( 'Discard', 'stagify' )
+			esc_attr__( 'Remove this task?', 'stagify' ),
+			esc_attr__( 'This task and its history will be permanently deleted.', 'stagify' ),
+			esc_attr__( 'Remove', 'stagify' ),
+			$label
 		);
 	}
 
@@ -256,14 +301,14 @@ final class TasksListTable extends \WP_List_Table {
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
 		if ( $is_active ) {
-			return $this->badge( __( 'Active', 'stagify' ), '#46b450', true );
+			return '<span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
 		}
 
 		return match ( $item->status ) {
-			TaskStatus::Pending => $this->badge( __( 'Pending', 'stagify' ), '#a0a5aa' ),
-			TaskStatus::Pushing => $this->badge( __( 'Pushing', 'stagify' ), '#f0b849' ),
-			TaskStatus::Pushed  => $this->badge( __( 'Pushed', 'stagify' ), '#00a0d2' ),
-			TaskStatus::Failed  => $this->badge( __( 'Failed', 'stagify' ), '#dc3232' ),
+			TaskStatus::Pending => '',
+			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing…', 'stagify' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
+			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
 		};
 	}
 

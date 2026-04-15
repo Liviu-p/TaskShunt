@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Pages;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Domain\PluginMode;
 
 /**
@@ -50,6 +54,22 @@ final class SetupPage {
 						$this->render();
 					}
 				);
+			}
+		);
+
+		add_action(
+			'admin_enqueue_scripts',
+			static function (): void {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+				if ( 'stagify-setup' === $page ) {
+					wp_enqueue_style(
+						'stagify-admin',
+						STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
+						array(),
+						STAGIFY_VERSION
+					);
+				}
 			}
 		);
 	}
@@ -103,76 +123,88 @@ final class SetupPage {
 	 * @return void
 	 */
 	public function render(): void {
-		echo '<div class="wrap" style="max-width:720px;margin:40px auto;">';
-		echo '<h1 style="text-align:center;margin-bottom:8px;">' . esc_html__( 'Welcome to Stagify', 'stagify' ) . '</h1>';
-		echo '<p style="text-align:center;color:#50575e;margin-bottom:32px;">'
-			. esc_html__( 'How will this site use Stagify?', 'stagify' )
+		echo '<div class="wrap stagify-wrap stagify-setup">';
+
+		echo '<h1>' . esc_html__( 'Welcome to Stagify', 'stagify' ) . '</h1>';
+		echo '<p class="stagify-subtitle">'
+			. esc_html__( 'Sync content changes between staging and production.', 'stagify' )
+			. '</p>';
+		echo '<h2 class="stagify-setup-choose">' . esc_html__( 'What is this site?', 'stagify' ) . '</h2>';
+
+		$this->render_setup_form();
+
+		echo '<p class="stagify-setup-hint">'
+			. esc_html__( 'Install Stagify on both sites. We\'ll guide you through the rest.', 'stagify' )
 			. '</p>';
 
-		echo '<div style="display:flex;gap:24px;justify-content:center;">';
-		$this->render_sender_card();
-		$this->render_receiver_card();
-		echo '</div>';
 		echo '</div>';
 	}
 
 	/**
-	 * Render the Sender mode card.
+	 * Render the setup form with mode cards and submit button.
 	 *
 	 * @return void
 	 */
-	private function render_sender_card(): void {
+	private function render_setup_form(): void {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" id="stagify-setup-form">';
+		echo '<input type="hidden" name="action" value="stagify_save_mode">';
+		echo '<input type="hidden" name="stagify_mode" value="" id="stagify-mode-input">';
+		wp_nonce_field( 'stagify_save_mode' );
+
+		echo '<div class="stagify-setup-cards">';
 		$this->render_mode_card(
 			PluginMode::Sender,
-			__( 'Staging (Sender)', 'stagify' ),
-			__( 'This is a staging site. Track content and file changes, then push them to production.', 'stagify' ),
-			'dashicons-upload'
+			__( 'Staging', 'stagify' ),
+			__( 'I edit and test content here.', 'stagify' ),
+			'dashicons-edit'
 		);
-	}
-
-	/**
-	 * Render the Receiver mode card.
-	 *
-	 * @return void
-	 */
-	private function render_receiver_card(): void {
 		$this->render_mode_card(
 			PluginMode::Receiver,
-			__( 'Production (Receiver)', 'stagify' ),
-			__( 'This is a production site. Accept and apply changes pushed from a staging server.', 'stagify' ),
-			'dashicons-download'
+			__( 'Production', 'stagify' ),
+			__( 'This is my live website.', 'stagify' ),
+			'dashicons-admin-site-alt3'
 		);
+		echo '</div>';
+
+		echo '<div class="stagify-setup-submit" id="stagify-setup-submit" style="display:none;">';
+		printf(
+			'<button type="submit" class="button button-primary stagify-setup-go" id="stagify-setup-go">%s</button>',
+			esc_html__( 'Continue', 'stagify' )
+		);
+		echo '</div>';
+		echo '</form>';
 	}
 
 	/**
-	 * Render a single mode selection card.
+	 * Render a selectable mode card (no submit button inside).
 	 *
-	 * @param PluginMode $mode  The mode this card represents.
-	 * @param string     $title Card heading.
-	 * @param string     $desc  Card description text.
-	 * @param string     $icon  Dashicons class name.
+	 * @param PluginMode $mode  The mode enum value.
+	 * @param string     $title Card title.
+	 * @param string     $desc  Short description.
+	 * @param string     $icon  Dashicons class.
 	 * @return void
 	 */
 	private function render_mode_card( PluginMode $mode, string $title, string $desc, string $icon ): void {
 		printf(
-			'<form method="post" action="%s" style="flex:1;max-width:320px;">'
-			. '<div style="border:1px solid #c3c4c7;border-radius:8px;padding:28px 24px;text-align:center;background:#fff;">'
-			. '<span class="dashicons %s" style="font-size:48px;width:48px;height:48px;color:#2271b1;margin-bottom:16px;"></span>'
-			. '<h2 style="margin:0 0 8px;">%s</h2>'
-			. '<p style="color:#50575e;min-height:48px;">%s</p>'
-			. '<input type="hidden" name="action" value="stagify_save_mode">'
-			. '<input type="hidden" name="stagify_mode" value="%s">',
-			esc_url( admin_url( 'admin-post.php' ) ),
+			'<div class="stagify-setup-card-form">'
+			. '<div class="stagify-card stagify-card--selectable" data-mode="%s" data-label="%s">'
+			. '<span class="stagify-card-radio"></span>'
+			. '<span class="dashicons %s stagify-card-icon"></span>'
+			. '<h3>%s</h3>'
+			. '<p>%s</p>'
+			. '</div>'
+			. '</div>',
+			esc_attr( $mode->value ),
+			esc_attr(
+				sprintf(
+				/* translators: %s: mode name */
+					__( 'Continue as %s', 'stagify' ),
+					$title
+				) 
+			),
 			esc_attr( $icon ),
 			esc_html( $title ),
-			esc_html( $desc ),
-			esc_attr( $mode->value )
-		);
-		wp_nonce_field( 'stagify_save_mode' );
-		printf(
-			'<button type="submit" class="button button-primary button-hero" style="margin-top:16px;">%s</button>'
-			. '</div></form>',
-			esc_html__( 'Select', 'stagify' )
+			esc_html( $desc )
 		);
 	}
 }

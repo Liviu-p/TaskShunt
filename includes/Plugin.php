@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\Container;
 use Stagify\Admin\Actions\DiscardTaskAction;
 use Stagify\Admin\Actions\PushTaskAction;
@@ -17,10 +21,14 @@ use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
+use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
+use Stagify\Admin\Ajax\PreviewTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
+use Stagify\Admin\Ajax\RenameTaskAction;
 use Stagify\Admin\Ajax\TestConnectionAction;
 use Stagify\Admin\AdminMenu;
+use Stagify\Admin\DashboardWidget;
 use Stagify\Admin\Notices;
 use Stagify\Admin\Pages\ReceiverSettingsPage;
 use Stagify\Admin\Pages\SetupPage;
@@ -29,6 +37,14 @@ use Stagify\Domain\PluginMode;
 
 /**
  * Plugin singleton that bootstraps the application.
+ *
+ * Stagify operates in one of two modes:
+ *  - Sender (staging site): tracks content/file/plugin/theme changes, groups them
+ *    into "tasks", and pushes the task payload to a production site via HTTP.
+ *  - Receiver (production site): exposes a REST API that accepts incoming tasks
+ *    and applies the changes (create/update/delete posts, install plugins, etc.).
+ *
+ * On first activation, neither mode is set and the user sees a setup screen.
  */
 final class Plugin {
 
@@ -75,19 +91,23 @@ final class Plugin {
 	 * @return void
 	 */
 	public function boot(): void {
+		// The mode-switch action must always be available so users can change modes.
 		$this->register_mode_action();
 
 		$mode = SetupPage::get_mode();
 
+		// No mode selected yet — show the first-run setup screen.
 		if ( is_admin() && null === $mode ) {
 			$this->boot_setup();
 			return;
 		}
 
+		// Sender mode: enable change tracking (HookManager), admin UI, and push actions.
 		if ( PluginMode::Sender === $mode ) {
 			$this->boot_sender();
 		}
 
+		// Receiver mode: register the REST API endpoint that accepts pushes.
 		if ( PluginMode::Receiver === $mode ) {
 			$this->boot_receiver();
 		}
@@ -95,6 +115,7 @@ final class Plugin {
 
 	/**
 	 * Boot the first-run setup screen when no mode is selected.
+	 * Shows a full-page "Sender or Receiver?" choice, and redirects admins there until they pick one.
 	 *
 	 * @return void
 	 */
@@ -107,12 +128,18 @@ final class Plugin {
 	/**
 	 * Boot the sender (staging) feature set.
 	 *
+	 * HookManager — listens to WordPress events (post saves, plugin activations, etc.)
+	 *               and automatically records every change into the active task.
+	 * AdminMenu  — registers the Stagify menu pages (Tasks, Settings) and admin bar widget.
+	 * Actions    — form handlers for push, discard, retry, save server, etc.
+	 *
 	 * @return void
 	 */
 	private function boot_sender(): void {
 		$this->container->get( HookManager::class )->register();
 		if ( is_admin() ) {
 			$this->container->get( AdminMenu::class )->register();
+			$this->container->get( DashboardWidget::class )->register();
 			Notices::register();
 			$this->register_sender_actions();
 		}
@@ -120,6 +147,11 @@ final class Plugin {
 
 	/**
 	 * Boot the receiver (production) feature set.
+	 *
+	 * ReceiverApi          — registers the REST endpoint (POST /stagify/v1/receive) that accepts
+	 *                        incoming pushes and applies changes to this site.
+	 * ReceiverSettingsPage — admin page to manage the API key and view receiver status.
+	 * SetupPage            — kept available so the user can switch back to sender mode.
 	 *
 	 * @return void
 	 */
@@ -150,13 +182,17 @@ final class Plugin {
 	}
 
 	/**
-	 * Register admin_post and AJAX handlers for sender mode.
+	 * Register all admin_post and AJAX handlers for sender mode.
+	 *
+	 * Admin_post handlers process traditional form submissions (POST → redirect).
+	 * AJAX handlers process JavaScript-driven requests from the admin bar and task pages.
 	 *
 	 * @return void
 	 */
 	private function register_sender_actions(): void {
 		$this->register_task_actions();
 		$this->register_server_actions();
+		$this->register_ajax_actions();
 	}
 
 	/**
@@ -186,7 +222,7 @@ final class Plugin {
 	}
 
 	/**
-	 * Register server-related admin_post and AJAX handlers.
+	 * Register server-related admin_post handlers.
 	 *
 	 * @return void
 	 */
@@ -200,19 +236,7 @@ final class Plugin {
 		add_action(
 			'admin_post_stagify_delete_server',
 			function (): void {
-				check_admin_referer( 'stagify_delete_server' );
-
-				if ( ! current_user_can( 'manage_options' ) ) {
-					wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
-				}
-
-				$server_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
-				if ( $server_id > 0 ) {
-					$this->container->get( \Stagify\Contracts\ServerRepositoryInterface::class )->delete( $server_id );
-				}
-
-				wp_safe_redirect( admin_url( 'admin.php?page=stagify-settings' ) );
-				exit;
+				$this->container->get( \Stagify\Admin\Actions\DeleteServerAction::class )->handle();
 			}
 		);
 		add_action(
@@ -227,10 +251,34 @@ final class Plugin {
 				$this->container->get( TestConnectionAction::class )->handle();
 			}
 		);
+	}
+
+	/**
+	 * Register AJAX handlers for task management.
+	 *
+	 * @return void
+	 */
+	private function register_ajax_actions(): void {
+		$this->register_task_ajax_actions();
+		$this->register_utility_ajax_actions();
+	}
+
+	/**
+	 * Register AJAX handlers for task CRUD operations.
+	 *
+	 * @return void
+	 */
+	private function register_task_ajax_actions(): void {
 		add_action(
 			'wp_ajax_stagify_activate_task',
 			function (): void {
 				$this->container->get( ActivateTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_create_task',
+			function (): void {
+				$this->container->get( AjaxCreateTaskAction::class )->handle();
 			}
 		);
 		add_action(
@@ -239,10 +287,30 @@ final class Plugin {
 				$this->container->get( AjaxDiscardTaskAction::class )->handle();
 			}
 		);
+	}
+
+	/**
+	 * Register AJAX handlers for push, preview, and rename.
+	 *
+	 * @return void
+	 */
+	private function register_utility_ajax_actions(): void {
 		add_action(
 			'wp_ajax_stagify_push_task_ajax',
 			function (): void {
 				$this->container->get( AjaxPushTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_preview_task',
+			function (): void {
+				$this->container->get( PreviewTaskAction::class )->handle();
+			}
+		);
+		add_action(
+			'wp_ajax_stagify_rename_task',
+			function (): void {
+				$this->container->get( RenameTaskAction::class )->handle();
 			}
 		);
 	}

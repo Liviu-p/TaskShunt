@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Serializers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\PayloadSerializerInterface;
 
 /**
@@ -47,7 +51,8 @@ final class SerializerRegistry {
 		}
 
 		throw new \RuntimeException(
-			esc_html( sprintf( 'No serializer registered for object type "%s".', $object_type ) )
+			/* translators: %s: WordPress object type slug */
+			esc_html( sprintf( __( 'No serializer registered for object type "%s".', 'stagify' ), $object_type ) )
 		);
 	}
 }

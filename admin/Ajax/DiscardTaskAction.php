@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Ajax;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\TaskRepositoryInterface;
 use Stagify\Domain\TaskStatus;
@@ -59,7 +63,23 @@ final class DiscardTaskAction {
 		$this->task_repository->delete( $task_id );
 		$this->event_dispatcher->dispatch( new TaskDeleted( $task_id ) );
 
-		// Return remaining switchable tasks.
+		wp_send_json_success(
+			array(
+				'admin_bar_title' => '<span style="color:#a0a5aa;">' . esc_html__( 'No active task', 'stagify' ) . '</span>',
+				'items'           => array(),
+				'total_items'     => 0,
+				'task_id'         => 0,
+				'tasks'           => $this->get_pending_tasks(),
+			)
+		);
+	}
+
+	/**
+	 * Return an array of pending tasks for the admin bar switcher.
+	 *
+	 * @return array<int, array{id: int, title: string}>
+	 */
+	private function get_pending_tasks(): array {
 		$tasks = array();
 		foreach ( $this->task_repository->find_all() as $t ) {
 			if ( TaskStatus::Pending !== $t->status ) {
@@ -70,13 +90,6 @@ final class DiscardTaskAction {
 				'title' => $t->title,
 			);
 		}
-
-		wp_send_json_success( array(
-			'admin_bar_title' => '<span style="color:#a0a5aa;">' . esc_html__( 'No active task', 'stagify' ) . '</span>',
-			'items'           => array(),
-			'total_items'     => 0,
-			'task_id'         => 0,
-			'tasks'           => $tasks,
-		) );
+		return $tasks;
 	}
 }

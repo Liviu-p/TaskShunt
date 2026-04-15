@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Admin\Ajax;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\TaskItemRepositoryInterface;
 use Stagify\Contracts\TaskRepositoryInterface;
@@ -61,13 +65,15 @@ final class ActivateTaskAction {
 		$this->task_repository->set_active( $task_id );
 		$this->event_dispatcher->dispatch( new TaskActivated( $task ) );
 
-		wp_send_json_success( array(
-			'admin_bar_title' => $this->build_title( $task ),
-			'items'           => $this->build_item_list( $task_id ),
-			'total_items'     => $task->item_count,
-			'task_id'         => $task_id,
-			'tasks'           => $this->build_task_list( $task_id ),
-		) );
+		wp_send_json_success(
+			array(
+				'admin_bar_title' => $this->build_title( $task ),
+				'items'           => $this->build_item_list( $task_id ),
+				'total_items'     => $task->item_count,
+				'task_id'         => $task_id,
+				'tasks'           => $this->build_task_list( $task_id ),
+			) 
+		);
 	}
 
 	/**
@@ -83,7 +89,7 @@ final class ActivateTaskAction {
 			. ' '
 			. esc_html__( 'changes', 'stagify' );
 
-		return '<span style="color:#46b450;">' . $label . '</span>';
+		return '<span style="color:#ff7759;">' . $label . '</span>';
 	}
 
 	/**
@@ -115,11 +121,11 @@ final class ActivateTaskAction {
 	 */
 	private function format_item_label( TaskItem $item ): string {
 		$action_colors = array(
-			'create' => '#46b450',
-			'update' => '#f0b849',
-			'delete' => '#dc3232',
+			'create' => '#39594d',
+			'update' => '#ff7759',
+			'delete' => '#b20000',
 		);
-		$color = $action_colors[ $item->action->value ] ?? '#a0a5aa';
+		$color         = $action_colors[ $item->action->value ] ?? '#a0a5aa';
 
 		$icon = match ( $item->action->value ) {
 			'create' => '+',

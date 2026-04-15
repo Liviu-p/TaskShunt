@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Contracts\EventDispatcherInterface;
 use Stagify\Contracts\ServerRepositoryInterface;
 use Stagify\Contracts\TaskItemRepositoryInterface;
@@ -20,7 +24,13 @@ use Stagify\Events\TaskFailed;
 use Stagify\Events\TaskPushed;
 
 /**
- * Pushes a task and its items to the configured receiver server.
+ * Pushes a task to the production server. This is what happens when you click "Push now":
+ *
+ *  1. Loads the task and all its items from the database.
+ *  2. Serializes everything into a JSON payload.
+ *  3. Sends an HTTP POST to {server_url}/wp-json/stagify/v1/receive with the API key header.
+ *  4. Reads the receiver's response — checks if each item succeeded or failed.
+ *  5. Updates the task status to Pushed (success) or Failed (error).
  */
 final class PushService {
 
@@ -152,7 +162,8 @@ final class PushService {
 			return $this->fail( $task, $code, sprintf( __( 'HTTP %1$d: %2$s', 'stagify' ), $code, $message ) );
 		}
 
-		// Check the per-item results from the receiver.
+		// The receiver returns {success: bool, results: [{success, message}, ...]} for each item.
+		// Even with HTTP 200, individual items may have failed (e.g. a plugin not found on WordPress.org).
 		if ( is_array( $decoded ) && isset( $decoded['success'] ) && false === $decoded['success'] ) {
 			$failed_messages = array();
 			foreach ( ( $decoded['results'] ?? array() ) as $result ) {
@@ -181,6 +192,7 @@ final class PushService {
 	private function succeed( Task $task, int $code ): PushResult {
 		$this->task_repository->update_status( $task->id, TaskStatus::Pushed );
 		$this->task_repository->clear_active();
+		$this->log_push( $task->id, $code, __( 'Task pushed successfully.', 'stagify' ) );
 		$this->event_dispatcher->dispatch( new TaskPushed( $task, $code ) );
 
 		return new PushResult( true, $code, __( 'Task pushed successfully.', 'stagify' ) );
@@ -196,8 +208,31 @@ final class PushService {
 	 */
 	private function fail( Task $task, int $code, string $message ): PushResult {
 		$this->task_repository->update_status( $task->id, TaskStatus::Failed );
+		$this->log_push( $task->id, $code, $message );
 		$this->event_dispatcher->dispatch( new TaskFailed( $task, $message ) );
 
 		return new PushResult( false, $code, $message );
+	}
+
+	/**
+	 * Write a row to the push log table.
+	 *
+	 * @param int    $task_id Task ID.
+	 * @param int    $code    HTTP response code.
+	 * @param string $message Result message.
+	 * @return void
+	 */
+	private function log_push( int $task_id, int $code, string $message ): void {
+		global $wpdb;
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->prefix . 'stagify_push_log',
+			array(
+				'task_id'          => $task_id,
+				'pushed_at'        => current_time( 'mysql' ),
+				'http_code'        => $code,
+				'response_message' => $message,
+			),
+			array( '%d', '%s', '%d', '%s' )
+		);
 	}
 }

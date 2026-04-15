@@ -9,6 +9,17 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * The two sides of a Stagify deployment:
+ *  Sender   — the staging site that tracks changes and pushes them out.
+ *  Receiver — the production site that accepts pushes and applies the changes.
+ *
+ * Each WordPress install runs in exactly one mode (chosen on first activation).
+ */
 enum PluginMode: string {
 
 	case Sender   = 'sender';

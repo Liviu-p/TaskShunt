@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Represents a point-in-time snapshot of a single tracked file.
  *

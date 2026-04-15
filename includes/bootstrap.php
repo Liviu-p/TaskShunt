@@ -2,19 +2,26 @@
 /**
  * DI container bootstrap.
  *
- * Builds and returns a configured PHP-DI container with all
- * application services bound to their interfaces.
+ * Builds and returns a configured PHP-DI container with all application
+ * services bound to their interfaces. This is the central wiring point:
+ * every class the plugin needs is registered here so that constructor
+ * injection resolves dependencies automatically.
  *
  * @package Stagify
  */
 
 declare(strict_types=1);
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use DI\ContainerBuilder;
 use Stagify\Api\Handlers\ContentHandler;
 use Stagify\Api\Handlers\EnvironmentHandler;
 use Stagify\Api\Handlers\FileHandler;
 use Stagify\Api\ReceiverApi;
+use Stagify\Admin\Actions\DeleteServerAction;
 use Stagify\Admin\Actions\DiscardTaskAction;
 use Stagify\Admin\Actions\PushTaskAction;
 use Stagify\Admin\Actions\RetryTaskAction;
@@ -22,6 +29,7 @@ use Stagify\Admin\Actions\SaveModeAction;
 use Stagify\Admin\Actions\SaveServerAction;
 use Stagify\Admin\Actions\SaveTrackingAction;
 use Stagify\Admin\Ajax\ActivateTaskAction;
+use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
 use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
 use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
 use Stagify\Admin\Ajax\TestConnectionAction;
@@ -76,15 +84,17 @@ $builder->addDefinitions(
 
 		// Admin.
 		AdminMenu::class                       => \DI\autowire(),
+		DeleteServerAction::class              => \DI\autowire(),
 		DiscardTaskAction::class               => \DI\autowire(),
 		PushTaskAction::class                  => \DI\autowire(),
 		RetryTaskAction::class                 => \DI\autowire(),
 		SaveModeAction::class                  => \DI\autowire(),
 		SaveServerAction::class                => \DI\autowire(),
 		SaveTrackingAction::class              => \DI\autowire(),
-		ReceiverSettingsPage::class             => \DI\autowire(),
+		ReceiverSettingsPage::class            => \DI\autowire(),
 		SetupPage::class                       => \DI\autowire(),
 		ActivateTaskAction::class              => \DI\autowire(),
+		AjaxCreateTaskAction::class            => \DI\autowire(),
 		AjaxDiscardTaskAction::class           => \DI\autowire(),
 		AjaxPushTaskAction::class              => \DI\autowire(),
 		TestConnectionAction::class            => \DI\autowire(),

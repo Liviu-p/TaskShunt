@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Stagify\Api\Handlers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stagify\Domain\TaskAction;
 
 /**
@@ -66,6 +70,7 @@ final class ContentHandler {
 	 * @param string     $object_type Post type slug.
 	 * @param int        $object_id   Original post ID from the sender.
 	 * @param mixed      $payload     Decoded payload data.
+	 * @param string     $sender_url  Sender site URL for URL rewriting.
 	 * @return array{success: bool, message: string, object_id?: int}
 	 */
 	private function handle_upsert( TaskAction $action, string $object_type, int $object_id, mixed $payload, string $sender_url = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
@@ -74,7 +79,7 @@ final class ContentHandler {
 		}
 
 		// Attachments need special handling — sideload the file first.
-		if ( 'attachment' === $object_type && ! empty( $payload['attachment_url'] ) ) {
+		if ( 'attachment' === $object_type && ( ! empty( $payload['attachment_data'] ) || ! empty( $payload['attachment_url'] ) ) ) {
 			return $this->handle_attachment_upsert( $payload, $sender_url );
 		}
 
@@ -98,7 +103,8 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => sprintf( 'Post %s successfully.', null !== $local_id ? 'updated' : 'created' ),
+			/* translators: %s: action (created/updated) */
+			'message'   => sprintf( __( 'Post %s successfully.', 'stagify' ), null !== $local_id ? __( 'updated', 'stagify' ) : __( 'created', 'stagify' ) ),
 			'object_id' => $result,
 		);
 	}
@@ -110,66 +116,141 @@ final class ContentHandler {
 	 * @param string               $sender_url Sender site URL.
 	 * @return array{success: bool, message: string, object_id?: int}
 	 */
-	private function handle_attachment_upsert( array $payload, string $sender_url ): array {
+	private function handle_attachment_upsert( array $payload, string $sender_url ): array { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		$attachment_url = (string) $payload['attachment_url'];
-		$tmp_file       = download_url( $attachment_url );
-
-		if ( is_wp_error( $tmp_file ) ) {
-			return $this->error(
-				sprintf( 'Failed to download attachment: %s', $tmp_file->get_error_message() )
-			);
+		// Prefer embedded file data (works across networks/localhost); fall back to URL download.
+		if ( ! empty( $payload['attachment_data'] ) ) {
+			$download = $this->decode_attachment_data( $payload );
+		} else {
+			$download = $this->download_attachment( (string) $payload['attachment_url'] );
 		}
 
-		$filename   = basename( wp_parse_url( $attachment_url, PHP_URL_PATH ) ?? 'file' );
-		$file_array = array(
-			'name'     => sanitize_file_name( $filename ),
-			'tmp_name' => $tmp_file,
-		);
+		if ( isset( $download['error'] ) ) {
+			return $this->error( $download['error'] );
+		}
 
-		// Check if this attachment already exists locally.
 		$local_id = $this->find_local_post( $payload['post'], 'attachment' );
 
 		if ( null !== $local_id ) {
-			// Update existing: sideload the file and update the attachment record.
-			$upload = wp_handle_sideload( $file_array, array( 'test_form' => false ) );
+			return $this->update_existing_attachment( $local_id, $download['file_array'], $payload );
+		}
 
-			if ( isset( $upload['error'] ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
-				@unlink( $tmp_file );
-				return $this->error( sprintf( 'Sideload failed: %s', $upload['error'] ) );
-			}
+		return $this->create_new_attachment( $download['file_array'], $payload );
+	}
 
-			update_attached_file( $local_id, $upload['file'] );
-			wp_update_post( array(
+	/**
+	 * Download an attachment URL and prepare the file array for sideloading.
+	 *
+	 * @param string $attachment_url Remote URL.
+	 * @return array{file_array: array{name: string, tmp_name: string}}|array{error: string}
+	 */
+	private function download_attachment( string $attachment_url ): array {
+		$tmp_file = download_url( $attachment_url );
+
+		if ( is_wp_error( $tmp_file ) ) {
+			/* translators: %s: error message */
+			return array( 'error' => sprintf( __( 'Failed to download attachment: %s', 'stagify' ), $tmp_file->get_error_message() ) );
+		}
+
+		$filename = basename( wp_parse_url( $attachment_url, PHP_URL_PATH ) ?? 'file' );
+
+		return array(
+			'file_array' => array(
+				'name'     => sanitize_file_name( $filename ),
+				'tmp_name' => $tmp_file,
+			),
+		);
+	}
+
+	/**
+	 * Decode base64-encoded attachment data from the payload into a temp file.
+	 *
+	 * @param array<string, mixed> $payload Decoded payload data.
+	 * @return array{file_array: array{name: string, tmp_name: string}}|array{error: string}
+	 */
+	private function decode_attachment_data( array $payload ): array {
+		$data = base64_decode( (string) $payload['attachment_data'], true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+
+		if ( false === $data ) {
+			return array( 'error' => __( 'Failed to decode attachment data.', 'stagify' ) );
+		}
+
+		$tmp_file = wp_tempnam( $payload['attachment_filename'] ?? 'file' );
+
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+		if ( ! $wp_filesystem->put_contents( $tmp_file, $data ) ) {
+			return array( 'error' => __( 'Failed to write attachment to temp file.', 'stagify' ) );
+		}
+
+		$filename = sanitize_file_name( $payload['attachment_filename'] ?? 'file' );
+
+		return array(
+			'file_array' => array(
+				'name'     => $filename,
+				'tmp_name' => $tmp_file,
+			),
+		);
+	}
+
+	/**
+	 * Update an existing attachment with a new file.
+	 *
+	 * @param int                  $local_id   Local attachment post ID.
+	 * @param array<string, mixed> $file_array File array for sideloading.
+	 * @param array<string, mixed> $payload    Decoded payload data.
+	 * @return array{success: bool, message: string, object_id?: int}
+	 */
+	private function update_existing_attachment( int $local_id, array $file_array, array $payload ): array {
+		$upload = wp_handle_sideload( $file_array, array( 'test_form' => false ) );
+
+		if ( isset( $upload['error'] ) ) {
+			wp_delete_file( $file_array['tmp_name'] );
+			/* translators: %s: error message */
+			return $this->error( sprintf( __( 'Sideload failed: %s', 'stagify' ), $upload['error'] ) );
+		}
+
+		update_attached_file( $local_id, $upload['file'] );
+		wp_update_post(
+			array(
 				'ID'             => $local_id,
 				'post_title'     => $payload['post']['post_title'] ?? '',
 				'post_excerpt'   => $payload['post']['post_excerpt'] ?? '',
 				'post_mime_type' => $upload['type'],
 				'guid'           => $upload['url'],
-			) );
+			)
+		);
 
-			$metadata = wp_generate_attachment_metadata( $local_id, $upload['file'] );
-			wp_update_attachment_metadata( $local_id, $metadata );
+		$metadata = wp_generate_attachment_metadata( $local_id, $upload['file'] );
+		wp_update_attachment_metadata( $local_id, $metadata );
 
-			return array(
-				'success'   => true,
-				'message'   => 'Attachment updated successfully.',
-				'object_id' => $local_id,
-			);
-		}
+		return array(
+			'success'   => true,
+			'message'   => __( 'Attachment updated successfully.', 'stagify' ),
+			'object_id' => $local_id,
+		);
+	}
 
-		// New attachment: use media_handle_sideload which creates the post + file in one step.
+	/**
+	 * Create a new attachment via media_handle_sideload.
+	 *
+	 * @param array<string, mixed> $file_array File array for sideloading.
+	 * @param array<string, mixed> $payload    Decoded payload data.
+	 * @return array{success: bool, message: string, object_id?: int}
+	 */
+	private function create_new_attachment( array $file_array, array $payload ): array {
 		$post_id = media_handle_sideload( $file_array, 0, $payload['post']['post_title'] ?? '' );
 
 		if ( is_wp_error( $post_id ) ) {
 			return $this->error( $post_id->get_error_message() );
 		}
 
-		// Apply post fields that media_handle_sideload doesn't set.
 		$update_data = array( 'ID' => $post_id );
 		foreach ( array( 'post_name', 'post_excerpt', 'post_status' ) as $field ) {
 			if ( ! empty( $payload['post'][ $field ] ) ) {
@@ -182,7 +263,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => 'Attachment created successfully.',
+			'message'   => __( 'Attachment created successfully.', 'stagify' ),
 			'object_id' => $post_id,
 		);
 	}

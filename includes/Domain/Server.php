@@ -9,8 +9,15 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Represents a configured remote staging server.
+ * The remote server that this sender pushes tasks to (i.e. the production site).
+ *
+ * Only one server can be configured at a time. Stores the URL and API key needed
+ * to authenticate with the receiver's REST endpoint.
  *
  * Pure data object — no DB access. Hydrate via Server::from_db_row().
  */

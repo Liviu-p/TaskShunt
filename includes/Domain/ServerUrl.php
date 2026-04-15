@@ -9,9 +9,17 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Represents a validated server URL.
- * Construction fails fast if the URL is not syntactically valid.
+ * The production site's URL (e.g. "https://example.com").
+ *
+ * Used by PushService to build the full receive endpoint:
+ *   {ServerUrl}/wp-json/stagify/v1/receive
+ *
+ * Construction throws if the URL is not syntactically valid.
  */
 final readonly class ServerUrl extends ValueObject {
 
@@ -32,7 +40,8 @@ final readonly class ServerUrl extends ValueObject {
 	public function __construct( string $value ) {
 		if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
 			throw new \InvalidArgumentException(
-				esc_html( sprintf( '"%s" is not a valid URL.', $value ) )
+				/* translators: %s: URL value */
+				esc_html( sprintf( __( '"%s" is not a valid URL.', 'stagify' ), $value ) )
 			);
 		}
 
@@ -60,7 +69,7 @@ final readonly class ServerUrl extends ValueObject {
 	/**
 	 * Check equality with another ServerUrl.
 	 *
-	 * @param self $other The other value object to compare.
+	 * @param ValueObject $other The other value object to compare.
 	 * @return bool
 	 */
 	public function equals( ValueObject $other ): bool {

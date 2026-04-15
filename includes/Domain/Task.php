@@ -9,8 +9,16 @@ declare(strict_types=1);
 
 namespace Stagify\Domain;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Represents a staging task.
+ * A Task is like a "deployment batch" — a named container that groups related changes together.
+ *
+ * Example: you create a task called "Homepage redesign", activate it, then edit posts and
+ * upload images. Each change becomes a TaskItem inside this task. When you're ready,
+ * you push the whole task to production in one go.
  *
  * Pure data object — no DB access. Hydrate via Task::from_db_row().
  */
