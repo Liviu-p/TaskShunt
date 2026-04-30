@@ -2,33 +2,33 @@
 /**
  * Push service.
  *
- * @package Stagify\Services
+ * @package TaskShunt\Services
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Services;
+namespace TaskShunt\Services;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\PushResult;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
-use Stagify\Events\TaskFailed;
-use Stagify\Events\TaskPushed;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\PushResult;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
+use TaskShunt\Events\TaskFailed;
+use TaskShunt\Events\TaskPushed;
 
 /**
  * Pushes a task to the production server. This is what happens when you click "Push now":
  *
  *  1. Loads the task and all its items from the database.
  *  2. Serializes everything into a JSON payload.
- *  3. Sends an HTTP POST to the stagify/v1/receive REST route with the API key header.
+ *  3. Sends an HTTP POST to the taskshunt/v1/receive REST route with the API key header.
  *  4. Reads the receiver's response — checks if each item succeeded or failed.
  *  5. Updates the task status to Pushed (success) or Failed (error).
  */
@@ -37,7 +37,7 @@ final class PushService {
 	/**
 	 * Receive endpoint path appended to the server URL.
 	 */
-	private const RECEIVE_ROUTE = '/stagify/v1/receive';
+	private const RECEIVE_ROUTE = '/taskshunt/v1/receive';
 
 	/**
 	 * Request timeout in seconds.
@@ -69,13 +69,13 @@ final class PushService {
 		$task = $this->task_repository->find_by_id( $task_id );
 
 		if ( null === $task ) {
-			return new PushResult( false, 0, __( 'Task not found.', 'stagify' ) );
+			return new PushResult( false, 0, __( 'Task not found.', 'taskshunt' ) );
 		}
 
 		$server = $this->server_repository->find();
 
 		if ( null === $server ) {
-			return new PushResult( false, 0, __( 'No server configured.', 'stagify' ) );
+			return new PushResult( false, 0, __( 'No server configured.', 'taskshunt' ) );
 		}
 
 		$this->task_repository->update_status( $task_id, TaskStatus::Pushing );
@@ -121,7 +121,7 @@ final class PushService {
 	 * Send the HTTP POST request to the receiver.
 	 *
 	 * @param string $url     Full receive endpoint URL.
-	 * @param string $api_key API key for the X-Stagify-API-Key header.
+	 * @param string $api_key API key for the X-TaskShunt-API-Key header.
 	 * @param string $body    JSON-encoded request body.
 	 * @return array|\WP_Error wp_remote_post response or WP_Error.
 	 */
@@ -133,7 +133,7 @@ final class PushService {
 				'timeout' => self::TIMEOUT,
 				'headers' => array(
 					'Content-Type'      => 'application/json',
-					'X-Stagify-API-Key' => $api_key,
+					'X-TaskShunt-API-Key' => $api_key,
 				),
 				'body'    => $body,
 			)
@@ -159,7 +159,7 @@ final class PushService {
 		if ( $code < 200 || $code >= 300 ) {
 			$message = $decoded['message'] ?? '';
 			/* translators: 1: HTTP status code, 2: error message from server */
-			return $this->fail( $task, $code, sprintf( __( 'HTTP %1$d: %2$s', 'stagify' ), $code, $message ) );
+			return $this->fail( $task, $code, sprintf( __( 'HTTP %1$d: %2$s', 'taskshunt' ), $code, $message ) );
 		}
 
 		// The receiver returns {success: bool, results: [{success, message}, ...]} for each item.
@@ -174,7 +174,7 @@ final class PushService {
 
 			$message = ! empty( $failed_messages )
 				? implode( '; ', $failed_messages )
-				: __( 'One or more items failed on the receiver.', 'stagify' );
+				: __( 'One or more items failed on the receiver.', 'taskshunt' );
 
 			return $this->fail( $task, $code, $message );
 		}
@@ -192,10 +192,10 @@ final class PushService {
 	private function succeed( Task $task, int $code ): PushResult {
 		$this->task_repository->update_status( $task->id, TaskStatus::Pushed );
 		$this->task_repository->clear_active();
-		$this->log_push( $task->id, $code, __( 'Task pushed successfully.', 'stagify' ) );
+		$this->log_push( $task->id, $code, __( 'Task pushed successfully.', 'taskshunt' ) );
 		$this->event_dispatcher->dispatch( new TaskPushed( $task, $code ) );
 
-		return new PushResult( true, $code, __( 'Task pushed successfully.', 'stagify' ) );
+		return new PushResult( true, $code, __( 'Task pushed successfully.', 'taskshunt' ) );
 	}
 
 	/**
@@ -225,7 +225,7 @@ final class PushService {
 	private function log_push( int $task_id, int $code, string $message ): void {
 		global $wpdb;
 		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$wpdb->prefix . 'stagify_push_log',
+			$wpdb->prefix . 'taskshunt_push_log',
 			array(
 				'task_id'          => $task_id,
 				'pushed_at'        => current_time( 'mysql' ),

@@ -2,19 +2,19 @@
 /**
  * Task repository interface.
  *
- * @package Stagify\Contracts
+ * @package TaskShunt\Contracts
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Contracts;
+namespace TaskShunt\Contracts;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
 
 interface TaskRepositoryInterface {
 

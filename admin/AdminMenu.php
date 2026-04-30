@@ -2,30 +2,30 @@
 /**
  * Admin menu registration.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 use DI\Container;
-use Stagify\Admin\Pages\SettingsPage;
-use Stagify\Admin\Pages\TasksPage;
-use Stagify\Admin\TaskDetailPage;
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\TaskStatus;
-use Stagify\Events\TaskActivated;
+use TaskShunt\Admin\Pages\SettingsPage;
+use TaskShunt\Admin\Pages\TasksPage;
+use TaskShunt\Admin\TaskDetailPage;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\TaskStatus;
+use TaskShunt\Events\TaskActivated;
 
 /**
- * Registers the Stagify admin menu pages and admin bar node.
+ * Registers the TaskShunt admin menu pages and admin bar node.
  */
 final class AdminMenu {
 
@@ -97,17 +97,17 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private static function render_confirm_modal(): void {
-		echo '<div class="stagify-modal-overlay" id="stagify-modal-overlay">'
-			. '<div class="stagify-modal">'
-			. '<strong id="stagify-modal-title"></strong>'
-			. '<p id="stagify-modal-message"></p>'
-			. '<div id="stagify-modal-prompt" style="display:none;margin:12px 0 0;">'
-			. '<input type="text" id="stagify-modal-input" class="regular-text" style="width:100%;" maxlength="200">'
+		echo '<div class="taskshunt-modal-overlay" id="taskshunt-modal-overlay">'
+			. '<div class="taskshunt-modal">'
+			. '<strong id="taskshunt-modal-title"></strong>'
+			. '<p id="taskshunt-modal-message"></p>'
+			. '<div id="taskshunt-modal-prompt" style="display:none;margin:12px 0 0;">'
+			. '<input type="text" id="taskshunt-modal-input" class="regular-text" style="width:100%;" maxlength="200">'
 			. '</div>'
-			. '<div id="stagify-modal-preview" class="stagify-modal-preview"></div>'
-			. '<div class="stagify-modal-actions">'
-			. '<button type="button" class="button" id="stagify-modal-cancel">' . esc_html__( 'Cancel', 'stagify' ) . '</button>'
-			. '<button type="button" class="button button-primary" id="stagify-modal-ok"></button>'
+			. '<div id="taskshunt-modal-preview" class="taskshunt-modal-preview"></div>'
+			. '<div class="taskshunt-modal-actions">'
+			. '<button type="button" class="button" id="taskshunt-modal-cancel">' . esc_html__( 'Cancel', 'taskshunt' ) . '</button>'
+			. '<button type="button" class="button button-primary" id="taskshunt-modal-ok"></button>'
 			. '</div></div></div>';
 	}
 
@@ -117,14 +117,14 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private function register_menu_pages(): void {
-		$icon_svg = file_get_contents( STAGIFY_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$icon_svg = file_get_contents( TASKSHUNT_PLUGIN_DIR . 'assets/img/icon.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$icon_uri = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 		$hook = add_menu_page(
-			__( 'Stagify', 'stagify' ),
-			__( 'Stagify', 'stagify' ),
+			__( 'TaskShunt', 'taskshunt' ),
+			__( 'TaskShunt', 'taskshunt' ),
 			'manage_options',
-			'stagify',
+			'taskshunt',
 			function (): void {
 				$this->render_tasks_router();
 			},
@@ -150,11 +150,11 @@ final class AdminMenu {
 	 */
 	private function add_tasks_submenu(): void {
 		add_submenu_page(
-			'stagify',
-			__( 'Tasks', 'stagify' ),
-			__( 'Tasks', 'stagify' ),
+			'taskshunt',
+			__( 'Tasks', 'taskshunt' ),
+			__( 'Tasks', 'taskshunt' ),
 			'manage_options',
-			'stagify'
+			'taskshunt'
 		);
 	}
 
@@ -187,11 +187,11 @@ final class AdminMenu {
 	 */
 	private function add_settings_submenu(): void {
 		add_submenu_page(
-			'stagify',
-			__( 'Settings', 'stagify' ),
-			__( 'Settings', 'stagify' ),
+			'taskshunt',
+			__( 'Settings', 'taskshunt' ),
+			__( 'Settings', 'taskshunt' ),
 			'manage_options',
-			'stagify-settings',
+			'taskshunt-settings',
 			function (): void {
 				$this->container->get( SettingsPage::class )->render();
 			}
@@ -204,31 +204,31 @@ final class AdminMenu {
 	 * @return void
 	 */
 	private function enqueue_admin_bar_script(): void {
-		wp_enqueue_style( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css', array(), STAGIFY_VERSION );
+		wp_enqueue_style( 'taskshunt-admin', TASKSHUNT_PLUGIN_URL . 'assets/css/taskshunt-admin.css', array(), TASKSHUNT_VERSION );
 
-		wp_enqueue_script( 'stagify-admin', STAGIFY_PLUGIN_URL . 'assets/dist/admin.js', array(), STAGIFY_VERSION, true );
-		wp_enqueue_script( 'stagify-modal', STAGIFY_PLUGIN_URL . 'assets/dist/modal.js', array(), STAGIFY_VERSION, true );
+		wp_enqueue_script( 'taskshunt-admin', TASKSHUNT_PLUGIN_URL . 'assets/dist/admin.js', array(), TASKSHUNT_VERSION, true );
+		wp_enqueue_script( 'taskshunt-modal', TASKSHUNT_PLUGIN_URL . 'assets/dist/modal.js', array(), TASKSHUNT_VERSION, true );
 		wp_localize_script(
-			'stagify-modal',
-			'stagifyModal',
+			'taskshunt-modal',
+			'taskshuntModal',
 			array(
 				'actionLabels'   => array(
-					'create' => __( 'Create', 'stagify' ),
-					'update' => __( 'Update', 'stagify' ),
-					'delete' => __( 'Delete', 'stagify' ),
+					'create' => __( 'Create', 'taskshunt' ),
+					'update' => __( 'Update', 'taskshunt' ),
+					'delete' => __( 'Delete', 'taskshunt' ),
 				),
 				'typeLabels'     => array(
-					'content'     => __( 'Content', 'stagify' ),
-					'file'        => __( 'File', 'stagify' ),
-					'environment' => __( 'Plugin/Theme', 'stagify' ),
-					'database'    => __( 'Database', 'stagify' ),
+					'content'     => __( 'Content', 'taskshunt' ),
+					'file'        => __( 'File', 'taskshunt' ),
+					'environment' => __( 'Plugin/Theme', 'taskshunt' ),
+					'database'    => __( 'Database', 'taskshunt' ),
 				),
-				'loadingPreview' => __( 'Loading preview…', 'stagify' ),
+				'loadingPreview' => __( 'Loading preview…', 'taskshunt' ),
 			)
 		);
 
-		wp_enqueue_script( 'stagify-admin-bar', STAGIFY_PLUGIN_URL . 'assets/dist/admin-bar.js', array( 'stagify-modal' ), STAGIFY_VERSION, true );
-		wp_localize_script( 'stagify-admin-bar', 'stagifyAdminBar', $this->get_admin_bar_data() );
+		wp_enqueue_script( 'taskshunt-admin-bar', TASKSHUNT_PLUGIN_URL . 'assets/dist/admin-bar.js', array( 'taskshunt-modal' ), TASKSHUNT_VERSION, true );
+		wp_localize_script( 'taskshunt-admin-bar', 'taskshuntAdminBar', $this->get_admin_bar_data() );
 	}
 
 	/**
@@ -239,32 +239,32 @@ final class AdminMenu {
 	private function get_admin_bar_data(): array {
 		return array(
 			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-			'nonce'          => wp_create_nonce( 'stagify_activate_task' ),
-			'allTasksUrl'    => admin_url( 'admin.php?page=stagify' ),
-			'allTasksLabel'  => __( 'All tasks', 'stagify' ),
-			'pushLabel'      => __( 'Push now', 'stagify' ),
-			'noServerLabel'  => __( 'Configure server to push', 'stagify' ),
-			'settingsUrl'    => admin_url( 'admin.php?page=stagify-settings' ),
+			'nonce'          => wp_create_nonce( 'taskshunt_activate_task' ),
+			'allTasksUrl'    => admin_url( 'admin.php?page=taskshunt' ),
+			'allTasksLabel'  => __( 'All tasks', 'taskshunt' ),
+			'pushLabel'      => __( 'Push now', 'taskshunt' ),
+			'noServerLabel'  => __( 'Configure server to push', 'taskshunt' ),
+			'settingsUrl'    => admin_url( 'admin.php?page=taskshunt-settings' ),
 			'hasServer'      => null !== $this->server_repository->find(),
-			'discardLabel'   => __( 'Discard task', 'stagify' ),
-			'discardConfirm' => __( 'Discard this task?', 'stagify' ),
-			'discardMessage' => __( 'This will permanently delete this task and all its tracked changes. This action cannot be undone.', 'stagify' ),
-			'pushConfirm'    => __( 'Push this task to production?', 'stagify' ),
-			'pushMessage'    => __( 'All tracked changes in this task will be sent to your production site and applied automatically.', 'stagify' ),
-			'pushingLabel'   => __( 'Pushing…', 'stagify' ),
-			'pushedLabel'    => __( 'Pushed!', 'stagify' ),
-			'noActiveLabel'  => __( 'No active task', 'stagify' ),
+			'discardLabel'   => __( 'Discard task', 'taskshunt' ),
+			'discardConfirm' => __( 'Discard this task?', 'taskshunt' ),
+			'discardMessage' => __( 'This will permanently delete this task and all its tracked changes. This action cannot be undone.', 'taskshunt' ),
+			'pushConfirm'    => __( 'Push this task to production?', 'taskshunt' ),
+			'pushMessage'    => __( 'All tracked changes in this task will be sent to your production site and applied automatically.', 'taskshunt' ),
+			'pushingLabel'   => __( 'Pushing…', 'taskshunt' ),
+			'pushedLabel'    => __( 'Pushed!', 'taskshunt' ),
+			'noActiveLabel'  => __( 'No active task', 'taskshunt' ),
 			'activeTaskId'   => $this->task_repository->get_active_task_id() ?? 0,
-			'newTaskLabel'   => __( '+ New task', 'stagify' ),
-			'newTaskPrompt'  => __( 'Task name:', 'stagify' ),
-			'creatingLabel'  => __( 'Creating…', 'stagify' ),
+			'newTaskLabel'   => __( '+ New task', 'taskshunt' ),
+			'newTaskPrompt'  => __( 'Task name:', 'taskshunt' ),
+			'creatingLabel'  => __( 'Creating…', 'taskshunt' ),
 			/* translators: %d: number of additional changes not shown in admin bar */
-			'moreLabel'      => __( '+ %d more…', 'stagify' ),
+			'moreLabel'      => __( '+ %d more…', 'taskshunt' ),
 		);
 	}
 
 	/**
-	 * Handle the stagify_action=activate GET request.
+	 * Handle the taskshunt_action=activate GET request.
 	 *
 	 * Processes task activation from admin bar links and list table row actions,
 	 * then redirects back to the referring page.
@@ -273,15 +273,15 @@ final class AdminMenu {
 	 */
 	private function handle_activate_task(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = isset( $_GET['stagify_action'] ) ? sanitize_key( $_GET['stagify_action'] ) : '';
+		$action = isset( $_GET['taskshunt_action'] ) ? sanitize_key( $_GET['taskshunt_action'] ) : '';
 		if ( 'activate' !== $action ) {
 			return;
 		}
 
-		check_admin_referer( 'stagify_task_action' );
+		check_admin_referer( 'taskshunt_task_action' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
 		$task_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
@@ -296,19 +296,19 @@ final class AdminMenu {
 				'success',
 				sprintf(
 				/* translators: %s: task title */
-					__( 'Task "%s" is now active.', 'stagify' ),
+					__( 'Task "%s" is now active.', 'taskshunt' ),
 					$task->title
 				) 
 			);
 		}
 
 		$referer = wp_get_referer();
-		wp_safe_redirect( $referer ? remove_query_arg( array( 'stagify_action', 'task_id', '_wpnonce' ), $referer ) : admin_url( 'admin.php?page=stagify' ) );
+		wp_safe_redirect( $referer ? remove_query_arg( array( 'taskshunt_action', 'task_id', '_wpnonce' ), $referer ) : admin_url( 'admin.php?page=taskshunt' ) );
 		exit;
 	}
 
 	/**
-	 * Add the Stagify node and task-switcher children to the WP admin bar.
+	 * Add the TaskShunt node and task-switcher children to the WP admin bar.
 	 *
 	 * Structure:
 	 *  - Active task items (recent changes)
@@ -327,9 +327,9 @@ final class AdminMenu {
 
 		$wp_admin_bar->add_node(
 			array(
-				'id'    => 'stagify',
+				'id'    => 'taskshunt',
 				'title' => $this->get_admin_bar_title( $active_task ),
-				'href'  => admin_url( 'admin.php?page=stagify' ),
+				'href'  => admin_url( 'admin.php?page=taskshunt' ),
 			)
 		);
 
@@ -341,20 +341,20 @@ final class AdminMenu {
 
 		$wp_admin_bar->add_node(
 			array(
-				'parent' => 'stagify',
-				'id'     => 'stagify-new-task',
-				'title'  => esc_html__( '+ New task', 'stagify' ),
+				'parent' => 'taskshunt',
+				'id'     => 'taskshunt-new-task',
+				'title'  => esc_html__( '+ New task', 'taskshunt' ),
 				'href'   => '#',
-				'meta'   => array( 'class' => 'stagify-ab-new-task' ),
+				'meta'   => array( 'class' => 'taskshunt-ab-new-task' ),
 			)
 		);
 
 		$wp_admin_bar->add_node(
 			array(
-				'parent' => 'stagify',
-				'id'     => 'stagify-all-tasks',
-				'title'  => esc_html__( 'All tasks', 'stagify' ),
-				'href'   => admin_url( 'admin.php?page=stagify' ),
+				'parent' => 'taskshunt',
+				'id'     => 'taskshunt-all-tasks',
+				'title'  => esc_html__( 'All tasks', 'taskshunt' ),
+				'href'   => admin_url( 'admin.php?page=taskshunt' ),
 			)
 		);
 	}
@@ -363,10 +363,10 @@ final class AdminMenu {
 	 * Add nodes for the active task: recent items, push link, and view link.
 	 *
 	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
-	 * @param \Stagify\Domain\Task $task         The active task.
+	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
-	private function add_active_task_nodes( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
+	private function add_active_task_nodes( \WP_Admin_Bar $wp_admin_bar, \TaskShunt\Domain\Task $task ): void {
 		$this->add_item_nodes( $wp_admin_bar, $task );
 		$this->add_push_node( $wp_admin_bar, $task );
 		$this->add_discard_and_separator( $wp_admin_bar );
@@ -376,22 +376,22 @@ final class AdminMenu {
 	 * Add item preview nodes for the active task.
 	 *
 	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
-	 * @param \Stagify\Domain\Task $task         The active task.
+	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
-	private function add_item_nodes( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
+	private function add_item_nodes( \WP_Admin_Bar $wp_admin_bar, \TaskShunt\Domain\Task $task ): void {
 		$items    = $this->container->get( TaskItemRepositoryInterface::class )->find_by_task( $task->id );
 		$shown    = array_slice( $items, 0, 5 );
-		$task_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . $task->id );
+		$task_url = admin_url( 'admin.php?page=taskshunt&action=view&task_id=' . $task->id );
 
 		foreach ( $shown as $item ) {
 			$wp_admin_bar->add_node(
 				array(
-					'parent' => 'stagify',
-					'id'     => 'stagify-item-' . $item->id,
+					'parent' => 'taskshunt',
+					'id'     => 'taskshunt-item-' . $item->id,
 					'title'  => $this->format_item_label( $item ),
 					'href'   => $task_url,
-					'meta'   => array( 'class' => 'stagify-ab-item' ),
+					'meta'   => array( 'class' => 'taskshunt-ab-item' ),
 				)
 			);
 		}
@@ -399,15 +399,15 @@ final class AdminMenu {
 		if ( count( $items ) > 5 ) {
 			$wp_admin_bar->add_node(
 				array(
-					'parent' => 'stagify',
-					'id'     => 'stagify-items-more',
+					'parent' => 'taskshunt',
+					'id'     => 'taskshunt-items-more',
 					'title'  => sprintf(
 						/* translators: %d: number of additional changes not shown */
-						esc_html__( '+ %d more…', 'stagify' ),
+						esc_html__( '+ %d more…', 'taskshunt' ),
 						count( $items ) - 5
 					),
 					'href'   => $task_url,
-					'meta'   => array( 'class' => 'stagify-ab-item' ),
+					'meta'   => array( 'class' => 'taskshunt-ab-item' ),
 				)
 			);
 		}
@@ -417,10 +417,10 @@ final class AdminMenu {
 	 * Add the push or configure-server node.
 	 *
 	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
-	 * @param \Stagify\Domain\Task $task         The active task.
+	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
-	private function add_push_node( \WP_Admin_Bar $wp_admin_bar, \Stagify\Domain\Task $task ): void {
+	private function add_push_node( \WP_Admin_Bar $wp_admin_bar, \TaskShunt\Domain\Task $task ): void {
 		if ( 0 === $task->item_count ) {
 			return;
 		}
@@ -430,21 +430,21 @@ final class AdminMenu {
 		if ( null !== $server ) {
 			$wp_admin_bar->add_node(
 				array(
-					'parent' => 'stagify',
-					'id'     => 'stagify-push',
-					'title'  => esc_html__( 'Push now', 'stagify' ),
+					'parent' => 'taskshunt',
+					'id'     => 'taskshunt-push',
+					'title'  => esc_html__( 'Push now', 'taskshunt' ),
 					'href'   => '#',
-					'meta'   => array( 'class' => 'stagify-ab-push' ),
+					'meta'   => array( 'class' => 'taskshunt-ab-push' ),
 				)
 			);
 		} else {
 			$wp_admin_bar->add_node(
 				array(
-					'parent' => 'stagify',
-					'id'     => 'stagify-push',
-					'title'  => esc_html__( 'Configure server to push', 'stagify' ),
-					'href'   => admin_url( 'admin.php?page=stagify-settings' ),
-					'meta'   => array( 'class' => 'stagify-ab-no-server' ),
+					'parent' => 'taskshunt',
+					'id'     => 'taskshunt-push',
+					'title'  => esc_html__( 'Configure server to push', 'taskshunt' ),
+					'href'   => admin_url( 'admin.php?page=taskshunt-settings' ),
+					'meta'   => array( 'class' => 'taskshunt-ab-no-server' ),
 				)
 			);
 		}
@@ -459,20 +459,20 @@ final class AdminMenu {
 	private function add_discard_and_separator( \WP_Admin_Bar $wp_admin_bar ): void {
 		$wp_admin_bar->add_node(
 			array(
-				'parent' => 'stagify',
-				'id'     => 'stagify-discard',
-				'title'  => esc_html__( 'Discard task', 'stagify' ),
+				'parent' => 'taskshunt',
+				'id'     => 'taskshunt-discard',
+				'title'  => esc_html__( 'Discard task', 'taskshunt' ),
 				'href'   => '#',
-				'meta'   => array( 'class' => 'stagify-ab-discard' ),
+				'meta'   => array( 'class' => 'taskshunt-ab-discard' ),
 			)
 		);
 
 		$wp_admin_bar->add_node(
 			array(
-				'parent' => 'stagify',
-				'id'     => 'stagify-separator',
+				'parent' => 'taskshunt',
+				'id'     => 'taskshunt-separator',
 				'title'  => '',
-				'meta'   => array( 'class' => 'stagify-ab-separator' ),
+				'meta'   => array( 'class' => 'taskshunt-ab-separator' ),
 			)
 		);
 	}
@@ -480,10 +480,10 @@ final class AdminMenu {
 	/**
 	 * Format a task item into a compact label for the admin bar.
 	 *
-	 * @param \Stagify\Domain\TaskItem $item Task item.
+	 * @param \TaskShunt\Domain\TaskItem $item Task item.
 	 * @return string HTML label.
 	 */
-	private function format_item_label( \Stagify\Domain\TaskItem $item ): string {
+	private function format_item_label( \TaskShunt\Domain\TaskItem $item ): string {
 		$action_colors = array(
 			'create' => '#39594d',
 			'update' => '#ff7759',
@@ -499,14 +499,14 @@ final class AdminMenu {
 		};
 
 		$name = $item->object_type . ' #' . $item->object_id;
-		if ( \Stagify\Domain\TaskItemType::File === $item->type ) {
+		if ( \TaskShunt\Domain\TaskItemType::File === $item->type ) {
 			$name = basename( $item->object_id );
-		} elseif ( \Stagify\Domain\TaskItemType::Content === $item->type ) {
+		} elseif ( \TaskShunt\Domain\TaskItemType::Content === $item->type ) {
 			$post_title = get_the_title( (int) $item->object_id );
 			if ( '' !== $post_title ) {
 				$name = $post_title;
 			}
-		} elseif ( \Stagify\Domain\TaskItemType::Environment === $item->type ) {
+		} elseif ( \TaskShunt\Domain\TaskItemType::Environment === $item->type ) {
 			$item_payload = json_decode( $item->payload, true );
 			$name         = ( $item_payload['name'] ?? $item->object_id ) . ' (' . $item->object_type . ')';
 		}
@@ -537,18 +537,18 @@ final class AdminMenu {
 			$activate_url = wp_nonce_url(
 				add_query_arg(
 					array(
-						'stagify_action' => 'activate',
+						'taskshunt_action' => 'activate',
 						'task_id'        => $task->id,
 					),
-					admin_url( 'admin.php?page=stagify' )
+					admin_url( 'admin.php?page=taskshunt' )
 				),
-				'stagify_task_action'
+				'taskshunt_task_action'
 			);
 
 			$wp_admin_bar->add_node(
 				array(
-					'parent' => 'stagify',
-					'id'     => 'stagify-task-' . $task->id,
+					'parent' => 'taskshunt',
+					'id'     => 'taskshunt-task-' . $task->id,
 					'title'  => esc_html( $task->title ),
 					'href'   => $activate_url,
 				)
@@ -562,19 +562,19 @@ final class AdminMenu {
 	 * Shows "No active task" in muted gray when idle, or the task title
 	 * and item count in green when a task is active.
 	 *
-	 * @param \Stagify\Domain\Task|null $task The active task, or null.
+	 * @param \TaskShunt\Domain\Task|null $task The active task, or null.
 	 * @return string HTML string (dynamic parts are escaped).
 	 */
-	private function get_admin_bar_title( ?\Stagify\Domain\Task $task ): string {
+	private function get_admin_bar_title( ?\TaskShunt\Domain\Task $task ): string {
 		if ( null === $task ) {
-			return '<span style="color:#9e9e9e;">' . esc_html__( 'No active task', 'stagify' ) . '</span>';
+			return '<span style="color:#9e9e9e;">' . esc_html__( 'No active task', 'taskshunt' ) . '</span>';
 		}
 
 		$label = esc_html( $task->title )
 			. ' &middot; '
 			. esc_html( (string) $task->item_count )
 			. ' '
-			. esc_html__( 'changes', 'stagify' );
+			. esc_html__( 'changes', 'taskshunt' );
 
 		return '<span style="color:#ff7759;">' . $label . '</span>';
 	}

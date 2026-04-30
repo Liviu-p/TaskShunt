@@ -2,18 +2,18 @@
 /**
  * Content item handler for the receiver API.
  *
- * @package Stagify\Api\Handlers
+ * @package TaskShunt\Api\Handlers
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Api\Handlers;
+namespace TaskShunt\Api\Handlers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\TaskAction;
+use TaskShunt\Domain\TaskAction;
 
 /**
  * Applies a single content (post/page/CPT) change on the receiver site.
@@ -53,7 +53,7 @@ final class ContentHandler {
 	public function handle( TaskAction $action, string $object_type, int $object_id, mixed $payload, string $sender_url = '' ): array {
 		if ( ! post_type_exists( $object_type ) ) {
 			/* translators: %s: post type slug */
-			return $this->error( sprintf( __( 'Unknown post type: %s.', 'stagify' ), $object_type ) );
+			return $this->error( sprintf( __( 'Unknown post type: %s.', 'taskshunt' ), $object_type ) );
 		}
 
 		if ( TaskAction::Delete === $action ) {
@@ -75,7 +75,7 @@ final class ContentHandler {
 	 */
 	private function handle_upsert( TaskAction $action, string $object_type, int $object_id, mixed $payload, string $sender_url = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
 		if ( ! is_array( $payload ) || empty( $payload['post'] ) ) {
-			return $this->error( __( 'Payload must contain a post object.', 'stagify' ) );
+			return $this->error( __( 'Payload must contain a post object.', 'taskshunt' ) );
 		}
 
 		// Attachments need special handling — sideload the file first.
@@ -104,7 +104,7 @@ final class ContentHandler {
 		return array(
 			'success'   => true,
 			/* translators: %s: action (created/updated) */
-			'message'   => sprintf( __( 'Post %s successfully.', 'stagify' ), null !== $local_id ? __( 'updated', 'stagify' ) : __( 'created', 'stagify' ) ),
+			'message'   => sprintf( __( 'Post %s successfully.', 'taskshunt' ), null !== $local_id ? __( 'updated', 'taskshunt' ) : __( 'created', 'taskshunt' ) ),
 			'object_id' => $result,
 		);
 	}
@@ -152,7 +152,7 @@ final class ContentHandler {
 
 		if ( is_wp_error( $tmp_file ) ) {
 			/* translators: %s: error message */
-			return array( 'error' => sprintf( __( 'Failed to download attachment: %s', 'stagify' ), $tmp_file->get_error_message() ) );
+			return array( 'error' => sprintf( __( 'Failed to download attachment: %s', 'taskshunt' ), $tmp_file->get_error_message() ) );
 		}
 
 		$filename = basename( wp_parse_url( $attachment_url, PHP_URL_PATH ) ?? 'file' );
@@ -175,7 +175,7 @@ final class ContentHandler {
 		$data = base64_decode( (string) $payload['attachment_data'], true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 
 		if ( false === $data ) {
-			return array( 'error' => __( 'Failed to decode attachment data.', 'stagify' ) );
+			return array( 'error' => __( 'Failed to decode attachment data.', 'taskshunt' ) );
 		}
 
 		$tmp_file = wp_tempnam( $payload['attachment_filename'] ?? 'file' );
@@ -186,7 +186,7 @@ final class ContentHandler {
 			WP_Filesystem();
 		}
 		if ( ! $wp_filesystem->put_contents( $tmp_file, $data ) ) {
-			return array( 'error' => __( 'Failed to write attachment to temp file.', 'stagify' ) );
+			return array( 'error' => __( 'Failed to write attachment to temp file.', 'taskshunt' ) );
 		}
 
 		$filename = sanitize_file_name( $payload['attachment_filename'] ?? 'file' );
@@ -215,7 +215,7 @@ final class ContentHandler {
 		if ( isset( $upload['error'] ) ) {
 			wp_delete_file( $file_array['tmp_name'] );
 			/* translators: %s: error message */
-			return $this->error( sprintf( __( 'Sideload failed: %s', 'stagify' ), $upload['error'] ) );
+			return $this->error( sprintf( __( 'Sideload failed: %s', 'taskshunt' ), $upload['error'] ) );
 		}
 
 		update_attached_file( $local_id, $upload['file'] );
@@ -234,7 +234,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => __( 'Attachment updated successfully.', 'stagify' ),
+			'message'   => __( 'Attachment updated successfully.', 'taskshunt' ),
 			'object_id' => $local_id,
 		);
 	}
@@ -301,7 +301,7 @@ final class ContentHandler {
 
 		return array(
 			'success'   => true,
-			'message'   => __( 'Attachment created successfully.', 'stagify' ),
+			'message'   => __( 'Attachment created successfully.', 'taskshunt' ),
 			'object_id' => $post_id,
 		);
 	}
@@ -318,20 +318,20 @@ final class ContentHandler {
 		$slug = $this->extract_slug( $payload );
 
 		if ( null === $slug ) {
-			return $this->error( __( 'Payload must contain a post_name for delete.', 'stagify' ) );
+			return $this->error( __( 'Payload must contain a post_name for delete.', 'taskshunt' ) );
 		}
 
 		$local_id = $this->find_by_slug( $slug, $object_type );
 
 		if ( null === $local_id ) {
-			return $this->error( __( 'Post not found.', 'stagify' ) );
+			return $this->error( __( 'Post not found.', 'taskshunt' ) );
 		}
 
 		wp_delete_post( $local_id, true );
 
 		return array(
 			'success' => true,
-			'message' => __( 'Post deleted successfully.', 'stagify' ),
+			'message' => __( 'Post deleted successfully.', 'taskshunt' ),
 		);
 	}
 

@@ -2,24 +2,24 @@
 /**
  * Retry failed task action handler.
  *
- * @package Stagify\Admin\Actions
+ * @package TaskShunt\Admin\Actions
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Actions;
+namespace TaskShunt\Admin\Actions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Notices;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\TaskStatus;
-use Stagify\Services\PushService;
+use TaskShunt\Admin\Notices;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\TaskStatus;
+use TaskShunt\Services\PushService;
 
 /**
- * Handles the admin_post_stagify_retry_task request.
+ * Handles the admin_post_taskshunt_retry_task request.
  *
  * Resets a failed task to Pending, then immediately pushes it.
  */
@@ -42,17 +42,17 @@ final class RetryTaskAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_admin_referer( 'stagify_retry_task' );
+		check_admin_referer( 'taskshunt_retry_task' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
 		$task_id = isset( $_REQUEST['task_id'] ) ? (int) $_REQUEST['task_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $task_id <= 0 ) {
-			Notices::add( 'error', __( 'Invalid task ID.', 'stagify' ) );
-			wp_safe_redirect( admin_url( 'admin.php?page=stagify' ) );
+			Notices::add( 'error', __( 'Invalid task ID.', 'taskshunt' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=taskshunt' ) );
 			exit;
 		}
 
@@ -65,7 +65,7 @@ final class RetryTaskAction {
 			$result->message
 		);
 
-		wp_safe_redirect( admin_url( 'admin.php?page=stagify' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt' ) );
 		exit;
 	}
 }

@@ -2,7 +2,7 @@
 /**
  * Default test bootstrap — delegates to the unit test bootstrap.
  *
- * @package Stagify\Tests
+ * @package TaskShunt\Tests
  */
 
 declare(strict_types=1);

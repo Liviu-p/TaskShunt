@@ -2,22 +2,22 @@
 /**
  * Save plugin mode action handler.
  *
- * @package Stagify\Admin\Actions
+ * @package TaskShunt\Admin\Actions
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Actions;
+namespace TaskShunt\Admin\Actions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Pages\SetupPage;
-use Stagify\Domain\PluginMode;
+use TaskShunt\Admin\Pages\SetupPage;
+use TaskShunt\Domain\PluginMode;
 
 /**
- * Handles the admin_post_stagify_save_mode request.
+ * Handles the admin_post_taskshunt_save_mode request.
  *
  * Persists the chosen plugin mode and redirects to the main dashboard.
  */
@@ -29,23 +29,23 @@ final class SaveModeAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_admin_referer( 'stagify_save_mode' );
+		check_admin_referer( 'taskshunt_save_mode' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
-		$raw  = isset( $_POST['stagify_mode'] ) ? sanitize_key( $_POST['stagify_mode'] ) : '';
+		$raw  = isset( $_POST['taskshunt_mode'] ) ? sanitize_key( $_POST['taskshunt_mode'] ) : '';
 		$mode = PluginMode::tryFrom( $raw );
 
 		if ( null === $mode ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=stagify-setup' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=taskshunt-setup' ) );
 			exit;
 		}
 
 		update_option( SetupPage::OPTION_KEY, $mode->value );
 
-		wp_safe_redirect( admin_url( 'admin.php?page=stagify' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt' ) );
 		exit;
 	}
 }

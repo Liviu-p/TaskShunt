@@ -2,27 +2,27 @@
 /**
  * Hook manager.
  *
- * @package Stagify
+ * @package TaskShunt
  */
 
 declare(strict_types=1);
 
-namespace Stagify;
+namespace TaskShunt;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItemType;
-use Stagify\Events\ItemAdded;
-use Stagify\Events\TaskActivated;
-use Stagify\Serializers\SerializerRegistry;
-use Stagify\Services\FileScanner;
-use Stagify\Services\PostTypeRegistry;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItemType;
+use TaskShunt\Events\ItemAdded;
+use TaskShunt\Events\TaskActivated;
+use TaskShunt\Serializers\SerializerRegistry;
+use TaskShunt\Services\FileScanner;
+use TaskShunt\Services\PostTypeRegistry;
 
 /**
  * The "ears" of the sender — listens to WordPress events and records changes.
@@ -835,7 +835,7 @@ final class HookManager {
 
 		// Auto-create a task so changes are never lost.
 		/* translators: %s: date and time, e.g. "Apr 16, 2026 · 14:35" */
-		$title   = sprintf( __( 'Quick changes · %s', 'stagify' ), wp_date( 'M j, Y · H:i' ) );
+		$title   = sprintf( __( 'Quick changes · %s', 'taskshunt' ), wp_date( 'M j, Y · H:i' ) );
 		$task_id = $this->task_repository->create( $title );
 		$this->task_repository->set_active( $task_id );
 

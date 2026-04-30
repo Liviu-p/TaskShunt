@@ -2,21 +2,21 @@
 /**
  * Server repository.
  *
- * @package Stagify\Repository
+ * @package TaskShunt\Repository
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Repository;
+namespace TaskShunt\Repository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Domain\ApiKey;
-use Stagify\Domain\Server;
-use Stagify\Domain\ServerUrl;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Domain\ApiKey;
+use TaskShunt\Domain\Server;
+use TaskShunt\Domain\ServerUrl;
 
 /**
  * Persists and retrieves the single server configuration (1-server limit).
@@ -36,7 +36,7 @@ final class ServerRepository implements ServerRepositoryInterface {
 	 * @param \wpdb $wpdb WordPress database object.
 	 */
 	public function __construct( private readonly \wpdb $wpdb ) {
-		$this->table = $wpdb->prefix . 'stagify_servers';
+		$this->table = $wpdb->prefix . 'taskshunt_servers';
 	}
 
 	/**

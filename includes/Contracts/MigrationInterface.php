@@ -2,12 +2,12 @@
 /**
  * Migration interface.
  *
- * @package Stagify\Contracts
+ * @package TaskShunt\Contracts
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Contracts;
+namespace TaskShunt\Contracts;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

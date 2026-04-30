@@ -5,7 +5,7 @@
  * Loads the WordPress test library from the WP_TESTS_DIR environment variable.
  * Requires a local WordPress test installation (see wp-tests-config.php).
  *
- * @package Stagify\Tests
+ * @package TaskShunt\Tests
  */
 
 declare(strict_types=1);
@@ -27,7 +27,7 @@ require_once $wp_tests_dir . '/includes/functions.php'; // phpcs:ignore WordPres
 tests_add_filter(
 	'muplugins_loaded',
 	static function (): void {
-		require dirname( __DIR__ ) . '/stagify.php';
+		require dirname( __DIR__ ) . '/taskshunt.php';
 	}
 );
 

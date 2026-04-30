@@ -4,23 +4,23 @@
  *
  * Scans wp-content directories for file changes and records them as task items.
  *
- * @package Stagify\Services
+ * @package TaskShunt\Services
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Services;
+namespace TaskShunt\Services;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\FileSnapshotRepositoryInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\RelativePath;
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItemType;
+use TaskShunt\Contracts\FileSnapshotRepositoryInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\RelativePath;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItemType;
 
 /**
  * Watches for file changes in your theme and mu-plugins folders.
@@ -44,7 +44,7 @@ final class FileScanner {
 	/**
 	 * Transient key used to throttle scans.
 	 */
-	private const THROTTLE_KEY = 'stagify_file_scan_last';
+	private const THROTTLE_KEY = 'taskshunt_file_scan_last';
 
 	/**
 	 * Minimum seconds between scans.

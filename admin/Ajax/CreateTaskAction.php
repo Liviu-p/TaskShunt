@@ -2,26 +2,26 @@
 /**
  * Create task AJAX action.
  *
- * @package Stagify\Admin\Ajax
+ * @package TaskShunt\Admin\Ajax
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Ajax;
+namespace TaskShunt\Admin\Ajax;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
-use Stagify\Events\TaskActivated;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
+use TaskShunt\Events\TaskActivated;
 
 /**
- * Handles the wp_ajax_stagify_create_task request.
+ * Handles the wp_ajax_taskshunt_create_task request.
  *
  * Creates a new task, sets it active, and returns JSON with updated admin bar data.
  */
@@ -51,17 +51,17 @@ final class CreateTaskAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_ajax_referer( 'stagify_activate_task' );
+		check_ajax_referer( 'taskshunt_activate_task' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'stagify' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'taskshunt' ) ), 403 );
 		}
 
 		$raw_title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
 		$title     = substr( $raw_title, 0, self::MAX_TITLE_LENGTH );
 
 		if ( '' === $title ) {
-			wp_send_json_error( array( 'message' => __( 'Task title cannot be empty.', 'stagify' ) ), 400 );
+			wp_send_json_error( array( 'message' => __( 'Task title cannot be empty.', 'taskshunt' ) ), 400 );
 		}
 
 		$task_id = $this->task_repository->create( $title );
@@ -92,14 +92,14 @@ final class CreateTaskAction {
 	 */
 	private function build_title( ?Task $task ): string {
 		if ( null === $task ) {
-			return '<span style="color:#9e9e9e;">' . esc_html__( 'No active task', 'stagify' ) . '</span>';
+			return '<span style="color:#9e9e9e;">' . esc_html__( 'No active task', 'taskshunt' ) . '</span>';
 		}
 
 		$label = esc_html( $task->title )
 			. ' &middot; '
 			. esc_html( (string) $task->item_count )
 			. ' '
-			. esc_html__( 'changes', 'stagify' );
+			. esc_html__( 'changes', 'taskshunt' );
 
 		return '<span style="color:#ff7759;">' . $label . '</span>';
 	}

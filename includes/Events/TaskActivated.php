@@ -2,18 +2,18 @@
 /**
  * TaskActivated domain event.
  *
- * @package Stagify\Events
+ * @package TaskShunt\Events
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Events;
+namespace TaskShunt\Events;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\Task;
+use TaskShunt\Domain\Task;
 
 /**
  * Fired after a task is set as the active task.

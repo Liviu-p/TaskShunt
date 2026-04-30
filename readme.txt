@@ -1,5 +1,5 @@
-=== Stagify ===
-Contributors: stagify
+=== TaskShunt ===
+Contributors: taskshunt
 Tags: staging, deployment, content sync, migration, push
 Requires at least: 6.0
 Tested up to: 6.9
@@ -12,21 +12,21 @@ Staging-to-production content deployment for WordPress. Track changes on a stagi
 
 == Description ==
 
-Stagify lets you work freely on a staging site, then push only the changes you want to production — no full-site migrations, no database dumps, no downtime.
+TaskShunt lets you work freely on a staging site, then push only the changes you want to production — no full-site migrations, no database dumps, no downtime.
 
 It tracks every content and file change you make while a task is active, bundles them into a reviewable list, and deploys them to your production site over a secure REST API with a single click.
 
 = How It Works =
 
 1. **Activate a task** on your staging site to start recording changes.
-2. **Work normally** — create pages, upload images, edit theme files. Stagify captures it all.
+2. **Work normally** — create pages, upload images, edit theme files. TaskShunt captures it all.
 3. **Review the task** to see exactly what will be pushed.
-4. **Push to production** and Stagify applies each change on the live site.
+4. **Push to production** and TaskShunt applies each change on the live site.
 
 = What Gets Tracked =
 
 * **Content** — Posts, pages, media/attachments, and any registered custom post type. Creates, updates, and deletes are all captured.
-* **Files** — Theme and plugin file changes (PHP, CSS, JS, JSON, HTML, SVG, Twig). Stagify takes SHA-256 snapshots so only genuinely changed files are included.
+* **Files** — Theme and plugin file changes (PHP, CSS, JS, JSON, HTML, SVG, Twig). TaskShunt takes SHA-256 snapshots so only genuinely changed files are included.
 * **Environment** — Plugin and theme activations, deactivations, installs, updates, and deletions.
 
 = Key Features =
@@ -44,23 +44,23 @@ It tracks every content and file change you make while a task is active, bundles
 
 = Two Modes =
 
-Stagify operates in one of two modes, chosen on first activation:
+TaskShunt operates in one of two modes, chosen on first activation:
 
 * **Sender (Staging)** — Tracks changes and pushes them to the connected production site.
 * **Receiver (Production)** — Accepts incoming pushes and applies the changes.
 
 = Setup =
 
-1. On your **production site**, go to **Stagify > Settings** and select **Receiver** mode. Copy the generated API key.
-2. On your **staging site**, go to **Stagify > Settings** and select **Sender** mode. Enter the production site URL and API key.
+1. On your **production site**, go to **TaskShunt > Settings** and select **Receiver** mode. Copy the generated API key.
+2. On your **staging site**, go to **TaskShunt > Settings** and select **Sender** mode. Enter the production site URL and API key.
 3. Use the **Test Connection** button to verify the link.
 4. Create your first task and start tracking changes.
 
 == Frequently Asked Questions ==
 
-= Does Stagify copy my entire database? =
+= Does TaskShunt copy my entire database? =
 
-No. Stagify only tracks and pushes the specific changes you make while a task is active. It does not touch your full database.
+No. TaskShunt only tracks and pushes the specific changes you make while a task is active. It does not touch your full database.
 
 = Can I push from localhost to a live site? =
 

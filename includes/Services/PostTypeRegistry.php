@@ -2,19 +2,19 @@
 /**
  * Post type registry service.
  *
- * @package Stagify\Services
+ * @package TaskShunt\Services
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Services;
+namespace TaskShunt\Services;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Resolves the set of public post types Stagify should monitor.
+ * Resolves the set of public post types TaskShunt should monitor.
  *
  * Post types are loaded lazily on the first call to get_tracked() and cached
  * for the lifetime of the request.
@@ -24,7 +24,7 @@ final class PostTypeRegistry {
 	/**
 	 * WP option key storing the tracked post type slugs.
 	 */
-	public const OPTION_KEY = 'stagify_tracked_post_types';
+	public const OPTION_KEY = 'taskshunt_tracked_post_types';
 
 	/**
 	 * Cached list of tracked post type slugs, or null before first resolution.

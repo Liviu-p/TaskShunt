@@ -1,7 +1,7 @@
 {
-    "name": "stagify",
+    "name": "taskshunt",
     "version": "1.0.0",
-    "description": "Stagify WordPress Plugin",
+    "description": "TaskShunt WordPress Plugin",
     "private": true,
     "scripts": {
         "build": "webpack --mode production",

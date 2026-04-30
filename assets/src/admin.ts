@@ -1,8 +1,8 @@
 ( () => {
 	// New task form toggle (TasksPage).
-	const newTaskBtn = document.getElementById( 'stagify-new-task-toggle' );
-	const createForm = document.getElementById( 'stagify-create-form' );
-	const createCancel = document.getElementById( 'stagify-create-cancel' );
+	const newTaskBtn = document.getElementById( 'taskshunt-new-task-toggle' );
+	const createForm = document.getElementById( 'taskshunt-create-form' );
+	const createCancel = document.getElementById( 'taskshunt-create-cancel' );
 
 	if ( newTaskBtn && createForm && createCancel ) {
 		newTaskBtn.addEventListener( 'click', () => {
@@ -17,7 +17,7 @@
 	}
 
 	// Payload detail toggles (TaskDetailPage).
-	document.querySelectorAll< HTMLButtonElement >( '.stagify-payload-toggle' ).forEach( ( btn ) => {
+	document.querySelectorAll< HTMLButtonElement >( '.taskshunt-payload-toggle' ).forEach( ( btn ) => {
 		btn.addEventListener( 'click', () => {
 			const pre = document.getElementById( btn.dataset.target || '' );
 			if ( ! pre ) {
@@ -32,16 +32,16 @@
 	} );
 
 	// Setup wizard card selection (SetupPage).
-	const modeInput = document.getElementById( 'stagify-mode-input' ) as HTMLInputElement | null;
-	const setupSubmit = document.getElementById( 'stagify-setup-submit' );
-	const setupBtn = document.getElementById( 'stagify-setup-go' );
-	const cards = document.querySelectorAll< HTMLElement >( '.stagify-card--selectable' );
+	const modeInput = document.getElementById( 'taskshunt-mode-input' ) as HTMLInputElement | null;
+	const setupSubmit = document.getElementById( 'taskshunt-setup-submit' );
+	const setupBtn = document.getElementById( 'taskshunt-setup-go' );
+	const cards = document.querySelectorAll< HTMLElement >( '.taskshunt-card--selectable' );
 
 	if ( modeInput && setupSubmit && setupBtn && cards.length ) {
 		cards.forEach( ( card ) => {
 			card.addEventListener( 'click', () => {
-				cards.forEach( ( c ) => c.classList.remove( 'stagify-card--selected' ) );
-				card.classList.add( 'stagify-card--selected' );
+				cards.forEach( ( c ) => c.classList.remove( 'taskshunt-card--selected' ) );
+				card.classList.add( 'taskshunt-card--selected' );
 				modeInput.value = card.dataset.mode || '';
 				setupBtn.textContent = card.dataset.label || '';
 				setupSubmit.style.display = 'block';
@@ -50,8 +50,8 @@
 	}
 
 	// Copy API key to clipboard (ReceiverSettingsPage).
-	const copyBtn = document.getElementById( 'stagify-copy-key' );
-	const keyValue = document.getElementById( 'stagify-key-value' );
+	const copyBtn = document.getElementById( 'taskshunt-copy-key' );
+	const keyValue = document.getElementById( 'taskshunt-key-value' );
 
 	if ( copyBtn && keyValue ) {
 		copyBtn.addEventListener( 'click', () => {
@@ -92,7 +92,7 @@
 	}
 
 	// Show/hide API key toggle (ReceiverSettingsPage).
-	const toggleReceiverKey = document.getElementById( 'stagify-toggle-receiver-key' );
+	const toggleReceiverKey = document.getElementById( 'taskshunt-toggle-receiver-key' );
 
 	if ( toggleReceiverKey && keyValue ) {
 		toggleReceiverKey.addEventListener( 'click', () => {
@@ -110,9 +110,9 @@
 	}
 
 	// Mode switch confirmation (SettingsPage + ReceiverSettingsPage).
-	const switchBtn = document.getElementById( 'stagify-switch-mode-btn' );
-	const modePanel = document.getElementById( 'stagify-mode-confirm' );
-	const switchCancel = document.getElementById( 'stagify-switch-mode-cancel' );
+	const switchBtn = document.getElementById( 'taskshunt-switch-mode-btn' );
+	const modePanel = document.getElementById( 'taskshunt-mode-confirm' );
+	const switchCancel = document.getElementById( 'taskshunt-switch-mode-cancel' );
 
 	if ( switchBtn && modePanel && switchCancel ) {
 		switchBtn.addEventListener( 'click', () => {
@@ -126,8 +126,8 @@
 	}
 
 	// API key show/hide toggle (SettingsPage).
-	const toggleKeyBtn = document.getElementById( 'stagify-toggle-key' );
-	const keyInput = document.getElementById( 'stagify_api_key' ) as HTMLInputElement | null;
+	const toggleKeyBtn = document.getElementById( 'taskshunt-toggle-key' );
+	const keyInput = document.getElementById( 'taskshunt_api_key' ) as HTMLInputElement | null;
 
 	if ( toggleKeyBtn && keyInput ) {
 		toggleKeyBtn.addEventListener( 'click', () => {

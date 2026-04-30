@@ -8,7 +8,7 @@ module.exports = {
 		'admin-bar': './assets/src/admin-bar.ts',
 		modal: './assets/src/modal.ts',
 		settings: './assets/src/settings.ts',
-		'stagify-admin': './assets/scss/stagify-admin.scss',
+		'taskshunt-admin': './assets/scss/taskshunt-admin.scss',
 	},
 	output: {
 		path: path.resolve( __dirname, 'assets/dist' ),

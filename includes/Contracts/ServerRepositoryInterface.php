@@ -2,20 +2,20 @@
 /**
  * Server repository interface.
  *
- * @package Stagify\Contracts
+ * @package TaskShunt\Contracts
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Contracts;
+namespace TaskShunt\Contracts;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\ApiKey;
-use Stagify\Domain\Server;
-use Stagify\Domain\ServerUrl;
+use TaskShunt\Domain\ApiKey;
+use TaskShunt\Domain\Server;
+use TaskShunt\Domain\ServerUrl;
 
 interface ServerRepositoryInterface {
 

@@ -2,12 +2,12 @@
 /**
  * API key value object.
  *
- * @package Stagify\Domain
+ * @package TaskShunt\Domain
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Domain;
+namespace TaskShunt\Domain;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * A validated API key — the shared secret between sender and receiver.
  *
- * The sender includes this key in the X-Stagify-API-Key HTTP header when pushing.
+ * The sender includes this key in the X-TaskShunt-API-Key HTTP header when pushing.
  * The receiver compares it against its stored key to authenticate the request.
  * Must be at least 16 characters — construction throws if shorter.
  */

@@ -2,29 +2,29 @@
 /**
  * Task detail page.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItem;
-use Stagify\Domain\TaskItemType;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItem;
+use TaskShunt\Domain\TaskItemType;
+use TaskShunt\Domain\TaskStatus;
 
 /**
  * Renders the detail view for a single task and its items.
  *
- * Displayed when ?page=stagify&action=view&task_id=X.
+ * Displayed when ?page=taskshunt&action=view&task_id=X.
  */
 final class TaskDetailPage {
 
@@ -49,24 +49,24 @@ final class TaskDetailPage {
 		$task = $this->task_repository->find_by_id( $task_id );
 
 		if ( null === $task ) {
-			echo '<div class="wrap stagify-wrap"><p>' . esc_html__( 'Task not found.', 'stagify' ) . '</p></div>';
+			echo '<div class="wrap taskshunt-wrap"><p>' . esc_html__( 'Task not found.', 'taskshunt' ) . '</p></div>';
 			return;
 		}
 
 		$items           = $this->task_item_repository->find_by_task( $task_id );
 		$active_task_id  = $this->task_repository->get_active_task_id();
-		$base_action_url = wp_nonce_url( admin_url( 'admin.php?page=stagify' ), 'stagify_task_action' );
+		$base_action_url = wp_nonce_url( admin_url( 'admin.php?page=taskshunt' ), 'taskshunt_task_action' );
 
-		echo '<div class="wrap stagify-wrap">';
+		echo '<div class="wrap taskshunt-wrap">';
 		$this->render_header( $task, $active_task_id, $base_action_url );
 
 		if ( TaskStatus::Pushed === $task->status ) {
 			printf(
-				'<div class="stagify-readonly-banner">'
+				'<div class="taskshunt-readonly-banner">'
 				. '<span class="dashicons dashicons-yes-alt"></span>'
 				. '<span>%s</span>'
 				. '</div>',
-				esc_html__( 'This task has been pushed to production. Changes below are read-only.', 'stagify' )
+				esc_html__( 'This task has been pushed to production. Changes below are read-only.', 'taskshunt' )
 			);
 		}
 
@@ -84,22 +84,22 @@ final class TaskDetailPage {
 	 * @return void
 	 */
 	private function render_header( Task $task, ?int $active_task_id, string $base_action_url ): void {
-		$back_url  = admin_url( 'admin.php?page=stagify' );
+		$back_url  = admin_url( 'admin.php?page=taskshunt' );
 		$is_active = TaskStatus::Pending === $task->status && $task->id === $active_task_id;
 
-		echo '<a href="' . esc_url( $back_url ) . '" class="stagify-back-link">&larr; ' . esc_html__( 'Back to tasks', 'stagify' ) . '</a>';
+		echo '<a href="' . esc_url( $back_url ) . '" class="taskshunt-back-link">&larr; ' . esc_html__( 'Back to tasks', 'taskshunt' ) . '</a>';
 
-		echo '<div class="stagify-page-header" style="margin-top:8px;">';
+		echo '<div class="taskshunt-page-header" style="margin-top:8px;">';
 		echo '<h1>' . esc_html( $task->title );
 		if ( $is_active ) {
-			echo ' <span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
+			echo ' <span class="taskshunt-badge taskshunt-badge--active"><span class="taskshunt-pulse-dot"></span>' . esc_html__( 'Tracking', 'taskshunt' ) . '</span>';
 		} elseif ( TaskStatus::Pushed === $task->status ) {
-			echo ' <span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>';
+			echo ' <span class="taskshunt-badge taskshunt-badge--pushed">' . esc_html__( 'Pushed', 'taskshunt' ) . '</span>';
 		} elseif ( TaskStatus::Failed === $task->status ) {
-			echo ' <span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>';
+			echo ' <span class="taskshunt-badge taskshunt-badge--failed">' . esc_html__( 'Failed', 'taskshunt' ) . '</span>';
 		}
 		echo '</h1>';
-		echo '<div class="stagify-actions" style="margin:0;">';
+		echo '<div class="taskshunt-actions" style="margin:0;">';
 		$this->render_action_buttons( $task, $active_task_id, $base_action_url, $is_active );
 		echo '</div>';
 		echo '</div>';
@@ -108,15 +108,15 @@ final class TaskDetailPage {
 		$meta_parts[] = esc_html(
 			sprintf(
 				/* translators: %d: number of changes */
-				_n( '%d change', '%d changes', $task->item_count, 'stagify' ),
+				_n( '%d change', '%d changes', $task->item_count, 'taskshunt' ),
 				$task->item_count
 			)
 		);
 		if ( TaskStatus::Pushed === $task->status && null !== $task->pushed_at ) {
 			/* translators: %s: relative time like "2 hours ago" */
-			$meta_parts[] = esc_html( sprintf( __( 'Pushed %s', 'stagify' ), human_time_diff( $task->pushed_at->getTimestamp(), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'stagify' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$meta_parts[] = esc_html( sprintf( __( 'Pushed %s', 'taskshunt' ), human_time_diff( $task->pushed_at->getTimestamp(), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'taskshunt' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 		}
-		echo '<p class="stagify-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each part is pre-escaped via esc_html()
+		echo '<p class="taskshunt-meta">' . implode( ' &middot; ', $meta_parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each part is pre-escaped via esc_html()
 	}
 
 	/**
@@ -139,13 +139,13 @@ final class TaskDetailPage {
 				esc_url(
 					add_query_arg(
 						array(
-							'stagify_action' => 'activate',
+							'taskshunt_action' => 'activate',
 							'task_id'        => $task->id,
 						),
 						$base_action_url
 					)
 				),
-				esc_html__( 'Work on this', 'stagify' )
+				esc_html__( 'Work on this', 'taskshunt' )
 			);
 		}
 
@@ -172,9 +172,9 @@ final class TaskDetailPage {
 	 */
 	private function push_form( int $task_id ): string {
 		return sprintf(
-			'<a href="#" class="button button-primary stagify-push-btn" data-task-id="%d" data-cy="push-task">%s</a> ',
+			'<a href="#" class="button button-primary taskshunt-push-btn" data-task-id="%d" data-cy="push-task">%s</a> ',
 			$task_id,
-			esc_html__( 'Push this task', 'stagify' )
+			esc_html__( 'Push this task', 'taskshunt' )
 		);
 	}
 
@@ -193,7 +193,7 @@ final class TaskDetailPage {
 			return;
 		}
 
-		echo '<div class="stagify-detail-footer">';
+		echo '<div class="taskshunt-detail-footer">';
 		echo $this->discard_form( $task->id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</div>';
 	}
@@ -208,21 +208,21 @@ final class TaskDetailPage {
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'  => 'stagify_discard_task',
+					'action'  => 'taskshunt_discard_task',
 					'task_id' => $task_id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'stagify_discard_task'
+			'taskshunt_discard_task'
 		);
 
 		return sprintf(
-			'<a href="%s" class="button stagify-link-danger stagify-confirm-link" data-cy="discard-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
+			'<a href="%s" class="button taskshunt-link-danger taskshunt-confirm-link" data-cy="discard-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $url ),
-			esc_attr__( 'Discard task?', 'stagify' ),
-			esc_attr__( 'This will permanently delete this task and all its tracked changes.', 'stagify' ),
-			esc_attr__( 'Discard', 'stagify' ),
-			esc_html__( 'Discard task', 'stagify' )
+			esc_attr__( 'Discard task?', 'taskshunt' ),
+			esc_attr__( 'This will permanently delete this task and all its tracked changes.', 'taskshunt' ),
+			esc_attr__( 'Discard', 'taskshunt' ),
+			esc_html__( 'Discard task', 'taskshunt' )
 		);
 	}
 
@@ -236,21 +236,21 @@ final class TaskDetailPage {
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'  => 'stagify_retry_task',
+					'action'  => 'taskshunt_retry_task',
 					'task_id' => $task_id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'stagify_retry_task'
+			'taskshunt_retry_task'
 		);
 
 		return sprintf(
-			'<a href="%s" class="button stagify-link-warning stagify-confirm-link" data-cy="retry-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a> ',
+			'<a href="%s" class="button taskshunt-link-warning taskshunt-confirm-link" data-cy="retry-task" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a> ',
 			esc_url( $url ),
-			esc_attr__( 'Retry push?', 'stagify' ),
-			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
-			esc_attr__( 'Retry', 'stagify' ),
-			esc_html__( 'Retry', 'stagify' )
+			esc_attr__( 'Retry push?', 'taskshunt' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'taskshunt' ),
+			esc_attr__( 'Retry', 'taskshunt' ),
+			esc_html__( 'Retry', 'taskshunt' )
 		);
 	}
 
@@ -262,16 +262,16 @@ final class TaskDetailPage {
 	 */
 	private function render_items_table( array $items ): void {
 		if ( empty( $items ) ) {
-			echo '<div class="stagify-empty-state">';
-			printf( '<p><strong>%s</strong></p>', esc_html__( 'No changes recorded yet', 'stagify' ) );
-			printf( '<p>%s</p>', esc_html__( 'Just work on your site as usual — edit content, upload media, activate plugins, or switch themes. Every change is tracked automatically and will show up here.', 'stagify' ) );
+			echo '<div class="taskshunt-empty-state">';
+			printf( '<p><strong>%s</strong></p>', esc_html__( 'No changes recorded yet', 'taskshunt' ) );
+			printf( '<p>%s</p>', esc_html__( 'Just work on your site as usual — edit content, upload media, activate plugins, or switch themes. Every change is tracked automatically and will show up here.', 'taskshunt' ) );
 			echo '</div>';
 			return;
 		}
 
 		echo '<table class="wp-list-table widefat fixed striped" style="margin-top:16px;">';
 		echo '<thead><tr>';
-		foreach ( array( __( 'Type', 'stagify' ), __( 'Item', 'stagify' ), __( 'Action', 'stagify' ), '' ) as $col ) {
+		foreach ( array( __( 'Type', 'taskshunt' ), __( 'Item', 'taskshunt' ), __( 'Action', 'taskshunt' ), '' ) as $col ) {
 			echo '<th>' . esc_html( $col ) . '</th>';
 		}
 		echo '</tr></thead><tbody>';
@@ -338,15 +338,15 @@ final class TaskDetailPage {
 	 */
 	private function render_payload_cell( int $item_id, string $payload ): string {
 		$formatted = wp_json_encode( json_decode( $payload, true ), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-		$id        = 'stagify-payload-' . $item_id;
+		$id        = 'taskshunt-payload-' . $item_id;
 
 		return sprintf(
-			'<button type="button" class="button button-small stagify-payload-toggle" data-target="%s" data-label-show="%s" data-label-hide="%s">%s</button>'
-			. '<pre id="%s" class="stagify-payload-pre">%s</pre>',
+			'<button type="button" class="button button-small taskshunt-payload-toggle" data-target="%s" data-label-show="%s" data-label-hide="%s">%s</button>'
+			. '<pre id="%s" class="taskshunt-payload-pre">%s</pre>',
 			esc_attr( $id ),
-			esc_attr__( 'Details', 'stagify' ),
-			esc_attr__( 'Hide', 'stagify' ),
-			esc_html__( 'Details', 'stagify' ),
+			esc_attr__( 'Details', 'taskshunt' ),
+			esc_attr__( 'Hide', 'taskshunt' ),
+			esc_html__( 'Details', 'taskshunt' ),
 			esc_attr( $id ),
 			esc_html( false !== $formatted ? $formatted : $payload )
 		);
@@ -360,10 +360,10 @@ final class TaskDetailPage {
 	 */
 	private function type_badge( TaskItemType $type ): string {
 		return match ( $type ) {
-			TaskItemType::Content     => '<span class="stagify-badge stagify-badge--content">' . esc_html__( 'Content', 'stagify' ) . '</span>',
-			TaskItemType::File        => '<span class="stagify-badge stagify-badge--file">' . esc_html__( 'File', 'stagify' ) . '</span>',
-			TaskItemType::Database    => '<span class="stagify-badge stagify-badge--database">' . esc_html__( 'Database', 'stagify' ) . '</span>',
-			TaskItemType::Environment => '<span class="stagify-badge stagify-badge--environment">' . esc_html__( 'Environment', 'stagify' ) . '</span>',
+			TaskItemType::Content     => '<span class="taskshunt-badge taskshunt-badge--content">' . esc_html__( 'Content', 'taskshunt' ) . '</span>',
+			TaskItemType::File        => '<span class="taskshunt-badge taskshunt-badge--file">' . esc_html__( 'File', 'taskshunt' ) . '</span>',
+			TaskItemType::Database    => '<span class="taskshunt-badge taskshunt-badge--database">' . esc_html__( 'Database', 'taskshunt' ) . '</span>',
+			TaskItemType::Environment => '<span class="taskshunt-badge taskshunt-badge--environment">' . esc_html__( 'Environment', 'taskshunt' ) . '</span>',
 		};
 	}
 
@@ -375,9 +375,9 @@ final class TaskDetailPage {
 	 */
 	private function action_badge( TaskAction $action ): string {
 		return match ( $action ) {
-			TaskAction::Create => '<span class="stagify-action--create">' . esc_html__( 'Create', 'stagify' ) . '</span>',
-			TaskAction::Update => '<span class="stagify-action--update">' . esc_html__( 'Update', 'stagify' ) . '</span>',
-			TaskAction::Delete => '<span class="stagify-action--delete">' . esc_html__( 'Delete', 'stagify' ) . '</span>',
+			TaskAction::Create => '<span class="taskshunt-action--create">' . esc_html__( 'Create', 'taskshunt' ) . '</span>',
+			TaskAction::Update => '<span class="taskshunt-action--update">' . esc_html__( 'Update', 'taskshunt' ) . '</span>',
+			TaskAction::Delete => '<span class="taskshunt-action--delete">' . esc_html__( 'Delete', 'taskshunt' ) . '</span>',
 		};
 	}
 
@@ -389,10 +389,10 @@ final class TaskDetailPage {
 	 */
 	private function status_badge( TaskStatus $status ): string {
 		return match ( $status ) {
-			TaskStatus::Pending => '<span class="stagify-badge stagify-badge--pending">' . esc_html__( 'Ready', 'stagify' ) . '</span>',
-			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing…', 'stagify' ) . '</span>',
-			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Done', 'stagify' ) . '</span>',
-			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
+			TaskStatus::Pending => '<span class="taskshunt-badge taskshunt-badge--pending">' . esc_html__( 'Ready', 'taskshunt' ) . '</span>',
+			TaskStatus::Pushing => '<span class="taskshunt-badge taskshunt-badge--pushing">' . esc_html__( 'Pushing…', 'taskshunt' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="taskshunt-badge taskshunt-badge--pushed">' . esc_html__( 'Done', 'taskshunt' ) . '</span>',
+			TaskStatus::Failed  => '<span class="taskshunt-badge taskshunt-badge--failed">' . esc_html__( 'Failed', 'taskshunt' ) . '</span>',
 		};
 	}
 }

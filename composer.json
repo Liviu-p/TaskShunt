@@ -1,6 +1,6 @@
 {
-    "name": "stagify/stagify",
-    "description": "Stagify WordPress Plugin",
+    "name": "taskshunt/taskshunt",
+    "description": "TaskShunt WordPress Plugin",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "require": {
@@ -19,14 +19,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Stagify\\": "includes/",
-            "Stagify\\Admin\\": "admin/",
-            "Stagify\\Api\\": "api/"
+            "TaskShunt\\": "includes/",
+            "TaskShunt\\Admin\\": "admin/",
+            "TaskShunt\\Api\\": "api/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Stagify\\Tests\\": "tests/"
+            "TaskShunt\\Tests\\": "tests/"
         }
     },
     "config": {

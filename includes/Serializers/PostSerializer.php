@@ -2,18 +2,18 @@
 /**
  * Post payload serializer.
  *
- * @package Stagify\Serializers
+ * @package TaskShunt\Serializers
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Serializers;
+namespace TaskShunt\Serializers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\PayloadSerializerInterface;
+use TaskShunt\Contracts\PayloadSerializerInterface;
 
 /**
  * Serializes any post type into a JSON payload including all post meta.

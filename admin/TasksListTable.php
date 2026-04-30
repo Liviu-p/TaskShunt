@@ -2,20 +2,20 @@
 /**
  * Tasks list table.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -56,10 +56,10 @@ final class TasksListTable extends \WP_List_Table {
 	public function get_columns(): array {
 		return array(
 			'cb'         => '<input type="checkbox">',
-			'title'      => __( 'Title', 'stagify' ),
-			'status'     => __( 'Status', 'stagify' ),
-			'item_count' => __( 'Changes', 'stagify' ),
-			'created_at' => __( 'Activity', 'stagify' ),
+			'title'      => __( 'Title', 'taskshunt' ),
+			'status'     => __( 'Status', 'taskshunt' ),
+			'item_count' => __( 'Changes', 'taskshunt' ),
+			'created_at' => __( 'Activity', 'taskshunt' ),
 		);
 	}
 
@@ -70,7 +70,7 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	public function get_bulk_actions(): array {
 		return array(
-			'bulk_discard' => __( 'Discard selected', 'stagify' ),
+			'bulk_discard' => __( 'Discard selected', 'taskshunt' ),
 		);
 	}
 
@@ -102,7 +102,7 @@ final class TasksListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
+		$detail_url = admin_url( 'admin.php?page=taskshunt&action=view&task_id=' . (int) $item->id );
 		$title      = '<a href="' . esc_url( $detail_url ) . '"><strong>' . esc_html( $item->title ) . '</strong></a>';
 
 		return $title . $this->row_actions( $this->build_row_actions( $item ), true );
@@ -126,7 +126,7 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	public function column_item_count( $item ): string { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 		return sprintf(
-			'<span class="stagify-pill">%d</span>',
+			'<span class="taskshunt-pill">%d</span>',
 			(int) $item->item_count
 		);
 	}
@@ -146,9 +146,9 @@ final class TasksListTable extends \WP_List_Table {
 
 		$label = null !== $item->pushed_at
 			/* translators: %s: relative time */
-			? sprintf( __( 'Pushed %s ago', 'stagify' ), $diff )
+			? sprintf( __( 'Pushed %s ago', 'taskshunt' ), $diff )
 			/* translators: %s: relative time */
-			: sprintf( __( '%s ago', 'stagify' ), $diff );
+			: sprintf( __( '%s ago', 'taskshunt' ), $diff );
 
 		return sprintf(
 			'<span title="%s">%s</span>',
@@ -165,18 +165,18 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	private function build_row_actions( Task $item ): array {
 		$actions    = array();
-		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . (int) $item->id );
+		$detail_url = admin_url( 'admin.php?page=taskshunt&action=view&task_id=' . (int) $item->id );
 
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
-		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'stagify' ) . '</a>';
+		$actions['view'] = '<a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'View', 'taskshunt' ) . '</a>';
 
 		if ( TaskStatus::Pending === $item->status ) {
 			$actions['rename'] = sprintf(
-				'<a href="#" class="stagify-rename-trigger" data-task-id="%d" data-title="%s">%s</a>',
+				'<a href="#" class="taskshunt-rename-trigger" data-task-id="%d" data-title="%s">%s</a>',
 				(int) $item->id,
 				esc_attr( $item->title ),
-				esc_html__( 'Rename', 'stagify' )
+				esc_html__( 'Rename', 'taskshunt' )
 			);
 		}
 
@@ -185,7 +185,7 @@ final class TasksListTable extends \WP_List_Table {
 		}
 
 		if ( TaskStatus::Pending === $item->status && ! $is_active ) {
-			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Work on this', 'stagify' ) . '</a>';
+			$actions['activate'] = '<a href="' . esc_url( $this->activate_url( $item->id ) ) . '">' . esc_html__( 'Work on this', 'taskshunt' ) . '</a>';
 		}
 
 		if ( TaskStatus::Failed === $item->status ) {
@@ -193,7 +193,7 @@ final class TasksListTable extends \WP_List_Table {
 		}
 
 		if ( TaskStatus::Pushing !== $item->status ) {
-			$actions['discard'] = $this->discard_form( $item->id, esc_html__( 'Delete', 'stagify' ) );
+			$actions['discard'] = $this->discard_form( $item->id, esc_html__( 'Delete', 'taskshunt' ) );
 		}
 
 		return $actions;
@@ -207,9 +207,9 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	private function push_form( int $task_id ): string {
 		return sprintf(
-			'<a href="#" class="stagify-push-btn" data-task-id="%d">%s</a>',
+			'<a href="#" class="taskshunt-push-btn" data-task-id="%d">%s</a>',
 			$task_id,
-			esc_html__( 'Push', 'stagify' )
+			esc_html__( 'Push', 'taskshunt' )
 		);
 	}
 
@@ -223,21 +223,21 @@ final class TasksListTable extends \WP_List_Table {
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'  => 'stagify_retry_task',
+					'action'  => 'taskshunt_retry_task',
 					'task_id' => $task_id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'stagify_retry_task'
+			'taskshunt_retry_task'
 		);
 
 		return sprintf(
-			'<a href="%s" class="stagify-link-warning stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a>',
+			'<a href="%s" class="taskshunt-link-warning taskshunt-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s">%s</a>',
 			esc_url( $url ),
-			esc_attr__( 'Retry push?', 'stagify' ),
-			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'stagify' ),
-			esc_attr__( 'Retry', 'stagify' ),
-			esc_html__( 'Retry', 'stagify' )
+			esc_attr__( 'Retry push?', 'taskshunt' ),
+			esc_attr__( 'This will attempt to push all changes to production again. Make sure your server connection is working.', 'taskshunt' ),
+			esc_attr__( 'Retry', 'taskshunt' ),
+			esc_html__( 'Retry', 'taskshunt' )
 		);
 	}
 
@@ -250,26 +250,26 @@ final class TasksListTable extends \WP_List_Table {
 	 */
 	private function discard_form( int $task_id, string $label = '' ): string {
 		if ( '' === $label ) {
-			$label = esc_html__( 'Discard', 'stagify' );
+			$label = esc_html__( 'Discard', 'taskshunt' );
 		}
 
 		$url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'  => 'stagify_discard_task',
+					'action'  => 'taskshunt_discard_task',
 					'task_id' => $task_id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'stagify_discard_task'
+			'taskshunt_discard_task'
 		);
 
 		return sprintf(
-			'<a href="%s" class="stagify-link-danger stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
+			'<a href="%s" class="taskshunt-link-danger taskshunt-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $url ),
-			esc_attr__( 'Remove this task?', 'stagify' ),
-			esc_attr__( 'This task and its history will be permanently deleted.', 'stagify' ),
-			esc_attr__( 'Remove', 'stagify' ),
+			esc_attr__( 'Remove this task?', 'taskshunt' ),
+			esc_attr__( 'This task and its history will be permanently deleted.', 'taskshunt' ),
+			esc_attr__( 'Remove', 'taskshunt' ),
 			$label
 		);
 	}
@@ -283,11 +283,11 @@ final class TasksListTable extends \WP_List_Table {
 	private function activate_url( int $task_id ): string {
 		return add_query_arg(
 			array(
-				'stagify_action' => 'activate',
+				'taskshunt_action' => 'activate',
 				'task_id'        => $task_id,
-				'_wpnonce'       => wp_create_nonce( 'stagify_task_action' ),
+				'_wpnonce'       => wp_create_nonce( 'taskshunt_task_action' ),
 			),
-			admin_url( 'admin.php?page=stagify' )
+			admin_url( 'admin.php?page=taskshunt' )
 		);
 	}
 
@@ -301,14 +301,14 @@ final class TasksListTable extends \WP_List_Table {
 		$is_active = TaskStatus::Pending === $item->status && $item->id === $this->active_task_id;
 
 		if ( $is_active ) {
-			return '<span class="stagify-badge stagify-badge--active"><span class="stagify-pulse-dot"></span>' . esc_html__( 'Tracking', 'stagify' ) . '</span>';
+			return '<span class="taskshunt-badge taskshunt-badge--active"><span class="taskshunt-pulse-dot"></span>' . esc_html__( 'Tracking', 'taskshunt' ) . '</span>';
 		}
 
 		return match ( $item->status ) {
 			TaskStatus::Pending => '',
-			TaskStatus::Pushing => '<span class="stagify-badge stagify-badge--pushing">' . esc_html__( 'Pushing…', 'stagify' ) . '</span>',
-			TaskStatus::Pushed  => '<span class="stagify-badge stagify-badge--pushed">' . esc_html__( 'Pushed', 'stagify' ) . '</span>',
-			TaskStatus::Failed  => '<span class="stagify-badge stagify-badge--failed">' . esc_html__( 'Failed', 'stagify' ) . '</span>',
+			TaskStatus::Pushing => '<span class="taskshunt-badge taskshunt-badge--pushing">' . esc_html__( 'Pushing…', 'taskshunt' ) . '</span>',
+			TaskStatus::Pushed  => '<span class="taskshunt-badge taskshunt-badge--pushed">' . esc_html__( 'Pushed', 'taskshunt' ) . '</span>',
+			TaskStatus::Failed  => '<span class="taskshunt-badge taskshunt-badge--failed">' . esc_html__( 'Failed', 'taskshunt' ) . '</span>',
 		};
 	}
 
@@ -323,7 +323,7 @@ final class TasksListTable extends \WP_List_Table {
 	private function badge( string $label, string $color, bool $pulse = false ): string {
 		$dot = '';
 		if ( $pulse ) {
-			$dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:5px;animation:stagify-pulse 1.5s infinite;"></span>';
+			$dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:5px;animation:taskshunt-pulse 1.5s infinite;"></span>';
 		}
 
 		return sprintf(

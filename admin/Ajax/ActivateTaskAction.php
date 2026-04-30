@@ -2,28 +2,28 @@
 /**
  * Activate task AJAX action.
  *
- * @package Stagify\Admin\Ajax
+ * @package TaskShunt\Admin\Ajax
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Ajax;
+namespace TaskShunt\Admin\Ajax;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskItem;
-use Stagify\Domain\TaskItemType;
-use Stagify\Domain\TaskStatus;
-use Stagify\Events\TaskActivated;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskItem;
+use TaskShunt\Domain\TaskItemType;
+use TaskShunt\Domain\TaskStatus;
+use TaskShunt\Events\TaskActivated;
 
 /**
- * Handles the wp_ajax_stagify_activate_task request.
+ * Handles the wp_ajax_taskshunt_activate_task request.
  *
  * Switches the active task and returns JSON with updated admin bar data.
  */
@@ -48,17 +48,17 @@ final class ActivateTaskAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_ajax_referer( 'stagify_activate_task' );
+		check_ajax_referer( 'taskshunt_activate_task' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'stagify' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'taskshunt' ) ), 403 );
 		}
 
 		$task_id = isset( $_POST['task_id'] ) ? (int) $_POST['task_id'] : 0;
 		$task    = $task_id > 0 ? $this->task_repository->find_by_id( $task_id ) : null;
 
 		if ( null === $task || TaskStatus::Pending !== $task->status ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid task.', 'stagify' ) ), 400 );
+			wp_send_json_error( array( 'message' => __( 'Invalid task.', 'taskshunt' ) ), 400 );
 		}
 
 		$this->task_repository->clear_active();
@@ -87,7 +87,7 @@ final class ActivateTaskAction {
 			. ' &middot; '
 			. esc_html( (string) $task->item_count )
 			. ' '
-			. esc_html__( 'changes', 'stagify' );
+			. esc_html__( 'changes', 'taskshunt' );
 
 		return '<span style="color:#ff7759;">' . $label . '</span>';
 	}

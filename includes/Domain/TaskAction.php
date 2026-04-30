@@ -2,12 +2,12 @@
 /**
  * Task action enum.
  *
- * @package Stagify\Domain
+ * @package TaskShunt\Domain
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Domain;
+namespace TaskShunt\Domain;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

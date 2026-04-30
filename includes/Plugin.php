@@ -2,44 +2,44 @@
 /**
  * Main plugin class.
  *
- * @package Stagify
+ * @package TaskShunt
  */
 
 declare(strict_types=1);
 
-namespace Stagify;
+namespace TaskShunt;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 use DI\Container;
-use Stagify\Admin\Actions\DiscardTaskAction;
-use Stagify\Admin\Actions\PushTaskAction;
-use Stagify\Admin\Actions\RetryTaskAction;
-use Stagify\Admin\Actions\SaveModeAction;
-use Stagify\Admin\Actions\SaveServerAction;
-use Stagify\Admin\Actions\SaveCleanupAction;
-use Stagify\Admin\Actions\SaveTrackingAction;
-use Stagify\Admin\Ajax\ActivateTaskAction;
-use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
-use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
-use Stagify\Admin\Ajax\PreviewTaskAction;
-use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
-use Stagify\Admin\Ajax\RenameTaskAction;
-use Stagify\Admin\Ajax\TestConnectionAction;
-use Stagify\Admin\AdminMenu;
-use Stagify\Admin\DashboardWidget;
-use Stagify\Admin\Notices;
-use Stagify\Admin\Pages\ReceiverSettingsPage;
-use Stagify\Admin\Pages\SetupPage;
-use Stagify\Api\ReceiverApi;
-use Stagify\Domain\PluginMode;
+use TaskShunt\Admin\Actions\DiscardTaskAction;
+use TaskShunt\Admin\Actions\PushTaskAction;
+use TaskShunt\Admin\Actions\RetryTaskAction;
+use TaskShunt\Admin\Actions\SaveModeAction;
+use TaskShunt\Admin\Actions\SaveServerAction;
+use TaskShunt\Admin\Actions\SaveCleanupAction;
+use TaskShunt\Admin\Actions\SaveTrackingAction;
+use TaskShunt\Admin\Ajax\ActivateTaskAction;
+use TaskShunt\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
+use TaskShunt\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
+use TaskShunt\Admin\Ajax\PreviewTaskAction;
+use TaskShunt\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
+use TaskShunt\Admin\Ajax\RenameTaskAction;
+use TaskShunt\Admin\Ajax\TestConnectionAction;
+use TaskShunt\Admin\AdminMenu;
+use TaskShunt\Admin\DashboardWidget;
+use TaskShunt\Admin\Notices;
+use TaskShunt\Admin\Pages\ReceiverSettingsPage;
+use TaskShunt\Admin\Pages\SetupPage;
+use TaskShunt\Api\ReceiverApi;
+use TaskShunt\Domain\PluginMode;
 
 /**
  * Plugin singleton that bootstraps the application.
  *
- * Stagify operates in one of two modes:
+ * TaskShunt operates in one of two modes:
  *  - Sender (staging site): tracks content/file/plugin/theme changes, groups them
  *    into "tasks", and pushes the task payload to a production site via HTTP.
  *  - Receiver (production site): exposes a REST API that accepts incoming tasks
@@ -79,9 +79,9 @@ final class Plugin {
 	 */
 	public static function get_instance( Container $container ): self {
 		return self::$instance ??= new self(
-			version: STAGIFY_VERSION,
-			plugin_dir: STAGIFY_PLUGIN_DIR,
-			plugin_url: STAGIFY_PLUGIN_URL,
+			version: TASKSHUNT_VERSION,
+			plugin_dir: TASKSHUNT_PLUGIN_DIR,
+			plugin_url: TASKSHUNT_PLUGIN_URL,
 			container: $container,
 		);
 	}
@@ -131,7 +131,7 @@ final class Plugin {
 	 *
 	 * HookManager — listens to WordPress events (post saves, plugin activations, etc.)
 	 *               and automatically records every change into the active task.
-	 * AdminMenu  — registers the Stagify menu pages (Tasks, Settings) and admin bar widget.
+	 * AdminMenu  — registers the TaskShunt menu pages (Tasks, Settings) and admin bar widget.
 	 * Actions    — form handlers for push, discard, retry, save server, etc.
 	 *
 	 * @return void
@@ -149,7 +149,7 @@ final class Plugin {
 	/**
 	 * Boot the receiver (production) feature set.
 	 *
-	 * ReceiverApi          — registers the REST endpoint (POST /stagify/v1/receive) that accepts
+	 * ReceiverApi          — registers the REST endpoint (POST /taskshunt/v1/receive) that accepts
 	 *                        incoming pushes and applies changes to this site.
 	 * ReceiverSettingsPage — admin page to manage the API key and view receiver status.
 	 * SetupPage            — kept available so the user can switch back to sender mode.
@@ -175,7 +175,7 @@ final class Plugin {
 	 */
 	private function register_mode_action(): void {
 		add_action(
-			'admin_post_stagify_save_mode',
+			'admin_post_taskshunt_save_mode',
 			function (): void {
 				$this->container->get( SaveModeAction::class )->handle();
 			}
@@ -203,19 +203,19 @@ final class Plugin {
 	 */
 	private function register_task_actions(): void {
 		add_action(
-			'admin_post_stagify_discard_task',
+			'admin_post_taskshunt_discard_task',
 			function (): void {
 				$this->container->get( DiscardTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'admin_post_stagify_push_task',
+			'admin_post_taskshunt_push_task',
 			function (): void {
 				$this->container->get( PushTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'admin_post_stagify_retry_task',
+			'admin_post_taskshunt_retry_task',
 			function (): void {
 				$this->container->get( RetryTaskAction::class )->handle();
 			}
@@ -229,31 +229,31 @@ final class Plugin {
 	 */
 	private function register_server_actions(): void {
 		add_action(
-			'admin_post_stagify_save_server',
+			'admin_post_taskshunt_save_server',
 			function (): void {
 				$this->container->get( SaveServerAction::class )->handle();
 			}
 		);
 		add_action(
-			'admin_post_stagify_delete_server',
+			'admin_post_taskshunt_delete_server',
 			function (): void {
-				$this->container->get( \Stagify\Admin\Actions\DeleteServerAction::class )->handle();
+				$this->container->get( \TaskShunt\Admin\Actions\DeleteServerAction::class )->handle();
 			}
 		);
 		add_action(
-			'admin_post_stagify_save_tracking',
+			'admin_post_taskshunt_save_tracking',
 			function (): void {
 				$this->container->get( SaveTrackingAction::class )->handle();
 			}
 		);
 		add_action(
-			'admin_post_stagify_save_cleanup',
+			'admin_post_taskshunt_save_cleanup',
 			function (): void {
 				$this->container->get( SaveCleanupAction::class )->handle();
 			}
 		);
 		add_action(
-			'wp_ajax_stagify_test_connection',
+			'wp_ajax_taskshunt_test_connection',
 			function (): void {
 				$this->container->get( TestConnectionAction::class )->handle();
 			}
@@ -277,19 +277,19 @@ final class Plugin {
 	 */
 	private function register_task_ajax_actions(): void {
 		add_action(
-			'wp_ajax_stagify_activate_task',
+			'wp_ajax_taskshunt_activate_task',
 			function (): void {
 				$this->container->get( ActivateTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'wp_ajax_stagify_create_task',
+			'wp_ajax_taskshunt_create_task',
 			function (): void {
 				$this->container->get( AjaxCreateTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'wp_ajax_stagify_discard_task_ajax',
+			'wp_ajax_taskshunt_discard_task_ajax',
 			function (): void {
 				$this->container->get( AjaxDiscardTaskAction::class )->handle();
 			}
@@ -303,19 +303,19 @@ final class Plugin {
 	 */
 	private function register_utility_ajax_actions(): void {
 		add_action(
-			'wp_ajax_stagify_push_task_ajax',
+			'wp_ajax_taskshunt_push_task_ajax',
 			function (): void {
 				$this->container->get( AjaxPushTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'wp_ajax_stagify_preview_task',
+			'wp_ajax_taskshunt_preview_task',
 			function (): void {
 				$this->container->get( PreviewTaskAction::class )->handle();
 			}
 		);
 		add_action(
-			'wp_ajax_stagify_rename_task',
+			'wp_ajax_taskshunt_rename_task',
 			function (): void {
 				$this->container->get( RenameTaskAction::class )->handle();
 			}

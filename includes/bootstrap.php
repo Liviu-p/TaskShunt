@@ -7,7 +7,7 @@
  * every class the plugin needs is registered here so that constructor
  * injection resolves dependencies automatically.
  *
- * @package Stagify
+ * @package TaskShunt
  */
 
 declare(strict_types=1);
@@ -17,50 +17,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DI\ContainerBuilder;
-use Stagify\Api\Handlers\ContentHandler;
-use Stagify\Api\Handlers\EnvironmentHandler;
-use Stagify\Api\Handlers\FileHandler;
-use Stagify\Api\ReceiverApi;
-use Stagify\Admin\Actions\DeleteServerAction;
-use Stagify\Admin\Actions\DiscardTaskAction;
-use Stagify\Admin\Actions\PushTaskAction;
-use Stagify\Admin\Actions\RetryTaskAction;
-use Stagify\Admin\Actions\SaveModeAction;
-use Stagify\Admin\Actions\SaveServerAction;
-use Stagify\Admin\Actions\SaveCleanupAction;
-use Stagify\Admin\Actions\SaveTrackingAction;
-use Stagify\Admin\Ajax\ActivateTaskAction;
-use Stagify\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
-use Stagify\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
-use Stagify\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
-use Stagify\Admin\Ajax\TestConnectionAction;
-use Stagify\Admin\Pages\ReceiverSettingsPage;
-use Stagify\Admin\Pages\SetupPage;
-use Stagify\Admin\AdminMenu;
-use Stagify\Admin\Pages\SettingsPage;
-use Stagify\Admin\Pages\TasksPage;
-use Stagify\Admin\TaskDetailPage;
-use Stagify\Admin\TasksListTable;
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\FileSnapshotRepositoryInterface;
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Events\EventDispatcher;
-use Stagify\HookManager;
-use Stagify\Repository\FileSnapshotRepository;
-use Stagify\Repository\ServerRepository;
-use Stagify\Repository\TaskItemRepository;
-use Stagify\Repository\TaskRepository;
-use Stagify\Serializers\PostSerializer;
-use Stagify\Serializers\SerializerRegistry;
-use Stagify\Services\PostTypeRegistry;
-use Stagify\Services\FileScanner;
-use Stagify\Services\PushService;
+use TaskShunt\Api\Handlers\ContentHandler;
+use TaskShunt\Api\Handlers\EnvironmentHandler;
+use TaskShunt\Api\Handlers\FileHandler;
+use TaskShunt\Api\ReceiverApi;
+use TaskShunt\Admin\Actions\DeleteServerAction;
+use TaskShunt\Admin\Actions\DiscardTaskAction;
+use TaskShunt\Admin\Actions\PushTaskAction;
+use TaskShunt\Admin\Actions\RetryTaskAction;
+use TaskShunt\Admin\Actions\SaveModeAction;
+use TaskShunt\Admin\Actions\SaveServerAction;
+use TaskShunt\Admin\Actions\SaveCleanupAction;
+use TaskShunt\Admin\Actions\SaveTrackingAction;
+use TaskShunt\Admin\Ajax\ActivateTaskAction;
+use TaskShunt\Admin\Ajax\CreateTaskAction as AjaxCreateTaskAction;
+use TaskShunt\Admin\Ajax\DiscardTaskAction as AjaxDiscardTaskAction;
+use TaskShunt\Admin\Ajax\PushTaskAction as AjaxPushTaskAction;
+use TaskShunt\Admin\Ajax\TestConnectionAction;
+use TaskShunt\Admin\Pages\ReceiverSettingsPage;
+use TaskShunt\Admin\Pages\SetupPage;
+use TaskShunt\Admin\AdminMenu;
+use TaskShunt\Admin\Pages\SettingsPage;
+use TaskShunt\Admin\Pages\TasksPage;
+use TaskShunt\Admin\TaskDetailPage;
+use TaskShunt\Admin\TasksListTable;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\FileSnapshotRepositoryInterface;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Events\EventDispatcher;
+use TaskShunt\HookManager;
+use TaskShunt\Repository\FileSnapshotRepository;
+use TaskShunt\Repository\ServerRepository;
+use TaskShunt\Repository\TaskItemRepository;
+use TaskShunt\Repository\TaskRepository;
+use TaskShunt\Serializers\PostSerializer;
+use TaskShunt\Serializers\SerializerRegistry;
+use TaskShunt\Services\PostTypeRegistry;
+use TaskShunt\Services\FileScanner;
+use TaskShunt\Services\PushService;
 
-$stagify_builder = new ContainerBuilder();
+$taskshunt_builder = new ContainerBuilder();
 
-$stagify_builder->addDefinitions(
+$taskshunt_builder->addDefinitions(
 	array(
 		// WordPress global — provides wpdb to any class that type-hints \wpdb.
 		\wpdb::class                           => \DI\factory(
@@ -124,4 +124,4 @@ $stagify_builder->addDefinitions(
 	)
 );
 
-return $stagify_builder->build();
+return $taskshunt_builder->build();

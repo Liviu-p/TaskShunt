@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Build a clean zip of the Stagify plugin for WordPress.org submission.
+# Build a clean zip of the TaskShunt plugin for WordPress.org submission.
 # Usage: npm run zip
 #
 set -euo pipefail
 
-PLUGIN_SLUG="stagify"
+PLUGIN_SLUG="taskshunt"
 PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$(mktemp -d)"
 DEST="${BUILD_DIR}/${PLUGIN_SLUG}"
@@ -18,7 +18,7 @@ echo "=> Copying plugin files..."
 mkdir -p "$DEST"
 
 # Copy only what WordPress.org needs.
-cp "$PLUGIN_DIR/stagify.php"   "$DEST/"
+cp "$PLUGIN_DIR/taskshunt.php"   "$DEST/"
 cp "$PLUGIN_DIR/readme.txt"    "$DEST/"
 cp "$PLUGIN_DIR/composer.json" "$DEST/"
 cp -R "$PLUGIN_DIR/admin"      "$DEST/"

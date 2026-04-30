@@ -2,22 +2,22 @@
 /**
  * Task item repository.
  *
- * @package Stagify\Repository
+ * @package TaskShunt\Repository
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Repository;
+namespace TaskShunt\Repository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItem;
-use Stagify\Domain\TaskItemType;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItem;
+use TaskShunt\Domain\TaskItemType;
+use TaskShunt\Domain\TaskStatus;
 
 /**
  * Persists and retrieves task item entities using a custom DB table.
@@ -44,8 +44,8 @@ final class TaskItemRepository implements TaskItemRepositoryInterface {
 	 * @param \wpdb $wpdb WordPress database object.
 	 */
 	public function __construct( private readonly \wpdb $wpdb ) {
-		$this->table       = $wpdb->prefix . 'stagify_task_items';
-		$this->tasks_table = $wpdb->prefix . 'stagify_tasks';
+		$this->table       = $wpdb->prefix . 'taskshunt_task_items';
+		$this->tasks_table = $wpdb->prefix . 'taskshunt_tasks';
 	}
 
 	/**

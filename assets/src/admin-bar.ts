@@ -1,4 +1,4 @@
-interface StagifyAdminBarData {
+interface TaskShuntAdminBarData {
 	ajaxUrl: string;
 	nonce: string;
 	allTasksUrl: string;
@@ -45,24 +45,24 @@ interface AjaxResponse {
 	data: AjaxResponseData;
 }
 
-declare const stagifyAdminBar: StagifyAdminBarData;
+declare const taskshuntAdminBar: TaskShuntAdminBarData;
 
 ( () => {
-	const ROOT_ID = 'wp-admin-bar-stagify';
-	const TASK_PREFIX = 'wp-admin-bar-stagify-task-';
-	const ITEM_PREFIX = 'wp-admin-bar-stagify-item-';
-	const ALL_TASKS_ID = 'wp-admin-bar-stagify-all-tasks';
-	const SEPARATOR_ID = 'wp-admin-bar-stagify-separator';
-	const PUSH_ID = 'wp-admin-bar-stagify-push';
-	const DISCARD_ID = 'wp-admin-bar-stagify-discard';
-	const MORE_ID = 'wp-admin-bar-stagify-items-more';
-	const NEW_TASK_ID = 'wp-admin-bar-stagify-new-task';
+	const ROOT_ID = 'wp-admin-bar-taskshunt';
+	const TASK_PREFIX = 'wp-admin-bar-taskshunt-task-';
+	const ITEM_PREFIX = 'wp-admin-bar-taskshunt-item-';
+	const ALL_TASKS_ID = 'wp-admin-bar-taskshunt-all-tasks';
+	const SEPARATOR_ID = 'wp-admin-bar-taskshunt-separator';
+	const PUSH_ID = 'wp-admin-bar-taskshunt-push';
+	const DISCARD_ID = 'wp-admin-bar-taskshunt-discard';
+	const MORE_ID = 'wp-admin-bar-taskshunt-items-more';
+	const NEW_TASK_ID = 'wp-admin-bar-taskshunt-new-task';
 
 	let busy = false;
 	let activeTaskId = 0;
 
 	document.addEventListener( 'DOMContentLoaded', () => {
-		activeTaskId = Number( stagifyAdminBar.activeTaskId ) || 0;
+		activeTaskId = Number( taskshuntAdminBar.activeTaskId ) || 0;
 
 		initPagePushButtons();
 
@@ -77,15 +77,15 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 			// Handle push click.
 			if ( clicked.closest( `#${ PUSH_ID }` ) ) {
 				e.preventDefault();
-				if ( busy || ! activeTaskId || ! stagifyAdminBar.hasServer ) {
+				if ( busy || ! activeTaskId || ! taskshuntAdminBar.hasServer ) {
 					return;
 				}
-				const confirmFn = ( window as any ).stagifyConfirm;
+				const confirmFn = ( window as any ).taskshuntConfirm;
 				if ( confirmFn ) {
-					confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: activeTaskId } ).then( ( ok: boolean ) => {
+					confirmFn( { title: taskshuntAdminBar.pushConfirm, message: taskshuntAdminBar.pushMessage, confirm: taskshuntAdminBar.pushLabel, previewTaskId: activeTaskId } ).then( ( ok: boolean ) => {
 						if ( ok ) pushTask( activeTaskId, root );
 					} );
-				} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+				} else if ( window.confirm( taskshuntAdminBar.pushConfirm ) ) {
 					pushTask( activeTaskId, root );
 				}
 				return;
@@ -97,12 +97,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy || ! activeTaskId ) {
 					return;
 				}
-				const confirmFn = ( window as any ).stagifyConfirm;
+				const confirmFn = ( window as any ).taskshuntConfirm;
 				if ( confirmFn ) {
-					confirmFn( { title: stagifyAdminBar.discardConfirm, message: stagifyAdminBar.discardMessage, confirm: stagifyAdminBar.discardLabel, danger: true } ).then( ( ok: boolean ) => {
+					confirmFn( { title: taskshuntAdminBar.discardConfirm, message: taskshuntAdminBar.discardMessage, confirm: taskshuntAdminBar.discardLabel, danger: true } ).then( ( ok: boolean ) => {
 						if ( ok ) discardTask( activeTaskId, root );
 					} );
-				} else if ( window.confirm( stagifyAdminBar.discardConfirm ) ) {
+				} else if ( window.confirm( taskshuntAdminBar.discardConfirm ) ) {
 					discardTask( activeTaskId, root );
 				}
 				return;
@@ -114,12 +114,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				if ( busy ) {
 					return;
 				}
-				const confirmFn = ( window as any ).stagifyConfirm;
+				const confirmFn = ( window as any ).taskshuntConfirm;
 				if ( confirmFn ) {
 					confirmFn( {
-						title: stagifyAdminBar.newTaskLabel,
-						message: stagifyAdminBar.newTaskPrompt,
-						confirm: stagifyAdminBar.creatingLabel.replace( '…', '' ),
+						title: taskshuntAdminBar.newTaskLabel,
+						message: taskshuntAdminBar.newTaskPrompt,
+						confirm: taskshuntAdminBar.creatingLabel.replace( '…', '' ),
 						prompt: true,
 						promptPlaceholder: 'e.g. Homepage update',
 					} ).then( ( result: string | false ) => {
@@ -169,12 +169,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 		try {
 			const body = new URLSearchParams( {
-				action: 'stagify_activate_task',
-				_ajax_nonce: stagifyAdminBar.nonce,
+				action: 'taskshunt_activate_task',
+				_ajax_nonce: taskshuntAdminBar.nonce,
 				task_id: String( taskId ),
 			} );
 
-			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+			const response = await fetch( taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body,
@@ -205,17 +205,17 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 		const newTaskLink = root.querySelector< HTMLElement >( `#${ NEW_TASK_ID } .ab-item` );
 		const originalLabel = newTaskLink?.textContent ?? '';
 		if ( newTaskLink ) {
-			newTaskLink.textContent = stagifyAdminBar.creatingLabel;
+			newTaskLink.textContent = taskshuntAdminBar.creatingLabel;
 		}
 
 		try {
 			const body = new URLSearchParams( {
-				action: 'stagify_create_task',
-				_ajax_nonce: stagifyAdminBar.nonce,
+				action: 'taskshunt_create_task',
+				_ajax_nonce: taskshuntAdminBar.nonce,
 				title,
 			} );
 
-			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+			const response = await fetch( taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body,
@@ -251,17 +251,17 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 		const pushLink = root.querySelector< HTMLElement >( `#${ PUSH_ID } .ab-item` );
 		const originalLabel = pushLink?.innerHTML ?? '';
 		if ( pushLink ) {
-			pushLink.textContent = stagifyAdminBar.pushingLabel;
+			pushLink.textContent = taskshuntAdminBar.pushingLabel;
 		}
 
 		try {
 			const body = new URLSearchParams( {
-				action: 'stagify_push_task_ajax',
-				_ajax_nonce: stagifyAdminBar.nonce,
+				action: 'taskshunt_push_task_ajax',
+				_ajax_nonce: taskshuntAdminBar.nonce,
 				task_id: String( taskId ),
 			} );
 
-			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+			const response = await fetch( taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body,
@@ -271,20 +271,20 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 			if ( pushLink ) {
 				if ( data.success ) {
-					pushLink.textContent = stagifyAdminBar.pushedLabel;
+					pushLink.textContent = taskshuntAdminBar.pushedLabel;
 					pushLink.style.color = '#39594d';
 
 					// Update the title to show "Pushed" status.
 					const titleLink = root.querySelector< HTMLElement >( ':scope > .ab-item' );
 					if ( titleLink ) {
-						titleLink.innerHTML = '<span style="color:#9e9e9e;">' + stagifyAdminBar.pushedLabel + '</span>';
+						titleLink.innerHTML = '<span style="color:#9e9e9e;">' + taskshuntAdminBar.pushedLabel + '</span>';
 					}
 
 					// Remove discard button after successful push.
 					document.getElementById( DISCARD_ID )?.remove();
 					activeTaskId = 0;
 
-					showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+					showPageBanner( 'success', data.data?.message ?? taskshuntAdminBar.pushedLabel );
 					triggerFirstTimeConfetti( 'push' );
 				} else {
 					pushLink.innerHTML = originalLabel;
@@ -309,12 +309,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 		try {
 			const body = new URLSearchParams( {
-				action: 'stagify_discard_task_ajax',
-				_ajax_nonce: stagifyAdminBar.nonce,
+				action: 'taskshunt_discard_task_ajax',
+				_ajax_nonce: taskshuntAdminBar.nonce,
 				task_id: String( taskId ),
 			} );
 
-			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+			const response = await fetch( taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body,
@@ -359,39 +359,39 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 		const ref = allTasksNode ?? null;
 		const hasActiveTask = data.task_id > 0;
-		const viewUrl = `${ stagifyAdminBar.allTasksUrl }&action=view&task_id=${ data.task_id }`;
+		const viewUrl = `${ taskshuntAdminBar.allTasksUrl }&action=view&task_id=${ data.task_id }`;
 
 		if ( hasActiveTask ) {
 			// Active task items.
 			for ( const item of data.items ) {
 				submenu.insertBefore(
-					makeNode( `${ ITEM_PREFIX }${ item.id }`, item.label, viewUrl, 'stagify-ab-item' ),
+					makeNode( `${ ITEM_PREFIX }${ item.id }`, item.label, viewUrl, 'taskshunt-ab-item' ),
 					ref
 				);
 			}
 
 			// "+ N more…" link.
 			if ( data.total_items > 5 ) {
-				const moreLabel = stagifyAdminBar.moreLabel.replace(
+				const moreLabel = taskshuntAdminBar.moreLabel.replace(
 					'%d',
 					String( data.total_items - 5 )
 				);
 				submenu.insertBefore(
-					makeNode( MORE_ID, moreLabel, viewUrl, 'stagify-ab-item' ),
+					makeNode( MORE_ID, moreLabel, viewUrl, 'taskshunt-ab-item' ),
 					ref
 				);
 			}
 
 			// Push button or server config message.
 			if ( data.total_items > 0 ) {
-				if ( stagifyAdminBar.hasServer ) {
+				if ( taskshuntAdminBar.hasServer ) {
 					submenu.insertBefore(
-						makeNode( PUSH_ID, stagifyAdminBar.pushLabel, '#', 'stagify-ab-push' ),
+						makeNode( PUSH_ID, taskshuntAdminBar.pushLabel, '#', 'taskshunt-ab-push' ),
 						ref
 					);
 				} else {
 					submenu.insertBefore(
-						makeNode( PUSH_ID, stagifyAdminBar.noServerLabel, stagifyAdminBar.settingsUrl, 'stagify-ab-no-server' ),
+						makeNode( PUSH_ID, taskshuntAdminBar.noServerLabel, taskshuntAdminBar.settingsUrl, 'taskshunt-ab-no-server' ),
 						ref
 					);
 				}
@@ -399,13 +399,13 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 			// Discard button.
 			submenu.insertBefore(
-				makeNode( DISCARD_ID, stagifyAdminBar.discardLabel, '#', 'stagify-ab-discard' ),
+				makeNode( DISCARD_ID, taskshuntAdminBar.discardLabel, '#', 'taskshunt-ab-discard' ),
 				ref
 			);
 		}
 
 		// Separator.
-		submenu.insertBefore( makeNode( SEPARATOR_ID, '', '#', 'stagify-ab-separator' ), ref );
+		submenu.insertBefore( makeNode( SEPARATOR_ID, '', '#', 'taskshunt-ab-separator' ), ref );
 
 		// Switch-to tasks.
 		for ( const task of data.tasks ) {
@@ -417,7 +417,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 		// "+ New task" button.
 		submenu.insertBefore(
-			makeNode( NEW_TASK_ID, stagifyAdminBar.newTaskLabel, '#', 'stagify-ab-new-task' ),
+			makeNode( NEW_TASK_ID, taskshuntAdminBar.newTaskLabel, '#', 'taskshunt-ab-new-task' ),
 			ref
 		);
 	}
@@ -444,11 +444,11 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 	}
 
 	/**
-	 * Intercept all .stagify-push-btn clicks on the page (task list + detail page).
+	 * Intercept all .taskshunt-push-btn clicks on the page (task list + detail page).
 	 */
 	function initPagePushButtons(): void {
 		document.addEventListener( 'click', ( e: Event ) => {
-			const btn = ( e.target as HTMLElement ).closest< HTMLElement >( '.stagify-push-btn' );
+			const btn = ( e.target as HTMLElement ).closest< HTMLElement >( '.taskshunt-push-btn' );
 			if ( ! btn ) {
 				return;
 			}
@@ -464,24 +464,24 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				return;
 			}
 
-			const confirmFn = ( window as any ).stagifyConfirm;
+			const confirmFn = ( window as any ).taskshuntConfirm;
 			if ( confirmFn ) {
-				confirmFn( { title: stagifyAdminBar.pushConfirm, message: stagifyAdminBar.pushMessage, confirm: stagifyAdminBar.pushLabel, previewTaskId: taskId } ).then( ( ok: boolean ) => {
+				confirmFn( { title: taskshuntAdminBar.pushConfirm, message: taskshuntAdminBar.pushMessage, confirm: taskshuntAdminBar.pushLabel, previewTaskId: taskId } ).then( ( ok: boolean ) => {
 					if ( ok ) pagePush( taskId, btn );
 				} );
-			} else if ( window.confirm( stagifyAdminBar.pushConfirm ) ) {
+			} else if ( window.confirm( taskshuntAdminBar.pushConfirm ) ) {
 				pagePush( taskId, btn );
 			}
 		} );
 	}
 
 	function triggerFirstTimeConfetti( milestone: string ): void {
-		const key = 'stagify_confetti_' + milestone;
+		const key = 'taskshunt_confetti_' + milestone;
 		if ( localStorage.getItem( key ) ) {
 			return;
 		}
 		localStorage.setItem( key, '1' );
-		const confettiFn = ( window as any ).stagifyConfetti;
+		const confettiFn = ( window as any ).taskshuntConfetti;
 		if ( confettiFn ) {
 			confettiFn();
 		}
@@ -489,13 +489,13 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 	function showPageBanner( type: 'success' | 'error', message: string ): void {
 		// Remove any existing banner.
-		document.querySelector( '.stagify-push-status-banner' )?.remove();
+		document.querySelector( '.taskshunt-push-status-banner' )?.remove();
 
-		const wrap = document.querySelector( '.stagify-wrap' );
+		const wrap = document.querySelector( '.taskshunt-wrap' );
 		if ( ! wrap ) return;
 
 		const banner = document.createElement( 'div' );
-		banner.className = 'stagify-push-status-banner stagify-push-status-banner--' + type;
+		banner.className = 'taskshunt-push-status-banner taskshunt-push-status-banner--' + type;
 
 		const icon = type === 'success' ? 'dashicons-yes-alt' : 'dashicons-warning';
 		const link = type === 'success'
@@ -510,14 +510,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 	}
 
 	function showPushingOverlay(): HTMLElement | null {
-		const wrap = document.querySelector( '.stagify-wrap' );
+		const wrap = document.querySelector( '.taskshunt-wrap' );
 		if ( ! wrap ) return null;
 
 		const overlay = document.createElement( 'div' );
-		overlay.className = 'stagify-pushing-overlay';
-		overlay.innerHTML = '<div class="stagify-pushing-content">'
-			+ '<div class="stagify-pushing-spinner"></div>'
-			+ '<strong>' + stagifyAdminBar.pushingLabel + '</strong>'
+		overlay.className = 'taskshunt-pushing-overlay';
+		overlay.innerHTML = '<div class="taskshunt-pushing-content">'
+			+ '<div class="taskshunt-pushing-spinner"></div>'
+			+ '<strong>' + taskshuntAdminBar.pushingLabel + '</strong>'
 			+ '<p>Sending changes to production…</p>'
 			+ '</div>';
 
@@ -529,7 +529,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 	async function pagePush( taskId: number, btn: HTMLElement ): Promise< void > {
 		busy = true;
 		const originalText = btn.textContent ?? '';
-		btn.textContent = stagifyAdminBar.pushingLabel;
+		btn.textContent = taskshuntAdminBar.pushingLabel;
 		btn.classList.add( 'disabled' );
 		btn.style.pointerEvents = 'none';
 
@@ -537,12 +537,12 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 
 		try {
 			const body = new URLSearchParams( {
-				action: 'stagify_push_task_ajax',
-				_ajax_nonce: stagifyAdminBar.nonce,
+				action: 'taskshunt_push_task_ajax',
+				_ajax_nonce: taskshuntAdminBar.nonce,
 				task_id: String( taskId ),
 			} );
 
-			const response = await fetch( stagifyAdminBar.ajaxUrl, {
+			const response = await fetch( taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body,
@@ -553,7 +553,7 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 			overlay?.remove();
 
 			if ( data.success ) {
-				btn.textContent = stagifyAdminBar.pushedLabel;
+				btn.textContent = taskshuntAdminBar.pushedLabel;
 				btn.style.pointerEvents = 'none';
 
 				// Update the admin bar title.
@@ -562,14 +562,14 @@ declare const stagifyAdminBar: StagifyAdminBarData;
 				);
 				if ( titleLink ) {
 					titleLink.innerHTML =
-						'<span style="color:#a0a5aa;">' + stagifyAdminBar.noActiveLabel + '</span>';
+						'<span style="color:#a0a5aa;">' + taskshuntAdminBar.noActiveLabel + '</span>';
 				}
 
 				document.getElementById( PUSH_ID )?.remove();
 				document.getElementById( DISCARD_ID )?.remove();
 				activeTaskId = 0;
 
-				showPageBanner( 'success', data.data?.message ?? stagifyAdminBar.pushedLabel );
+				showPageBanner( 'success', data.data?.message ?? taskshuntAdminBar.pushedLabel );
 				triggerFirstTimeConfetti( 'push' );
 			} else {
 				btn.textContent = originalText;

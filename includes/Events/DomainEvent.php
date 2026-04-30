@@ -2,12 +2,12 @@
 /**
  * Base domain event.
  *
- * @package Stagify\Events
+ * @package TaskShunt\Events
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Events;
+namespace TaskShunt\Events;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

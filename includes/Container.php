@@ -2,12 +2,12 @@
 /**
  * Global container accessor.
  *
- * @package Stagify
+ * @package TaskShunt
  */
 
 declare(strict_types=1);
 
-namespace Stagify;
+namespace TaskShunt;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

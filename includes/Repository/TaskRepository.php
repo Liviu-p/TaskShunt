@@ -2,21 +2,21 @@
 /**
  * Task repository.
  *
- * @package Stagify\Repository
+ * @package TaskShunt\Repository
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Repository;
+namespace TaskShunt\Repository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
 
 /**
  * Persists and retrieves task entities using a custom DB table.
@@ -26,7 +26,7 @@ final class TaskRepository implements TaskRepositoryInterface {
 	/**
 	 * The wp_options key that stores the active task ID.
 	 */
-	private const OPTION_ACTIVE_TASK = 'stagify_active_task_id';
+	private const OPTION_ACTIVE_TASK = 'taskshunt_active_task_id';
 
 	/**
 	 * Fully-qualified table name (with prefix).
@@ -45,7 +45,7 @@ final class TaskRepository implements TaskRepositoryInterface {
 		private readonly \wpdb $wpdb,
 		private readonly TaskItemRepositoryInterface $task_item_repository,
 	) {
-		$this->table = $wpdb->prefix . 'stagify_tasks';
+		$this->table = $wpdb->prefix . 'taskshunt_tasks';
 	}
 
 	/**
@@ -165,12 +165,12 @@ final class TaskRepository implements TaskRepositoryInterface {
 	/**
 	 * Delete all Pushed tasks older than the configured retention period.
 	 *
-	 * Respects the stagify_cleanup option: if disabled, does nothing.
+	 * Respects the taskshunt_cleanup option: if disabled, does nothing.
 	 *
 	 * @return void
 	 */
 	public function purge_old(): void {
-		$settings = (array) get_option( 'stagify_cleanup', array() );
+		$settings = (array) get_option( 'taskshunt_cleanup', array() );
 
 		if ( ! ( $settings['enabled'] ?? true ) ) {
 			return;

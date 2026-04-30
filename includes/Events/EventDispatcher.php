@@ -2,18 +2,18 @@
 /**
  * Event dispatcher implementation.
  *
- * @package Stagify\Events
+ * @package TaskShunt\Events
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Events;
+namespace TaskShunt\Events;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\EventDispatcherInterface;
 
 /**
  * Simple in-process event dispatcher.

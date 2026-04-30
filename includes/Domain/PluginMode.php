@@ -2,19 +2,19 @@
 /**
  * Plugin mode enum.
  *
- * @package Stagify\Domain
+ * @package TaskShunt\Domain
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Domain;
+namespace TaskShunt\Domain;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * The two sides of a Stagify deployment:
+ * The two sides of a TaskShunt deployment:
  *  Sender   — the staging site that tracks changes and pushes them out.
  *  Receiver — the production site that accepts pushes and applies the changes.
  *
@@ -32,8 +32,8 @@ enum PluginMode: string {
 	 */
 	public function label(): string {
 		return match ( $this ) {
-			self::Sender   => __( 'Staging (Sender)', 'stagify' ),
-			self::Receiver => __( 'Production (Receiver)', 'stagify' ),
+			self::Sender   => __( 'Staging (Sender)', 'taskshunt' ),
+			self::Receiver => __( 'Production (Receiver)', 'taskshunt' ),
 		};
 	}
 }

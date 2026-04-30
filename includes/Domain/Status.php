@@ -2,12 +2,12 @@
 /**
  * Status enum.
  *
- * @package Stagify\Domain
+ * @package TaskShunt\Domain
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Domain;
+namespace TaskShunt\Domain;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,9 +26,9 @@ enum Status: string {
 	 */
 	public function label(): string {
 		return match ( $this ) {
-			Status::Draft     => __( 'Draft', 'stagify' ),
-			Status::Published => __( 'Published', 'stagify' ),
-			Status::Archived  => __( 'Archived', 'stagify' ),
+			Status::Draft     => __( 'Draft', 'taskshunt' ),
+			Status::Published => __( 'Published', 'taskshunt' ),
+			Status::Archived  => __( 'Archived', 'taskshunt' ),
 		};
 	}
 

@@ -1,5 +1,5 @@
 /**
- * Stagify Admin Styles
+ * TaskShunt Admin Styles
  */
 
 @use 'variables' as *;
@@ -7,7 +7,7 @@
 /* ----------------------------------------------------------------
    1. Base wrapper
    ---------------------------------------------------------------- */
-.stagify-wrap {
+.taskshunt-wrap {
     font-family: $font-family;
     color: $neutral-800;
     max-width: calc(100% - 20px);
@@ -15,11 +15,11 @@
     margin-right: 20px;
 }
 
-.stagify-wrap * {
+.taskshunt-wrap * {
     box-sizing: border-box;
 }
 
-.stagify-wrap h1 {
+.taskshunt-wrap h1 {
     font-family: $font-family;
     font-weight: 700;
     font-size: 26px;
@@ -30,7 +30,7 @@
     line-height: 1.3;
 }
 
-.stagify-wrap h2 {
+.taskshunt-wrap h2 {
     font-family: $font-family;
     font-weight: 600;
     font-size: 16px;
@@ -41,14 +41,14 @@
     line-height: 1.4;
 }
 
-.stagify-wrap p {
+.taskshunt-wrap p {
     color: $neutral-600;
     font-size: 14px;
     line-height: 1.6;
     margin: 4px 0 12px;
 }
 
-.stagify-subheading {
+.taskshunt-subheading {
     color: $neutral-400 !important;
     font-size: 13px !important;
     margin: 0 0 20px !important;
@@ -57,11 +57,11 @@
 /* ----------------------------------------------------------------
    2. Buttons — Cohere style: pill-shaped, dark primary
    ---------------------------------------------------------------- */
-.stagify-wrap .button,
-.stagify-wrap .button-secondary,
-.stagify-wrap .button-primary,
-.stagify-wrap input[type="submit"].button,
-.stagify-wrap input[type="submit"].button-primary {
+.taskshunt-wrap .button,
+.taskshunt-wrap .button-secondary,
+.taskshunt-wrap .button-primary,
+.taskshunt-wrap input[type="submit"].button,
+.taskshunt-wrap input[type="submit"].button-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -83,65 +83,65 @@
 }
 
 /* Secondary — light outline, Cohere style (must come BEFORE primary) */
-.stagify-wrap .button,
-.stagify-wrap .button-secondary,
-.stagify-wrap input[type="submit"].button {
+.taskshunt-wrap .button,
+.taskshunt-wrap .button-secondary,
+.taskshunt-wrap input[type="submit"].button {
     background: #fff !important;
     border: 1px solid $border !important;
     color: $neutral-700 !important;
 }
 
-.stagify-wrap .button:hover,
-.stagify-wrap .button-secondary:hover,
-.stagify-wrap input[type="submit"].button:hover {
+.taskshunt-wrap .button:hover,
+.taskshunt-wrap .button-secondary:hover,
+.taskshunt-wrap input[type="submit"].button:hover {
     background: $light-200 !important;
     border-color: #bbbbc3 !important;
     color: $neutral-900 !important;
 }
 
 /* Primary — dark like Cohere (after secondary so it wins) */
-.stagify-wrap .button-primary,
-.stagify-wrap input[type="submit"].button-primary {
+.taskshunt-wrap .button-primary,
+.taskshunt-wrap input[type="submit"].button-primary {
     background: $neutral-900 !important;
     border: 1px solid $neutral-900 !important;
     color: #fff !important;
     font-weight: 600 !important;
 }
 
-.stagify-wrap .button-primary:hover,
-.stagify-wrap input[type="submit"].button-primary:hover {
+.taskshunt-wrap .button-primary:hover,
+.taskshunt-wrap input[type="submit"].button-primary:hover {
     background: $neutral-800 !important;
     border-color: $neutral-800 !important;
     color: #fff !important;
 }
 
-.stagify-wrap .button-primary:active {
+.taskshunt-wrap .button-primary:active {
     transform: scale(1);
 }
 
-.stagify-wrap .button-primary:focus {
+.taskshunt-wrap .button-primary:focus {
     box-shadow: 0 0 0 2px rgba(33, 33, 33, 0.25) !important;
 }
 
 /* Coral accent button — for warnings/CTAs */
-.stagify-wrap .button.stagify-btn-coral,
-.stagify-wrap .stagify-btn-coral {
+.taskshunt-wrap .button.taskshunt-btn-coral,
+.taskshunt-wrap .taskshunt-btn-coral {
     background: $coral !important;
     border: 1px solid $coral-dark !important;
     color: #fff !important;
     font-weight: 600 !important;
 }
 
-.stagify-wrap .button.stagify-btn-coral:hover,
-.stagify-wrap .stagify-btn-coral:hover {
+.taskshunt-wrap .button.taskshunt-btn-coral:hover,
+.taskshunt-wrap .taskshunt-btn-coral:hover {
     background: $coral-dark !important;
     border-color: $coral-darkest !important;
     color: #fff !important;
 }
 
 /* Small button variant */
-.stagify-wrap .button-small,
-.stagify-wrap .button.button-small {
+.taskshunt-wrap .button-small,
+.taskshunt-wrap .button.button-small {
     height: 30px !important;
     min-height: 30px !important;
     padding: 0 14px !important;
@@ -150,7 +150,7 @@
 }
 
 /* Hero button (setup page) */
-.stagify-wrap .button-hero {
+.taskshunt-wrap .button-hero {
     height: 44px !important;
     min-height: 44px !important;
     padding: 0 32px !important;
@@ -161,11 +161,11 @@
 /* ----------------------------------------------------------------
    3. Inputs — matched height to buttons
    ---------------------------------------------------------------- */
-.stagify-wrap input[type="text"],
-.stagify-wrap input[type="url"],
-.stagify-wrap input[type="password"],
-.stagify-wrap input[type="email"],
-.stagify-wrap input[type="search"] {
+.taskshunt-wrap input[type="text"],
+.taskshunt-wrap input[type="url"],
+.taskshunt-wrap input[type="password"],
+.taskshunt-wrap input[type="email"],
+.taskshunt-wrap input[type="search"] {
     height: 36px;
     padding: 0 12px;
     border: 1px solid $border;
@@ -179,16 +179,16 @@
     box-sizing: border-box;
 }
 
-.stagify-wrap input[type="text"]:focus,
-.stagify-wrap input[type="url"]:focus,
-.stagify-wrap input[type="password"]:focus,
-.stagify-wrap input[type="email"]:focus {
+.taskshunt-wrap input[type="text"]:focus,
+.taskshunt-wrap input[type="url"]:focus,
+.taskshunt-wrap input[type="password"]:focus,
+.taskshunt-wrap input[type="email"]:focus {
     border-color: $coral;
     box-shadow: 0 0 0 2px rgba(255, 119, 89, 0.15);
     outline: none;
 }
 
-.stagify-wrap .regular-text {
+.taskshunt-wrap .regular-text {
     width: 360px;
     max-width: 100%;
 }
@@ -196,52 +196,52 @@
 /* ----------------------------------------------------------------
    4. Page header — title + action button inline
    ---------------------------------------------------------------- */
-.stagify-page-header {
+.taskshunt-page-header {
     display: flex;
     align-items: center;
     gap: 16px;
     margin-bottom: 4px;
 }
 
-.stagify-page-header h1 {
+.taskshunt-page-header h1 {
     margin: 0;
 }
 
-.stagify-new-task-btn {
+.taskshunt-new-task-btn {
     flex-shrink: 0;
 }
 
 /* ----------------------------------------------------------------
    4b. Create task form — inline expand
    ---------------------------------------------------------------- */
-.stagify-wrap form {
+.taskshunt-wrap form {
     margin-top: 0;
     width: 100%;
 }
 
-.stagify-create-form {
+.taskshunt-create-form {
     align-items: center;
     gap: 8px;
 }
 
-.stagify-create-form input[type="text"] {
+.taskshunt-create-form input[type="text"] {
     width: 260px !important;
     flex-shrink: 0;
 }
 
-.stagify-create-form .button-primary,
-.stagify-create-form .stagify-create-cancel {
+.taskshunt-create-form .button-primary,
+.taskshunt-create-form .taskshunt-create-cancel {
     flex-shrink: 0;
 }
 
-.stagify-create-cancel {
+.taskshunt-create-cancel {
     color: $neutral-400 !important;
 }
 
 /* ----------------------------------------------------------------
    5. Cards (setup page)
    ---------------------------------------------------------------- */
-.stagify-card {
+.taskshunt-card {
     background: #fff;
     border: 1px solid $border-light;
     border-radius: 22px;
@@ -250,12 +250,12 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.stagify-card:hover {
+.taskshunt-card:hover {
     border-color: $neutral-900;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.stagify-card-icon {
+.taskshunt-card-icon {
     font-size: 40px;
     width: 40px;
     height: 40px;
@@ -264,14 +264,14 @@
     display: inline-block;
 }
 
-.stagify-card h2 {
+.taskshunt-card h2 {
     margin: 0 0 8px !important;
     font-size: 17px;
     color: $neutral-900;
     text-align: center;
 }
 
-.stagify-card p {
+.taskshunt-card p {
     color: $neutral-500;
     min-height: 48px;
     font-size: 13px;
@@ -280,7 +280,7 @@
 /* ----------------------------------------------------------------
    6. Active task banner
    ---------------------------------------------------------------- */
-.stagify-active-banner {
+.taskshunt-active-banner {
     background: #fff;
     border: 1px solid $border-light;
     border-left: 4px solid $neutral-900;
@@ -292,12 +292,12 @@
     gap: 16px;
 }
 
-.stagify-active-banner strong {
+.taskshunt-active-banner strong {
     color: $neutral-900;
     font-size: 14px;
 }
 
-.stagify-active-banner .stagify-change-count {
+.taskshunt-active-banner .taskshunt-change-count {
     color: $neutral-500;
     font-size: 13px;
 }
@@ -305,7 +305,7 @@
 /* ----------------------------------------------------------------
    7. Server badge
    ---------------------------------------------------------------- */
-.stagify-server-badge {
+.taskshunt-server-badge {
     display: inline-block;
     padding: 4px 14px;
     border-radius: 20px;
@@ -315,13 +315,13 @@
     line-height: 1.6;
 }
 
-.stagify-server-badge--configured {
+.taskshunt-server-badge--configured {
     background: $light-200;
     color: $neutral-600;
     border: 1px solid $border-light;
 }
 
-.stagify-server-badge--warning {
+.taskshunt-server-badge--warning {
     background: #fff3e0;
     color: $coral-dark;
     border: 1px solid #ffd6cc;
@@ -330,11 +330,11 @@
 /* ----------------------------------------------------------------
    8. Form table overrides
    ---------------------------------------------------------------- */
-.stagify-wrap .form-table {
+.taskshunt-wrap .form-table {
     max-width: 700px;
 }
 
-.stagify-wrap .form-table th {
+.taskshunt-wrap .form-table th {
     font-weight: 600;
     color: $neutral-700;
     font-size: 13px;
@@ -343,7 +343,7 @@
     vertical-align: middle;
 }
 
-.stagify-wrap .form-table td {
+.taskshunt-wrap .form-table td {
     padding: 12px 10px;
     vertical-align: middle;
 }
@@ -351,7 +351,7 @@
 /* ----------------------------------------------------------------
    9. Status & type badges
    ---------------------------------------------------------------- */
-.stagify-badge {
+.taskshunt-badge {
     display: inline-flex;
     align-items: center;
     padding: 3px 10px;
@@ -366,27 +366,27 @@
 }
 
 /* Status — GitHub style: solid bg, white text */
-.stagify-badge--active   { background: $coral; color: #fff; }
-.stagify-badge--pending  { background: #f0f0f0; color: $neutral-600; }
-.stagify-badge--pushing  { background: #f0f0f0; color: $neutral-600; }
-.stagify-badge--pushed   { background: #238636; color: #fff; }
-.stagify-badge--failed   { background: #da3633; color: #fff; }
+.taskshunt-badge--active   { background: $coral; color: #fff; }
+.taskshunt-badge--pending  { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--pushing  { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--pushed   { background: #238636; color: #fff; }
+.taskshunt-badge--failed   { background: #da3633; color: #fff; }
 
 /* Type */
-.stagify-badge--content     { background: #f0f0f0; color: $neutral-600; }
-.stagify-badge--file        { background: #f0f0f0; color: $neutral-600; }
-.stagify-badge--database    { background: #f0f0f0; color: $neutral-600; }
-.stagify-badge--environment { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--content     { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--file        { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--database    { background: #f0f0f0; color: $neutral-600; }
+.taskshunt-badge--environment { background: #f0f0f0; color: $neutral-600; }
 
 /* Action */
-.stagify-action--create { color: $green; font-weight: 600; }
-.stagify-action--update { color: $coral-dark; font-weight: 600; }
-.stagify-action--delete { color: #b20000; font-weight: 600; }
+.taskshunt-action--create { color: $green; font-weight: 600; }
+.taskshunt-action--update { color: $coral-dark; font-weight: 600; }
+.taskshunt-action--delete { color: #b20000; font-weight: 600; }
 
 /* ----------------------------------------------------------------
    10. Tables — full width, clean
    ---------------------------------------------------------------- */
-.stagify-wrap .wp-list-table {
+.taskshunt-wrap .wp-list-table {
     border: 1px solid $border-light;
     border-radius: 16px;
     overflow: hidden;
@@ -398,8 +398,8 @@
     margin-top: 4px;
 }
 
-.stagify-wrap .wp-list-table thead th,
-.stagify-wrap .wp-list-table thead td {
+.taskshunt-wrap .wp-list-table thead th,
+.taskshunt-wrap .wp-list-table thead td {
     background: $light-100;
     border-bottom: 2px solid $border-light;
     color: $neutral-600;
@@ -412,11 +412,11 @@
 }
 
 /* Hide duplicate footer headers */
-.stagify-wrap .wp-list-table tfoot {
+.taskshunt-wrap .wp-list-table tfoot {
     display: none;
 }
 
-.stagify-wrap .wp-list-table tbody td {
+.taskshunt-wrap .wp-list-table tbody td {
     padding: 12px 16px;
     border-bottom: 1px solid #f0f0f0;
     font-size: 13px;
@@ -424,16 +424,16 @@
     vertical-align: middle;
 }
 
-.stagify-wrap .wp-list-table tbody tr:hover td {
+.taskshunt-wrap .wp-list-table tbody tr:hover td {
     background: $light-100;
 }
 
-.stagify-wrap .wp-list-table tbody tr:last-child td {
+.taskshunt-wrap .wp-list-table tbody tr:last-child td {
     border-bottom: none;
 }
 
 /* Make "no items" row span nicely */
-.stagify-wrap .wp-list-table .no-items td {
+.taskshunt-wrap .wp-list-table .no-items td {
     padding: 24px 16px;
     text-align: center;
     color: $neutral-400;
@@ -441,28 +441,28 @@
 }
 
 /* Column widths */
-.stagify-wrap .wp-list-table .column-cb,
-.stagify-wrap .wp-list-table .check-column {
+.taskshunt-wrap .wp-list-table .column-cb,
+.taskshunt-wrap .wp-list-table .check-column {
     width: 36px;
     padding: 12px 8px 12px 12px;
     vertical-align: middle;
     text-align: center;
 }
 
-.stagify-wrap .wp-list-table .column-status {
+.taskshunt-wrap .wp-list-table .column-status {
     width: 120px;
 }
 
-.stagify-wrap .wp-list-table .column-item_count {
+.taskshunt-wrap .wp-list-table .column-item_count {
     width: 100px;
 }
 
-.stagify-wrap .wp-list-table .column-created_at {
+.taskshunt-wrap .wp-list-table .column-created_at {
     width: 160px;
 }
 
 /* Tablenav (bulk actions bar) */
-.stagify-wrap .tablenav {
+.taskshunt-wrap .tablenav {
     margin: 0 0 8px;
     display: flex;
     align-items: center;
@@ -472,22 +472,22 @@
     height: auto;
 }
 
-.stagify-wrap .tablenav br.clear {
+.taskshunt-wrap .tablenav br.clear {
     display: none;
 }
 
 /* Hide bottom tablenav */
-.stagify-wrap .tablenav.bottom {
+.taskshunt-wrap .tablenav.bottom {
     display: none !important;
 }
 
-.stagify-wrap .tablenav .actions {
+.taskshunt-wrap .tablenav .actions {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.stagify-wrap .tablenav select {
+.taskshunt-wrap .tablenav select {
     height: 32px;
     border: 1px solid $border;
     border-radius: 8px;
@@ -502,7 +502,7 @@
     appearance: none;
 }
 
-.stagify-wrap .tablenav .actions .button {
+.taskshunt-wrap .tablenav .actions .button {
     height: 32px !important;
     min-height: 32px !important;
     line-height: 32px !important;
@@ -511,12 +511,12 @@
     border-radius: 8px !important;
 }
 
-.stagify-wrap .tablenav .tablenav-pages {
+.taskshunt-wrap .tablenav .tablenav-pages {
     margin-left: auto;
 }
 
 /* Item count pill */
-.stagify-pill {
+.taskshunt-pill {
     display: inline-block;
     padding: 2px 12px;
     border-radius: 20px;
@@ -530,41 +530,41 @@
 /* ----------------------------------------------------------------
    11. Pulsing dot
    ---------------------------------------------------------------- */
-@keyframes stagify-pulse {
+@keyframes taskshunt-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
 }
 
-.stagify-pulse-dot {
+.taskshunt-pulse-dot {
     display: inline-block;
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: $coral;
     margin-right: 6px;
-    animation: stagify-pulse 1.5s infinite;
+    animation: taskshunt-pulse 1.5s infinite;
     vertical-align: middle;
 }
 
-.stagify-badge--active .stagify-pulse-dot {
+.taskshunt-badge--active .taskshunt-pulse-dot {
     background: #fff;
 }
 
 /* ----------------------------------------------------------------
    12. Setup page layout
    ---------------------------------------------------------------- */
-.stagify-setup {
+.taskshunt-setup {
     max-width: 720px;
     margin: 36px auto;
 }
 
-.stagify-setup h1 {
+.taskshunt-setup h1 {
     text-align: center;
     font-size: 26px;
     margin-bottom: 6px !important;
 }
 
-.stagify-setup .stagify-subtitle {
+.taskshunt-setup .taskshunt-subtitle {
     text-align: center;
     color: $neutral-500;
     margin-bottom: 24px !important;
@@ -575,7 +575,7 @@
 }
 
 /* Onboarding steps — how it works */
-.stagify-onboard-steps {
+.taskshunt-onboard-steps {
     background: $light-100;
     border: 1px solid $border-light;
     border-radius: 16px;
@@ -583,18 +583,18 @@
     margin-bottom: 28px;
 }
 
-.stagify-onboard-step {
+.taskshunt-onboard-step {
     display: flex;
     align-items: flex-start;
     gap: 14px;
     padding: 10px 0;
 }
 
-.stagify-onboard-step + .stagify-onboard-step {
+.taskshunt-onboard-step + .taskshunt-onboard-step {
     border-top: 1px solid $border-light;
 }
 
-.stagify-onboard-num {
+.taskshunt-onboard-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -610,14 +610,14 @@
     margin-top: 2px;
 }
 
-.stagify-onboard-step strong {
+.taskshunt-onboard-step strong {
     display: block;
     font-size: 13px;
     color: $neutral-900;
     margin-bottom: 2px;
 }
 
-.stagify-onboard-step p {
+.taskshunt-onboard-step p {
     font-size: 12px !important;
     color: $neutral-400 !important;
     margin: 0 !important;
@@ -625,7 +625,7 @@
 }
 
 /* Choose section */
-.stagify-setup-choose {
+.taskshunt-setup-choose {
     text-align: center;
     font-size: 17px !important;
     font-weight: 700 !important;
@@ -634,18 +634,18 @@
 }
 
 /* Setup cards */
-.stagify-setup-cards {
+.taskshunt-setup-cards {
     display: flex;
     gap: 16px;
     justify-content: center;
 }
 
-.stagify-setup-card-form {
+.taskshunt-setup-card-form {
     flex: 1;
 }
 
 /* Card styling */
-.stagify-setup .stagify-card {
+.taskshunt-setup .taskshunt-card {
     text-align: center;
     padding: 32px 28px;
     height: 100%;
@@ -654,7 +654,7 @@
     align-items: center;
 }
 
-.stagify-setup .stagify-card .stagify-card-icon {
+.taskshunt-setup .taskshunt-card .taskshunt-card-icon {
     color: $coral;
     font-size: 36px;
     width: 36px;
@@ -663,14 +663,14 @@
     display: block;
 }
 
-.stagify-setup .stagify-card h3 {
+.taskshunt-setup .taskshunt-card h3 {
     margin: 0 0 8px;
     font-size: 18px;
     font-weight: 700;
     color: $neutral-900;
 }
 
-.stagify-setup .stagify-card p {
+.taskshunt-setup .taskshunt-card p {
     font-size: 14px !important;
     color: $neutral-500 !important;
     margin: 0 0 22px !important;
@@ -679,23 +679,23 @@
 }
 
 /* Selectable card */
-.stagify-card--selectable {
+.taskshunt-card--selectable {
     cursor: pointer;
     position: relative;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.stagify-card--selectable:hover {
+.taskshunt-card--selectable:hover {
     border-color: #bbbbc3;
 }
 
-.stagify-card--selected {
+.taskshunt-card--selected {
     border-color: $green !important;
     box-shadow: 0 0 0 2px rgba(57, 89, 77, 0.15) !important;
 }
 
 /* Radio dot */
-.stagify-card-radio {
+.taskshunt-card-radio {
     position: absolute;
     top: 14px;
     right: 14px;
@@ -707,19 +707,19 @@
     transition: border-color 0.15s ease;
 }
 
-.stagify-card--selected .stagify-card-radio {
+.taskshunt-card--selected .taskshunt-card-radio {
     border-color: $green;
     background: $green;
     box-shadow: inset 0 0 0 3px #fff;
 }
 
 /* Submit area */
-.stagify-setup-submit {
+.taskshunt-setup-submit {
     text-align: center;
     margin-top: 20px;
 }
 
-.stagify-setup-go {
+.taskshunt-setup-go {
     min-width: 200px;
     height: 42px !important;
     min-height: 42px !important;
@@ -728,7 +728,7 @@
     padding: 0 32px !important;
 }
 
-.stagify-setup-hint {
+.taskshunt-setup-hint {
     text-align: center;
     color: $neutral-400 !important;
     font-size: 12px !important;
@@ -738,9 +738,9 @@
 /* ----------------------------------------------------------------
    13. Detail page
    ---------------------------------------------------------------- */
-.stagify-back-link,
-.stagify-back-link:visited,
-.stagify-back-link:active {
+.taskshunt-back-link,
+.taskshunt-back-link:visited,
+.taskshunt-back-link:active {
     color: $neutral-600 !important;
     text-decoration: none;
     font-size: 13px;
@@ -749,18 +749,18 @@
     margin-bottom: 4px;
 }
 
-.stagify-back-link:hover {
+.taskshunt-back-link:hover {
     color: $neutral-900 !important;
     text-decoration: underline;
 }
 
-.stagify-meta {
+.taskshunt-meta {
     color: $neutral-400;
     font-size: 13px;
     margin: 0 0 4px;
 }
 
-.stagify-actions {
+.taskshunt-actions {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -768,26 +768,26 @@
 }
 
 /* Discard link */
-.stagify-link-danger,
-.stagify-wrap .stagify-link-danger {
+.taskshunt-link-danger,
+.taskshunt-wrap .taskshunt-link-danger {
     color: #b20000 !important;
 }
 
-.stagify-link-danger:hover,
-.stagify-wrap .stagify-link-danger:hover {
+.taskshunt-link-danger:hover,
+.taskshunt-wrap .taskshunt-link-danger:hover {
     color: #5a0000 !important;
 }
 
 /* Retry link */
-.stagify-link-warning,
-.stagify-wrap .stagify-link-warning {
+.taskshunt-link-warning,
+.taskshunt-wrap .taskshunt-link-warning {
     color: $coral-dark !important;
 }
 
 /* ----------------------------------------------------------------
    14. Payload viewer
    ---------------------------------------------------------------- */
-.stagify-payload-pre {
+.taskshunt-payload-pre {
     display: none;
     max-height: 200px;
     overflow: auto;
@@ -804,18 +804,18 @@
 /* ----------------------------------------------------------------
    15. Checkbox / tracking section
    ---------------------------------------------------------------- */
-.stagify-wrap fieldset {
+.taskshunt-wrap fieldset {
     margin-top: 8px;
 }
 
-.stagify-wrap fieldset label {
+.taskshunt-wrap fieldset label {
     display: block;
     margin-bottom: 8px;
     font-size: 13px;
     color: $neutral-700;
 }
 
-.stagify-wrap fieldset label code {
+.taskshunt-wrap fieldset label code {
     background: $light-200;
     padding: 2px 6px;
     border-radius: 4px;
@@ -826,7 +826,7 @@
 /* ----------------------------------------------------------------
    16. Notices
    ---------------------------------------------------------------- */
-.stagify-wrap .notice {
+.taskshunt-wrap .notice {
     border: 1px solid $border-light;
     border-left: 4px solid $green;
     border-radius: 10px;
@@ -838,26 +838,26 @@
     margin: 8px 0 16px;
 }
 
-.stagify-wrap .notice-success {
+.taskshunt-wrap .notice-success {
     border-left-color: $green;
 }
 
-.stagify-wrap .notice-error {
+.taskshunt-wrap .notice-error {
     border-left-color: #b20000;
 }
 
-.stagify-wrap .notice-warning {
+.taskshunt-wrap .notice-warning {
     border-left-color: $coral-dark;
 }
 
-.stagify-wrap .notice p {
+.taskshunt-wrap .notice p {
     margin: 0 !important;
     font-size: 13px !important;
     color: $neutral-700 !important;
 }
 
-/* Custom Stagify notices */
-.stagify-notice {
+/* Custom TaskShunt notices */
+.taskshunt-notice {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -866,48 +866,48 @@
     margin: 16px 0;
 }
 
-.stagify-notice p {
+.taskshunt-notice p {
     margin: 2px 0 0;
     font-size: 13px;
 }
 
-.stagify-notice strong {
+.taskshunt-notice strong {
     font-size: 13px;
     display: block;
 }
 
-.stagify-notice .dashicons {
+.taskshunt-notice .dashicons {
     font-size: 22px;
     width: 22px;
     height: 22px;
     flex-shrink: 0;
 }
 
-.stagify-notice div {
+.taskshunt-notice div {
     flex: 1;
 }
 
-.stagify-notice .button {
+.taskshunt-notice .button {
     flex-shrink: 0;
 }
 
-.stagify-notice--warning {
+.taskshunt-notice--warning {
     background: #fff8f0;
     border: 1px solid #ffd6cc;
 }
 
-.stagify-notice--warning .dashicons {
+.taskshunt-notice--warning .dashicons {
     color: $coral-dark;
 }
 
-.stagify-notice--warning strong {
+.taskshunt-notice--warning strong {
     color: $coral-darkest;
 }
 
 /* ----------------------------------------------------------------
    17. Admin bar overrides
    ---------------------------------------------------------------- */
-#wp-admin-bar-stagify .stagify-ab-separator > .ab-item {
+#wp-admin-bar-taskshunt .taskshunt-ab-separator > .ab-item {
     height: 1px !important;
     min-height: 1px !important;
     padding: 0 !important;
@@ -916,16 +916,16 @@
     cursor: default !important;
 }
 
-#wp-admin-bar-stagify .stagify-ab-item > .ab-item {
+#wp-admin-bar-taskshunt .taskshunt-ab-item > .ab-item {
     font-size: 12px !important;
     opacity: 0.85;
 }
 
-#wp-admin-bar-stagify .stagify-ab-item > .ab-item:hover {
+#wp-admin-bar-taskshunt .taskshunt-ab-item > .ab-item:hover {
     opacity: 1;
 }
 
-#wp-admin-bar-stagify .stagify-ab-push > .ab-item {
+#wp-admin-bar-taskshunt .taskshunt-ab-push > .ab-item {
     color: #fff !important;
     font-weight: 700 !important;
     background: $coral !important;
@@ -937,78 +937,78 @@
     letter-spacing: 0.3px !important;
 }
 
-#wp-admin-bar-stagify .stagify-ab-push > .ab-item:hover {
+#wp-admin-bar-taskshunt .taskshunt-ab-push > .ab-item:hover {
     background: $coral-dark !important;
 }
 
-#wp-admin-bar-stagify .stagify-ab-no-server > .ab-item {
+#wp-admin-bar-taskshunt .taskshunt-ab-no-server > .ab-item {
     color: $coral-dark !important;
     font-style: italic !important;
 }
 
-#wp-admin-bar-stagify .stagify-ab-discard > .ab-item {
+#wp-admin-bar-taskshunt .taskshunt-ab-discard > .ab-item {
     color: $coral !important;
     font-weight: 500 !important;
 }
 
-#wp-admin-bar-stagify .stagify-ab-discard > .ab-item:hover {
+#wp-admin-bar-taskshunt .taskshunt-ab-discard > .ab-item:hover {
     color: #ff5533 !important;
 }
 
 /* ----------------------------------------------------------------
    18. Row actions
    ---------------------------------------------------------------- */
-.stagify-wrap .row-actions a {
+.taskshunt-wrap .row-actions a {
     color: $coral;
 }
 
-.stagify-wrap .row-actions a:hover {
+.taskshunt-wrap .row-actions a:hover {
     color: $coral-dark;
 }
 
 /* ----------------------------------------------------------------
    19. Links
    ---------------------------------------------------------------- */
-.stagify-wrap a {
+.taskshunt-wrap a {
     color: $coral;
 }
 
-.stagify-wrap a:hover {
+.taskshunt-wrap a:hover {
     color: $coral-dark;
 }
 
 /* Table title links — dark, not coral */
-.stagify-wrap .wp-list-table .row-title,
-.stagify-wrap .wp-list-table td.title a strong,
-.stagify-wrap .wp-list-table .column-title a {
+.taskshunt-wrap .wp-list-table .row-title,
+.taskshunt-wrap .wp-list-table td.title a strong,
+.taskshunt-wrap .wp-list-table .column-title a {
     color: $neutral-900 !important;
     text-decoration: none;
 }
 
-.stagify-wrap .wp-list-table .column-title a:hover {
+.taskshunt-wrap .wp-list-table .column-title a:hover {
     color: $coral !important;
 }
 
 /* Hide empty tablenav (bulk actions with no items) */
-.stagify-wrap .tablenav .actions select[name="action"],
-.stagify-wrap .tablenav .actions select[name="action2"] {
+.taskshunt-wrap .tablenav .actions select[name="action"],
+.taskshunt-wrap .tablenav .actions select[name="action2"] {
     border-radius: 8px;
 }
 
-.stagify-wrap .tablenav .no-pages {
+.taskshunt-wrap .tablenav .no-pages {
     display: none;
 }
 
 /* ----------------------------------------------------------------
    20. Submit button wrapper cleanup
    ---------------------------------------------------------------- */
-.stagify-wrap p.submit {
+.taskshunt-wrap p.submit {
     margin: 16px 0 8px;
     padding: 0;
 }
 
 /* WP checkbox styling — override colors only */
-.stagify-wrap input[type="checkbox"]:checked {
+.taskshunt-wrap input[type="checkbox"]:checked {
     background-color: $coral !important;
     border-color: $coral-dark !important;
     /* WP 5.3+ uses SVG mask for the checkmark — color it white */
@@ -1018,11 +1018,11 @@
     background-repeat: no-repeat !important;
 }
 
-.stagify-wrap input[type="checkbox"]:checked::before {
+.taskshunt-wrap input[type="checkbox"]:checked::before {
     content: none !important;
 }
 
-.stagify-wrap input[type="checkbox"]:focus {
+.taskshunt-wrap input[type="checkbox"]:focus {
     border-color: $coral;
     box-shadow: 0 0 0 2px rgba(255, 119, 89, 0.15);
     outline: none;
@@ -1031,7 +1031,7 @@
 /* ----------------------------------------------------------------
    21. Receiver page — status card
    ---------------------------------------------------------------- */
-.stagify-status-card {
+.taskshunt-status-card {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1043,19 +1043,19 @@
     width: 100%;
 }
 
-.stagify-status-card strong {
+.taskshunt-status-card strong {
     font-size: 13px;
     display: block;
     color: $neutral-900;
 }
 
-.stagify-status-card p {
+.taskshunt-status-card p {
     margin: 2px 0 0 !important;
     font-size: 12px !important;
     color: $neutral-400;
 }
 
-.stagify-status-card code {
+.taskshunt-status-card code {
     background: $light-200;
     padding: 2px 8px;
     border-radius: 4px;
@@ -1063,23 +1063,23 @@
     color: $neutral-600;
 }
 
-.stagify-status-card div {
+.taskshunt-status-card div {
     flex: 1;
 }
 
-.stagify-status-dot {
+.taskshunt-status-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-.stagify-status-dot--ready {
+.taskshunt-status-dot--ready {
     background: $green;
     box-shadow: 0 0 0 3px rgba(57, 89, 77, 0.15);
 }
 
-.stagify-status-dot--inactive {
+.taskshunt-status-dot--inactive {
     background: $coral-dark;
     box-shadow: 0 0 0 3px rgba(202, 73, 45, 0.15);
 }
@@ -1087,7 +1087,7 @@
 /* ----------------------------------------------------------------
    22. Receiver page — section card
    ---------------------------------------------------------------- */
-.stagify-section-card {
+.taskshunt-section-card {
     background: #fff;
     border: 1px solid $border-light;
     border-radius: 12px;
@@ -1095,25 +1095,25 @@
     margin-bottom: 16px;
 }
 
-.stagify-section-card h2 {
+.taskshunt-section-card h2 {
     margin: 0 0 12px !important;
     font-size: 15px;
 }
 
-.stagify-section-card p {
+.taskshunt-section-card p {
     margin: 8px 0 14px;
     font-size: 13px;
 }
 
 /* API key display — code + copy inline */
-.stagify-apikey-display {
+.taskshunt-apikey-display {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.stagify-apikey-display code {
+.taskshunt-apikey-display code {
     flex: 1;
     max-width: 420px;
     padding: 10px 14px;
@@ -1130,14 +1130,14 @@
     white-space: nowrap;
 }
 
-.stagify-apikey-generate {
+.taskshunt-apikey-generate {
     margin: 0 !important;
 }
 
 /* ----------------------------------------------------------------
    23. Mode bar
    ---------------------------------------------------------------- */
-.stagify-mode-bar {
+.taskshunt-mode-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1150,49 +1150,49 @@
     margin-top: 4px;
 }
 
-.stagify-mode-bar strong {
+.taskshunt-mode-bar strong {
     color: $neutral-900;
 }
 
 /* Mode confirm panel */
-.stagify-mode-confirm {
+.taskshunt-mode-confirm {
     margin-top: 12px;
 }
 
-.stagify-mode-confirm-inner {
+.taskshunt-mode-confirm-inner {
     background: #fff;
     border: 1px solid $border-light;
     border-radius: 12px;
     padding: 20px 24px;
 }
 
-.stagify-mode-confirm-inner strong {
+.taskshunt-mode-confirm-inner strong {
     font-size: 14px;
     color: $neutral-900;
     display: block;
     margin-bottom: 4px;
 }
 
-.stagify-mode-confirm-inner p {
+.taskshunt-mode-confirm-inner p {
     font-size: 13px;
     color: $neutral-500;
     margin: 0 0 16px;
 }
 
-.stagify-mode-confirm-actions {
+.taskshunt-mode-confirm-actions {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
 /* Danger button — red for destructive action */
-.stagify-wrap .button.stagify-btn-danger {
+.taskshunt-wrap .button.taskshunt-btn-danger {
     background: #b20000 !important;
     border-color: #b20000 !important;
     color: #fff !important;
 }
 
-.stagify-wrap .button.stagify-btn-danger:hover {
+.taskshunt-wrap .button.taskshunt-btn-danger:hover {
     background: #5a0000 !important;
     border-color: #5a0000 !important;
     color: #fff !important;
@@ -1201,11 +1201,11 @@
 /* ----------------------------------------------------------------
    25. Settings form fields — label above input
    ---------------------------------------------------------------- */
-.stagify-field {
+.taskshunt-field {
     margin-bottom: 16px;
 }
 
-.stagify-field label {
+.taskshunt-field label {
     display: block;
     font-size: 13px;
     font-weight: 600;
@@ -1213,30 +1213,30 @@
     margin-bottom: 6px;
 }
 
-.stagify-field input[type="text"],
-.stagify-field input[type="url"],
-.stagify-field input[type="password"] {
+.taskshunt-field input[type="text"],
+.taskshunt-field input[type="url"],
+.taskshunt-field input[type="password"] {
     width: 100%;
     max-width: 420px;
 }
 
-.stagify-field-row {
+.taskshunt-field-row {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.stagify-field-row input {
+.taskshunt-field-row input {
     flex: 1;
 }
 
 /* Server form */
-.stagify-server-form {
+.taskshunt-server-form {
     margin-top: 4px !important;
 }
 
 /* Server actions row */
-.stagify-server-actions {
+.taskshunt-server-actions {
     display: contents;
     align-items: center;
     gap: 8px;
@@ -1244,22 +1244,22 @@
     margin-left: auto;
 }
 
-.stagify-test-result {
+.taskshunt-test-result {
     margin-left: 8px;
     font-size: 13px;
     font-weight: 600;
 }
 
-.stagify-test-result--success {
+.taskshunt-test-result--success {
     color: $green;
 }
 
-.stagify-test-result--error {
+.taskshunt-test-result--error {
     color: #b20000;
 }
 
 /* Loading button state */
-.stagify-btn-loading {
+.taskshunt-btn-loading {
     opacity: 0.7 !important;
     pointer-events: none;
 }
@@ -1267,7 +1267,7 @@
 /* ----------------------------------------------------------------
    Confirm modal
    ---------------------------------------------------------------- */
-.stagify-modal-overlay {
+.taskshunt-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -1277,27 +1277,27 @@
     justify-content: center;
 }
 
-.stagify-modal-overlay.stagify-modal--open {
+.taskshunt-modal-overlay.taskshunt-modal--open {
     display: flex;
 }
 
-.stagify-modal {
+.taskshunt-modal {
     background: #fff;
     border-radius: 20px;
     padding: 32px;
     max-width: 420px;
     width: 90%;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-    animation: stagify-modal-in 0.15s ease;
+    animation: taskshunt-modal-in 0.15s ease;
     font-family: $font-family;
 }
 
-@keyframes stagify-modal-in {
+@keyframes taskshunt-modal-in {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
 
-.stagify-modal strong {
+.taskshunt-modal strong {
     display: block;
     font-size: 16px;
     font-weight: 700;
@@ -1306,21 +1306,21 @@
     letter-spacing: -0.01em;
 }
 
-.stagify-modal p {
+.taskshunt-modal p {
     font-size: 14px !important;
     color: $neutral-500 !important;
     margin: 0 0 24px !important;
     line-height: 1.6;
 }
 
-.stagify-modal-actions {
+.taskshunt-modal-actions {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
 }
 
-/* Modal buttons — styled independently from .stagify-wrap */
-.stagify-modal-actions .button {
+/* Modal buttons — styled independently from .taskshunt-wrap */
+.taskshunt-modal-actions .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1342,26 +1342,26 @@
     color: $neutral-700 !important;
 }
 
-.stagify-modal-actions .button:hover {
+.taskshunt-modal-actions .button:hover {
     background: $light-200 !important;
     border-color: #bbbbc3 !important;
 }
 
-.stagify-modal-actions .button-primary {
+.taskshunt-modal-actions .button-primary {
     background: $neutral-900 !important;
     border: 1px solid $neutral-900 !important;
     color: #fff !important;
     font-weight: 600 !important;
 }
 
-.stagify-modal-actions .button-primary:hover {
+.taskshunt-modal-actions .button-primary:hover {
     background: $neutral-800 !important;
     border-color: $neutral-800 !important;
     color: #fff !important;
 }
 
 /* Preview area inside modal */
-.stagify-modal-preview {
+.taskshunt-modal-preview {
     display: none;
     max-height: 240px;
     overflow-y: auto;
@@ -1371,18 +1371,18 @@
     background: $light-100;
 }
 
-.stagify-preview-loading {
+.taskshunt-preview-loading {
     padding: 20px;
     text-align: center;
     color: $neutral-400;
     font-size: 13px;
 }
 
-.stagify-preview-list {
+.taskshunt-preview-list {
     padding: 4px 0;
 }
 
-.stagify-preview-item {
+.taskshunt-preview-item {
     padding: 10px 16px;
     font-size: 13px;
     display: flex;
@@ -1391,31 +1391,31 @@
     flex-wrap: wrap;
 }
 
-.stagify-preview-item + .stagify-preview-item {
+.taskshunt-preview-item + .taskshunt-preview-item {
     border-top: 1px solid #f0f0f0;
 }
 
-.stagify-preview-item strong {
+.taskshunt-preview-item strong {
     font-size: 13px;
     color: $neutral-900;
     display: inline;
     margin: 0;
 }
 
-.stagify-preview-action {
+.taskshunt-preview-action {
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
-.stagify-preview-type {
+.taskshunt-preview-type {
     font-size: 11px;
     color: $neutral-400;
     margin-left: auto;
 }
 
-.stagify-preview-excerpt {
+.taskshunt-preview-excerpt {
     width: 100%;
     font-size: 12px !important;
     color: $neutral-400 !important;
@@ -1427,13 +1427,13 @@
 }
 
 /* Danger confirm button */
-.stagify-modal-actions .stagify-modal-confirm--danger {
+.taskshunt-modal-actions .taskshunt-modal-confirm--danger {
     background: #b20000 !important;
     border-color: #b20000 !important;
     color: #fff !important;
 }
 
-.stagify-modal-actions .stagify-modal-confirm--danger:hover {
+.taskshunt-modal-actions .taskshunt-modal-confirm--danger:hover {
     background: #5a0000 !important;
     border-color: #5a0000 !important;
     color: #fff !important;
@@ -1442,7 +1442,7 @@
 /* ----------------------------------------------------------------
    Empty state
    ---------------------------------------------------------------- */
-.stagify-empty-state {
+.taskshunt-empty-state {
     text-align: center;
     padding: 40px 20px;
     background: $light-100;
@@ -1451,28 +1451,28 @@
     margin-top: 16px;
 }
 
-.stagify-empty-state p:first-child strong {
+.taskshunt-empty-state p:first-child strong {
     font-size: 14px;
     color: $neutral-700;
 }
 
-.stagify-empty-state p:last-child {
+.taskshunt-empty-state p:last-child {
     color: $neutral-400 !important;
     font-size: 13px !important;
     margin-bottom: 0 !important;
 }
 
 /* Welcome state — first-time 1-2-3 steps */
-.stagify-welcome {
+.taskshunt-welcome {
     margin-top: 20px;
 }
 
-.stagify-welcome-steps {
+.taskshunt-welcome-steps {
     display: flex;
     gap: 24px;
 }
 
-.stagify-welcome-step {
+.taskshunt-welcome-step {
     flex: 1;
     background: #fff;
     border: 1px solid $border-light;
@@ -1481,7 +1481,7 @@
     text-align: center;
 }
 
-.stagify-welcome-number {
+.taskshunt-welcome-number {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1495,14 +1495,14 @@
     margin-bottom: 12px;
 }
 
-.stagify-welcome-step strong {
+.taskshunt-welcome-step strong {
     display: block;
     font-size: 14px;
     color: $neutral-900;
     margin-bottom: 6px;
 }
 
-.stagify-welcome-step p {
+.taskshunt-welcome-step p {
     color: $neutral-500;
     font-size: 13px;
     margin: 0;
@@ -1510,7 +1510,7 @@
 }
 
 /* Read-only banner for pushed tasks */
-.stagify-readonly-banner {
+.taskshunt-readonly-banner {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1523,7 +1523,7 @@
     color: $neutral-500;
 }
 
-.stagify-readonly-banner > .dashicons {
+.taskshunt-readonly-banner > .dashicons {
     color: $green;
     font-size: 16px;
     width: 16px;
@@ -1532,7 +1532,7 @@
 }
 
 /* Detail page footer — discard at bottom, subtle */
-.stagify-detail-footer {
+.taskshunt-detail-footer {
     margin-top: 24px;
     padding-top: 16px;
     border-top: 1px solid #f0f0f0;
@@ -1541,7 +1541,7 @@
 /* ----------------------------------------------------------------
    Push status banners (injected via JS)
    ---------------------------------------------------------------- */
-.stagify-push-status-banner {
+.taskshunt-push-status-banner {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1550,59 +1550,59 @@
     margin-bottom: 16px;
     font-size: 13px;
     color: $neutral-900;
-    animation: stagify-modal-in 0.2s ease;
+    animation: taskshunt-modal-in 0.2s ease;
     text-align: left;
     width: 100%;
     justify-content: flex-start;
 }
 
-.stagify-push-status-banner--success {
+.taskshunt-push-status-banner--success {
     background: #f0faf2;
     border: 1px solid #c8e6c9;
 }
 
-.stagify-push-status-banner--error {
+.taskshunt-push-status-banner--error {
     background: #fef2f2;
     border: 1px solid #fecaca;
 }
 
-.stagify-push-status-banner > .dashicons {
+.taskshunt-push-status-banner > .dashicons {
     font-size: 18px;
     width: 18px;
     height: 18px;
     flex-shrink: 0;
 }
 
-.stagify-push-status-banner--success > .dashicons {
+.taskshunt-push-status-banner--success > .dashicons {
     color: $green;
 }
 
-.stagify-push-status-banner--error > .dashicons {
+.taskshunt-push-status-banner--error > .dashicons {
     color: #b20000;
 }
 
-.stagify-push-status-banner > span {
+.taskshunt-push-status-banner > span {
     flex: 1;
     text-align: left;
 }
 
-.stagify-push-status-banner > a {
+.taskshunt-push-status-banner > a {
     margin-left: auto;
 }
 
-.stagify-push-status-banner > a {
+.taskshunt-push-status-banner > a {
     color: $green !important;
     font-weight: 600;
     text-decoration: none;
     flex-shrink: 0;
 }
 
-.stagify-push-status-banner > a:hover {
+.taskshunt-push-status-banner > a:hover {
     text-decoration: underline;
 }
 
 /* Pushing overlay */
-.stagify-pushing-overlay {
+.taskshunt-pushing-overlay {
     position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.85);
@@ -1613,39 +1613,39 @@
     border-radius: 8px;
 }
 
-.stagify-pushing-content {
+.taskshunt-pushing-content {
     text-align: center;
 }
 
-.stagify-pushing-content strong {
+.taskshunt-pushing-content strong {
     display: block;
     font-size: 15px;
     color: $neutral-900;
     margin-bottom: 4px;
 }
 
-.stagify-pushing-content p {
+.taskshunt-pushing-content p {
     font-size: 13px !important;
     color: $neutral-400 !important;
     margin: 0 !important;
 }
 
-.stagify-pushing-spinner {
+.taskshunt-pushing-spinner {
     width: 32px;
     height: 32px;
     border: 3px solid $border-light;
     border-top-color: $neutral-900;
     border-radius: 50%;
-    animation: stagify-spin 0.7s linear infinite;
+    animation: taskshunt-spin 0.7s linear infinite;
     margin: 0 auto 12px;
 }
 
-@keyframes stagify-spin {
+@keyframes taskshunt-spin {
     to { transform: rotate(360deg); }
 }
 
 /* Confetti celebration */
-.stagify-confetti-container {
+.taskshunt-confetti-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -1656,16 +1656,16 @@
     overflow: hidden;
 }
 
-.stagify-confetti-piece {
+.taskshunt-confetti-piece {
     position: absolute;
     top: -10px;
     width: 10px;
     height: 10px;
     border-radius: 2px;
-    animation: stagify-confetti-fall linear forwards;
+    animation: taskshunt-confetti-fall linear forwards;
 }
 
-@keyframes stagify-confetti-fall {
+@keyframes taskshunt-confetti-fall {
     0% { transform: translateY(0) rotate(0deg); opacity: 1; }
     80% { opacity: 1; }
     100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
@@ -1674,42 +1674,42 @@
 /* ----------------------------------------------------------------
    Dashboard widget
    ---------------------------------------------------------------- */
-.stagify-widget {
+.taskshunt-widget {
     font-family: $font-family;
 }
 
-.stagify-widget-active {
+.taskshunt-widget-active {
     margin-bottom: 12px;
 }
 
-.stagify-widget-row {
+.taskshunt-widget-row {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-.stagify-widget-row strong {
+.taskshunt-widget-row strong {
     display: block;
     font-size: 14px;
 }
 
-.stagify-widget-row strong a {
+.taskshunt-widget-row strong a {
     color: $neutral-900;
     text-decoration: none;
 }
 
-.stagify-widget-row strong a:hover {
+.taskshunt-widget-row strong a:hover {
     color: $coral;
 }
 
-.stagify-widget-meta {
+.taskshunt-widget-meta {
     font-size: 12px;
     color: $neutral-400;
     display: block;
 }
 
-.stagify-widget-push {
+.taskshunt-widget-push {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1725,23 +1725,23 @@
     text-decoration: none;
 }
 
-.stagify-widget-push:hover {
+.taskshunt-widget-push:hover {
     background: $neutral-800;
     color: #fff;
 }
 
-.stagify-widget-empty {
+.taskshunt-widget-empty {
     text-align: center;
     padding: 10px 0;
 }
 
-.stagify-widget-empty p {
+.taskshunt-widget-empty p {
     color: $neutral-400;
     font-size: 13px;
     margin-bottom: 10px;
 }
 
-.stagify-widget-stats {
+.taskshunt-widget-stats {
     display: flex;
     gap: 16px;
     padding-top: 12px;
@@ -1749,12 +1749,12 @@
     margin-top: 4px;
 }
 
-.stagify-widget-stat {
+.taskshunt-widget-stat {
     font-size: 12px;
     color: $neutral-400;
 }
 
-.stagify-widget-stat span {
+.taskshunt-widget-stat span {
     font-weight: 700;
     font-size: 18px;
     color: $neutral-900;
@@ -1764,25 +1764,25 @@
 /* ----------------------------------------------------------------
    Push history
    ---------------------------------------------------------------- */
-.stagify-history {
+.taskshunt-history {
     margin-top: 32px;
 }
 
-.stagify-history h2 {
+.taskshunt-history h2 {
     font-size: 14px !important;
     color: $neutral-400 !important;
     margin-bottom: 10px !important;
 }
 
-.stagify-history-list {
+.taskshunt-history-list {
     background: #fff;
     border: 1px solid $border-light;
     border-radius: 12px;
     overflow: hidden;
 }
 
-a.stagify-history-item,
-.stagify-history-item {
+a.taskshunt-history-item,
+.taskshunt-history-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1792,45 +1792,45 @@ a.stagify-history-item,
     transition: background 0.15s ease;
 }
 
-a.stagify-history-item:hover {
+a.taskshunt-history-item:hover {
     background: $light-100;
 }
 
-.stagify-history-item + .stagify-history-item {
+.taskshunt-history-item + .taskshunt-history-item {
     border-top: 1px solid $light-200;
 }
 
-.stagify-history-item > .dashicons {
+.taskshunt-history-item > .dashicons {
     font-size: 14px;
     width: 14px;
     height: 14px;
     flex-shrink: 0;
 }
 
-.stagify-history-icon--success {
+.taskshunt-history-icon--success {
     color: #238636;
 }
 
-.stagify-history-icon--failed {
+.taskshunt-history-icon--failed {
     color: #da3633;
 }
 
-.stagify-history-info {
+.taskshunt-history-info {
     flex: 1;
 }
 
-.stagify-history-info strong {
+.taskshunt-history-info strong {
     font-size: 12px;
     color: $neutral-900;
     display: block;
 }
 
-.stagify-history-meta {
+.taskshunt-history-meta {
     font-size: 11px;
     color: $neutral-400;
 }
 
-.stagify-history-time {
+.taskshunt-history-time {
     font-size: 11px;
     color: $neutral-400;
     flex-shrink: 0;
@@ -1839,7 +1839,7 @@ a.stagify-history-item:hover {
 /* ----------------------------------------------------------------
    No-active-task prompt
    ---------------------------------------------------------------- */
-.stagify-prompt {
+.taskshunt-prompt {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1850,12 +1850,12 @@ a.stagify-history-item:hover {
     margin-bottom: 16px;
 }
 
-.stagify-prompt--success {
+.taskshunt-prompt--success {
     background: #f0faf2;
     border-color: #c8e6c9;
 }
 
-.stagify-prompt > .dashicons {
+.taskshunt-prompt > .dashicons {
     font-size: 22px;
     width: 22px;
     height: 22px;
@@ -1863,34 +1863,34 @@ a.stagify-history-item:hover {
     color: $neutral-400;
 }
 
-.stagify-prompt--success > .dashicons {
+.taskshunt-prompt--success > .dashicons {
     color: $green;
 }
 
-.stagify-prompt > div {
+.taskshunt-prompt > div {
     flex: 1;
 }
 
-.stagify-prompt strong {
+.taskshunt-prompt strong {
     font-size: 14px;
     color: $neutral-900;
     display: block;
 }
 
-.stagify-prompt p {
+.taskshunt-prompt p {
     font-size: 13px !important;
     color: $neutral-500 !important;
     margin: 2px 0 0 !important;
 }
 
-.stagify-prompt .button {
+.taskshunt-prompt .button {
     flex-shrink: 0;
 }
 
 /* ----------------------------------------------------------------
    Active task guide — single line
    ---------------------------------------------------------------- */
-.stagify-guide-inline {
+.taskshunt-guide-inline {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1903,11 +1903,11 @@ a.stagify-history-item:hover {
     color: $neutral-600;
 }
 
-.stagify-guide-inline strong {
+.taskshunt-guide-inline strong {
     color: $neutral-900;
 }
 
-.stagify-guide-close {
+.taskshunt-guide-close {
     margin-left: auto;
     background: none;
     border: none;
@@ -1918,14 +1918,14 @@ a.stagify-history-item:hover {
     line-height: 1;
 }
 
-.stagify-guide-close:hover {
+.taskshunt-guide-close:hover {
     color: $neutral-700;
 }
 
 /* ----------------------------------------------------------------
    Onboarding checklist
    ---------------------------------------------------------------- */
-.stagify-checklist {
+.taskshunt-checklist {
     background: #fff;
     border: 1px solid $border-light;
     border-radius: 16px;
@@ -1933,59 +1933,59 @@ a.stagify-history-item:hover {
     overflow: hidden;
 }
 
-.stagify-checklist-header {
+.taskshunt-checklist-header {
     padding: 16px 20px 14px;
     border-bottom: 1px solid #f0f0f0;
 }
 
-.stagify-checklist-header > div:first-child {
+.taskshunt-checklist-header > div:first-child {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
 }
 
-.stagify-checklist-header strong {
+.taskshunt-checklist-header strong {
     font-size: 14px;
     color: $neutral-900;
 }
 
-.stagify-checklist-progress {
+.taskshunt-checklist-progress {
     font-size: 12px;
     color: $neutral-400;
     font-weight: 500;
 }
 
-.stagify-checklist-bar {
+.taskshunt-checklist-bar {
     height: 4px;
     background: #f0f0f0;
     border-radius: 4px;
     overflow: hidden;
 }
 
-.stagify-checklist-bar-fill {
+.taskshunt-checklist-bar-fill {
     height: 100%;
     background: $green;
     border-radius: 4px;
     transition: width 0.3s ease;
 }
 
-.stagify-checklist-steps {
+.taskshunt-checklist-steps {
     padding: 4px 0;
 }
 
-.stagify-checklist-step {
+.taskshunt-checklist-step {
     display: flex;
     align-items: flex-start;
     gap: 14px;
     padding: 14px 20px;
 }
 
-.stagify-checklist-step + .stagify-checklist-step {
+.taskshunt-checklist-step + .taskshunt-checklist-step {
     border-top: 1px solid $light-200;
 }
 
-.stagify-check-num {
+.taskshunt-check-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2001,7 +2001,7 @@ a.stagify-history-item:hover {
     margin-top: 1px;
 }
 
-.stagify-check-done {
+.taskshunt-check-done {
     color: $green;
     font-size: 24px;
     width: 24px;
@@ -2009,28 +2009,28 @@ a.stagify-history-item:hover {
     flex-shrink: 0;
 }
 
-.stagify-checklist-step strong {
+.taskshunt-checklist-step strong {
     font-size: 13px;
     color: $neutral-900;
     display: block;
 }
 
-.stagify-checklist-step--done strong {
+.taskshunt-checklist-step--done strong {
     color: $neutral-400;
 }
 
-.stagify-checklist-step--done strong s {
+.taskshunt-checklist-step--done strong s {
     text-decoration: line-through;
 }
 
-.stagify-checklist-step p {
+.taskshunt-checklist-step p {
     font-size: 12px !important;
     color: $neutral-500 !important;
     margin: 3px 0 0 !important;
     line-height: 1.5;
 }
 
-.stagify-checklist-step p a {
+.taskshunt-checklist-step p a {
     color: $coral !important;
     font-weight: 600;
 }
@@ -2039,120 +2039,120 @@ a.stagify-history-item:hover {
    26. Responsive
    ---------------------------------------------------------------- */
 @media screen and (max-width: 782px) {
-    .stagify-wrap {
+    .taskshunt-wrap {
         max-width: 100%;
         padding: 10px;
     }
 
     /* Page header — stack title and button */
-    .stagify-page-header {
+    .taskshunt-page-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
 
     /* Setup cards — stack vertically */
-    .stagify-setup-cards {
+    .taskshunt-setup-cards {
         flex-direction: column;
         align-items: center;
     }
 
-    .stagify-setup-card-form {
+    .taskshunt-setup-card-form {
         max-width: 100%;
         width: 100%;
     }
 
     /* Active banner */
-    .stagify-active-banner {
+    .taskshunt-active-banner {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
 
     /* Inputs full width */
-    .stagify-wrap .regular-text {
+    .taskshunt-wrap .regular-text {
         width: 100%;
     }
 
     /* Checklist */
-    .stagify-checklist-step {
+    .taskshunt-checklist-step {
         padding: 10px 14px;
     }
 
     /* Notices/prompts */
-    .stagify-notice,
-    .stagify-prompt {
+    .taskshunt-notice,
+    .taskshunt-prompt {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
 
-    .stagify-prompt .button {
+    .taskshunt-prompt .button {
         width: 100%;
         justify-content: center;
     }
 
     /* Status card */
-    .stagify-status-card {
+    .taskshunt-status-card {
         flex-wrap: wrap;
     }
 
-    .stagify-server-actions {
+    .taskshunt-server-actions {
         width: 100%;
         justify-content: flex-start;
         margin-top: 8px;
     }
 
     /* Mode bar */
-    .stagify-mode-bar {
+    .taskshunt-mode-bar {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
 
     /* Modal */
-    .stagify-modal {
+    .taskshunt-modal {
         padding: 24px 20px;
         max-width: 95%;
     }
 
     /* Table */
-    .stagify-wrap .wp-list-table {
+    .taskshunt-wrap .wp-list-table {
         border-radius: 8px;
     }
 
     /* API key display */
-    .stagify-apikey-display {
+    .taskshunt-apikey-display {
         flex-direction: column;
         gap: 8px;
     }
 
-    .stagify-apikey-display code {
+    .taskshunt-apikey-display code {
         max-width: 100%;
     }
 
     /* Guide inline */
-    .stagify-guide-inline {
+    .taskshunt-guide-inline {
         flex-wrap: wrap;
     }
 
     /* History */
-    .stagify-history-item {
+    .taskshunt-history-item {
         flex-wrap: wrap;
     }
 
-    .stagify-history-time {
+    .taskshunt-history-time {
         width: 100%;
         margin-top: 2px;
     }
 
     /* Push overlay */
-    .stagify-pushing-overlay {
+    .taskshunt-pushing-overlay {
         border-radius: 0;
     }
 
     /* Detail page actions */
-    .stagify-actions {
+    .taskshunt-actions {
         flex-wrap: wrap;
     }
 }

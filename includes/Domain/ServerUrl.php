@@ -2,12 +2,12 @@
 /**
  * Server URL value object.
  *
- * @package Stagify\Domain
+ * @package TaskShunt\Domain
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Domain;
+namespace TaskShunt\Domain;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The production site's URL (e.g. "https://example.com").
  *
  * Used by PushService to build the full receive endpoint:
- *   {ServerUrl}/wp-json/stagify/v1/receive
+ *   {ServerUrl}/wp-json/taskshunt/v1/receive
  *
  * Construction throws if the URL is not syntactically valid.
  */
@@ -41,7 +41,7 @@ final readonly class ServerUrl extends ValueObject {
 		if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
 			throw new \InvalidArgumentException(
 				/* translators: %s: URL value */
-				esc_html( sprintf( __( '"%s" is not a valid URL.', 'stagify' ), $value ) )
+				esc_html( sprintf( __( '"%s" is not a valid URL.', 'taskshunt' ), $value ) )
 			);
 		}
 

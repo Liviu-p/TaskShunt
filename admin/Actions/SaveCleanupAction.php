@@ -2,21 +2,21 @@
 /**
  * Save auto-cleanup settings action handler.
  *
- * @package Stagify\Admin\Actions
+ * @package TaskShunt\Admin\Actions
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Actions;
+namespace TaskShunt\Admin\Actions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Notices;
+use TaskShunt\Admin\Notices;
 
 /**
- * Handles the admin_post_stagify_save_cleanup request.
+ * Handles the admin_post_taskshunt_save_cleanup request.
  *
  * Persists the cleanup enabled flag and retention days.
  */
@@ -25,7 +25,7 @@ final class SaveCleanupAction {
 	/**
 	 * WordPress option key for cleanup settings.
 	 */
-	public const OPTION_KEY = 'stagify_cleanup';
+	public const OPTION_KEY = 'taskshunt_cleanup';
 
 	/**
 	 * Handle the POST request.
@@ -33,14 +33,14 @@ final class SaveCleanupAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_admin_referer( 'stagify_save_cleanup' );
+		check_admin_referer( 'taskshunt_save_cleanup' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
-		$enabled = ! empty( $_POST['stagify_cleanup_enabled'] );
-		$days    = isset( $_POST['stagify_cleanup_days'] ) ? absint( $_POST['stagify_cleanup_days'] ) : 30;
+		$enabled = ! empty( $_POST['taskshunt_cleanup_enabled'] );
+		$days    = isset( $_POST['taskshunt_cleanup_days'] ) ? absint( $_POST['taskshunt_cleanup_days'] ) : 30;
 		$days    = max( 1, min( 365, $days ) );
 
 		update_option(
@@ -51,8 +51,8 @@ final class SaveCleanupAction {
 			)
 		);
 
-		Notices::add( 'success', __( 'Auto-cleanup settings saved.', 'stagify' ) );
-		wp_safe_redirect( admin_url( 'admin.php?page=stagify-settings' ) );
+		Notices::add( 'success', __( 'Auto-cleanup settings saved.', 'taskshunt' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt-settings' ) );
 		exit;
 	}
 }

@@ -2,20 +2,20 @@
 /**
  * Preview task AJAX action — returns items summary for push preview.
  *
- * @package Stagify\Admin\Ajax
+ * @package TaskShunt\Admin\Ajax
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Ajax;
+namespace TaskShunt\Admin\Ajax;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\TaskItemRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Domain\TaskItemType;
+use TaskShunt\Contracts\TaskItemRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Domain\TaskItemType;
 
 /**
  * Returns a JSON summary of task items for the push preview modal.
@@ -39,21 +39,21 @@ final class PreviewTaskAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_ajax_referer( 'stagify_activate_task' );
+		check_ajax_referer( 'taskshunt_activate_task' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'stagify' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'taskshunt' ) ), 403 );
 		}
 
 		$task_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
 
 		if ( $task_id <= 0 ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid task ID.', 'stagify' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid task ID.', 'taskshunt' ) ) );
 		}
 
 		$task = $this->task_repository->find_by_id( $task_id );
 		if ( null === $task ) {
-			wp_send_json_error( array( 'message' => __( 'Task not found.', 'stagify' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Task not found.', 'taskshunt' ) ) );
 		}
 
 		$items   = $this->task_item_repository->find_by_task( $task_id );

@@ -2,21 +2,21 @@
 /**
  * Settings admin page.
  *
- * @package Stagify\Admin\Pages
+ * @package TaskShunt\Admin\Pages
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Pages;
+namespace TaskShunt\Admin\Pages;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Pages\SetupPage;
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Domain\Server;
-use Stagify\Services\PostTypeRegistry;
+use TaskShunt\Admin\Pages\SetupPage;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Domain\Server;
+use TaskShunt\Services\PostTypeRegistry;
 
 /**
  * Renders the Settings admin page — server connection form.
@@ -40,12 +40,12 @@ final class SettingsPage {
 	public function render(): void {
 		$server = $this->server_repository->find();
 
-		echo '<div class="wrap stagify-wrap">';
+		echo '<div class="wrap taskshunt-wrap">';
 
-		echo '<div class="stagify-page-header">';
-		echo '<h1>' . esc_html__( 'Settings', 'stagify' ) . '</h1>';
+		echo '<div class="taskshunt-page-header">';
+		echo '<h1>' . esc_html__( 'Settings', 'taskshunt' ) . '</h1>';
 		echo '</div>';
-		echo '<p class="stagify-subheading">' . esc_html__( 'Configure your staging server and content tracking.', 'stagify' ) . '</p>';
+		echo '<p class="taskshunt-subheading">' . esc_html__( 'Configure your staging server and content tracking.', 'taskshunt' ) . '</p>';
 
 		$this->render_server_section( $server );
 		$this->render_tracking_section();
@@ -61,23 +61,23 @@ final class SettingsPage {
 	 * @return void
 	 */
 	private function render_cleanup_section(): void {
-		$settings = (array) get_option( 'stagify_cleanup', array() );
+		$settings = (array) get_option( 'taskshunt_cleanup', array() );
 		$enabled  = ( $settings['enabled'] ?? true );
 		$days     = (int) ( $settings['days'] ?? 30 );
 
-		echo '<div class="stagify-section-card">';
-		echo '<h2>' . esc_html__( 'Auto-cleanup', 'stagify' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Automatically delete pushed tasks after a set number of days.', 'stagify' ) . '</p>';
+		echo '<div class="taskshunt-section-card">';
+		echo '<h2>' . esc_html__( 'Auto-cleanup', 'taskshunt' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Automatically delete pushed tasks after a set number of days.', 'taskshunt' ) . '</p>';
 
 		printf( '<form method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
-		echo '<input type="hidden" name="action" value="stagify_save_cleanup">';
-		wp_nonce_field( 'stagify_save_cleanup' );
+		echo '<input type="hidden" name="action" value="taskshunt_save_cleanup">';
+		wp_nonce_field( 'taskshunt_save_cleanup' );
 
 		$this->render_cleanup_fields( $enabled, $days );
 
 		printf(
 			'<button type="submit" class="button button-primary" style="margin-top:16px;">%s</button>',
-			esc_html__( 'Save', 'stagify' )
+			esc_html__( 'Save', 'taskshunt' )
 		);
 		echo '</form>';
 		echo '</div>';
@@ -94,19 +94,19 @@ final class SettingsPage {
 		printf(
 			'<fieldset style="margin-top:8px;">'
 			. '<label style="display:block;margin-bottom:12px;">'
-			. '<input type="checkbox" name="stagify_cleanup_enabled" value="1"%s> %s'
+			. '<input type="checkbox" name="taskshunt_cleanup_enabled" value="1"%s> %s'
 			. '</label>'
 			. '<label style="display:block;">'
 			. '%s '
-			. '<input type="number" name="stagify_cleanup_days" value="%d" min="1" max="365" style="width:70px;"> '
+			. '<input type="number" name="taskshunt_cleanup_days" value="%d" min="1" max="365" style="width:70px;"> '
 			. '%s'
 			. '</label>'
 			. '</fieldset>',
 			$enabled ? ' checked' : '',
-			esc_html__( 'Enable auto-cleanup', 'stagify' ),
-			esc_html__( 'Delete pushed tasks older than', 'stagify' ),
+			esc_html__( 'Enable auto-cleanup', 'taskshunt' ),
+			esc_html__( 'Delete pushed tasks older than', 'taskshunt' ),
 			esc_attr( (string) $days ),
-			esc_html__( 'days', 'stagify' )
+			esc_html__( 'days', 'taskshunt' )
 		);
 	}
 
@@ -119,13 +119,13 @@ final class SettingsPage {
 		$mode = SetupPage::get_mode();
 
 		printf(
-			'<div class="stagify-mode-bar">'
+			'<div class="taskshunt-mode-bar">'
 			. '<span>%s <strong>%s</strong></span>'
-			. '<button type="button" class="button button-small" id="stagify-switch-mode-btn">%s</button>'
+			. '<button type="button" class="button button-small" id="taskshunt-switch-mode-btn">%s</button>'
 			. '</div>',
-			esc_html__( 'Mode:', 'stagify' ),
-			null !== $mode ? esc_html( $mode->label() ) : esc_html__( 'Not set', 'stagify' ),
-			esc_html__( 'Switch mode', 'stagify' )
+			esc_html__( 'Mode:', 'taskshunt' ),
+			null !== $mode ? esc_html( $mode->label() ) : esc_html__( 'Not set', 'taskshunt' ),
+			esc_html__( 'Switch mode', 'taskshunt' )
 		);
 
 		$this->render_mode_confirm_panel();
@@ -138,19 +138,19 @@ final class SettingsPage {
 	 */
 	private function render_mode_confirm_panel(): void {
 		printf(
-			'<div class="stagify-mode-confirm" id="stagify-mode-confirm" style="display:none;">'
-			. '<div class="stagify-mode-confirm-inner">'
+			'<div class="taskshunt-mode-confirm" id="taskshunt-mode-confirm" style="display:none;">'
+			. '<div class="taskshunt-mode-confirm-inner">'
 			. '<strong>%s</strong>'
 			. '<p>%s</p>'
-			. '<div class="stagify-mode-confirm-actions">'
-			. '<a href="%s" class="button button-primary stagify-btn-danger">%s</a>'
-			. '<button type="button" class="button" id="stagify-switch-mode-cancel">%s</button>'
+			. '<div class="taskshunt-mode-confirm-actions">'
+			. '<a href="%s" class="button button-primary taskshunt-btn-danger">%s</a>'
+			. '<button type="button" class="button" id="taskshunt-switch-mode-cancel">%s</button>'
 			. '</div></div></div>',
-			esc_html__( 'Change plugin mode?', 'stagify' ),
-			esc_html__( 'You will be redirected to choose a new mode. This will change which features are active on this site.', 'stagify' ),
-			esc_url( admin_url( 'admin.php?page=stagify-setup' ) ),
-			esc_html__( 'Continue', 'stagify' ),
-			esc_html__( 'Cancel', 'stagify' )
+			esc_html__( 'Change plugin mode?', 'taskshunt' ),
+			esc_html__( 'You will be redirected to choose a new mode. This will change which features are active on this site.', 'taskshunt' ),
+			esc_url( admin_url( 'admin.php?page=taskshunt-setup' ) ),
+			esc_html__( 'Continue', 'taskshunt' ),
+			esc_html__( 'Cancel', 'taskshunt' )
 		);
 	}
 
@@ -163,13 +163,13 @@ final class SettingsPage {
 	 * @return void
 	 */
 	private function render_server_section( ?Server $server ): void {
-		echo '<div class="stagify-section-card">';
-		echo '<h2>' . esc_html__( 'Production server', 'stagify' ) . '</h2>';
+		echo '<div class="taskshunt-section-card">';
+		echo '<h2>' . esc_html__( 'Production server', 'taskshunt' ) . '</h2>';
 
 		if ( null !== $server ) {
 			$this->render_server_card( $server );
 		} else {
-			echo '<p>' . esc_html__( 'Connect the production site where changes will be pushed.', 'stagify' ) . '</p>';
+			echo '<p>' . esc_html__( 'Connect the production site where changes will be pushed.', 'taskshunt' ) . '</p>';
 			$this->render_server_form();
 		}
 
@@ -186,19 +186,19 @@ final class SettingsPage {
 		$tracked    = get_option( PostTypeRegistry::OPTION_KEY, false );
 		$tracked    = false !== $tracked ? (array) $tracked : array_keys( $post_types );
 
-		echo '<div class="stagify-section-card">';
-		echo '<h2>' . esc_html__( 'Content tracking', 'stagify' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Choose which post types to track for changes.', 'stagify' ) . '</p>';
+		echo '<div class="taskshunt-section-card">';
+		echo '<h2>' . esc_html__( 'Content tracking', 'taskshunt' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Choose which post types to track for changes.', 'taskshunt' ) . '</p>';
 
 		printf( '<form method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
-		echo '<input type="hidden" name="action" value="stagify_save_tracking">';
-		wp_nonce_field( 'stagify_save_tracking' );
+		echo '<input type="hidden" name="action" value="taskshunt_save_tracking">';
+		wp_nonce_field( 'taskshunt_save_tracking' );
 
 		$this->render_post_type_checkboxes( $post_types, $tracked );
 
 		printf(
 			'<button type="submit" class="button button-primary" style="margin-top:16px;">%s</button>',
-			esc_html__( 'Save', 'stagify' )
+			esc_html__( 'Save', 'taskshunt' )
 		);
 		echo '</form>';
 		echo '</div>';
@@ -218,7 +218,7 @@ final class SettingsPage {
 			$checked = in_array( $slug, $tracked, true ) ? ' checked' : '';
 			printf(
 				'<label style="display:block;margin-bottom:6px;">'
-				. '<input type="checkbox" name="stagify_post_types[]" value="%s"%s> %s <code>%s</code>'
+				. '<input type="checkbox" name="taskshunt_post_types[]" value="%s"%s> %s <code>%s</code>'
 				. '</label>',
 				esc_attr( $slug ),
 				esc_attr( $checked ),
@@ -239,26 +239,26 @@ final class SettingsPage {
 	 * @return void
 	 */
 	public function enqueue_scripts( string $hook ): void {
-		if ( 'stagify_page_stagify-settings' !== $hook ) {
+		if ( 'taskshunt_page_taskshunt-settings' !== $hook ) {
 			return;
 		}
 
-		$asset_url = STAGIFY_PLUGIN_URL . 'assets/dist/settings.js';
+		$asset_url = TASKSHUNT_PLUGIN_URL . 'assets/dist/settings.js';
 
 		wp_enqueue_script(
-			'stagify-settings',
+			'taskshunt-settings',
 			$asset_url,
 			array(),
-			STAGIFY_VERSION,
+			TASKSHUNT_VERSION,
 			true
 		);
 
 		wp_localize_script(
-			'stagify-settings',
-			'stagifySettings',
+			'taskshunt-settings',
+			'taskshuntSettings',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'stagify_test_connection' ),
+				'nonce'   => wp_create_nonce( 'taskshunt_test_connection' ),
 			)
 		);
 	}
@@ -273,33 +273,33 @@ final class SettingsPage {
 		$delete_url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'  => 'stagify_delete_server',
+					'action'  => 'taskshunt_delete_server',
 					'task_id' => $server->id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'stagify_delete_server'
+			'taskshunt_delete_server'
 		);
 
 		printf(
-			'<div class="stagify-status-card stagify-status-card--ready" style="margin-top:0;">'
-			. '<span class="stagify-status-dot stagify-status-dot--ready"></span>'
+			'<div class="taskshunt-status-card taskshunt-status-card--ready" style="margin-top:0;">'
+			. '<span class="taskshunt-status-dot taskshunt-status-dot--ready"></span>'
 			. '<div>'
 			. '<strong>%s</strong>'
 			. '<p>%s</p>'
 			. '</div>'
-			. '<div class="stagify-server-actions">',
+			. '<div class="taskshunt-server-actions">',
 			esc_html( $server->name ),
 			esc_html( $server->url->get_value() )
 		);
 		$this->render_test_button();
 		printf(
-			'<a href="%s" class="button button-small stagify-link-danger stagify-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
+			'<a href="%s" class="button button-small taskshunt-link-danger taskshunt-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a>',
 			esc_url( $delete_url ),
-			esc_attr__( 'Disconnect server?', 'stagify' ),
-			esc_attr__( 'This will remove the production server connection. You can re-add it later.', 'stagify' ),
-			esc_attr__( 'Disconnect', 'stagify' ),
-			esc_html__( 'Disconnect', 'stagify' )
+			esc_attr__( 'Disconnect server?', 'taskshunt' ),
+			esc_attr__( 'This will remove the production server connection. You can re-add it later.', 'taskshunt' ),
+			esc_attr__( 'Disconnect', 'taskshunt' ),
+			esc_html__( 'Disconnect', 'taskshunt' )
 		);
 		echo '</div></div>';
 	}
@@ -311,9 +311,9 @@ final class SettingsPage {
 	 */
 	private function render_test_button(): void {
 		printf(
-			'<button type="button" id="stagify-test-connection" class="button button-small">%s</button>'
-			. '<span id="stagify-test-result" class="stagify-test-result"></span>',
-			esc_html__( 'Test connection', 'stagify' )
+			'<button type="button" id="taskshunt-test-connection" class="button button-small">%s</button>'
+			. '<span id="taskshunt-test-result" class="taskshunt-test-result"></span>',
+			esc_html__( 'Test connection', 'taskshunt' )
 		);
 	}
 
@@ -324,11 +324,11 @@ final class SettingsPage {
 	 */
 	private function render_server_form(): void {
 		printf(
-			'<form method="post" action="%s" class="stagify-server-form">',
+			'<form method="post" action="%s" class="taskshunt-server-form">',
 			esc_url( admin_url( 'admin-post.php' ) )
 		);
-		echo '<input type="hidden" name="action" value="stagify_save_server">';
-		wp_nonce_field( 'stagify_save_server' );
+		echo '<input type="hidden" name="action" value="taskshunt_save_server">';
+		wp_nonce_field( 'taskshunt_save_server' );
 
 		$this->render_name_field();
 		$this->render_url_field();
@@ -336,7 +336,7 @@ final class SettingsPage {
 
 		printf(
 			'<button type="submit" class="button button-primary">%s</button>',
-			esc_html__( 'Connect server', 'stagify' )
+			esc_html__( 'Connect server', 'taskshunt' )
 		);
 		echo '</form>';
 	}
@@ -348,12 +348,12 @@ final class SettingsPage {
 	 */
 	private function render_name_field(): void {
 		printf(
-			'<div class="stagify-field">'
-			. '<label for="stagify_server_name">%s</label>'
-			. '<input type="text" id="stagify_server_name" name="stagify_server_name" placeholder="%s" required>'
+			'<div class="taskshunt-field">'
+			. '<label for="taskshunt_server_name">%s</label>'
+			. '<input type="text" id="taskshunt_server_name" name="taskshunt_server_name" placeholder="%s" required>'
 			. '</div>',
-			esc_html__( 'Name', 'stagify' ),
-			esc_attr__( 'e.g. Production', 'stagify' )
+			esc_html__( 'Name', 'taskshunt' ),
+			esc_attr__( 'e.g. Production', 'taskshunt' )
 		);
 	}
 
@@ -364,12 +364,12 @@ final class SettingsPage {
 	 */
 	private function render_url_field(): void {
 		printf(
-			'<div class="stagify-field">'
-			. '<label for="stagify_server_url">%s</label>'
-			. '<input type="url" id="stagify_server_url" name="stagify_server_url" placeholder="%s" required>'
+			'<div class="taskshunt-field">'
+			. '<label for="taskshunt_server_url">%s</label>'
+			. '<input type="url" id="taskshunt_server_url" name="taskshunt_server_url" placeholder="%s" required>'
 			. '</div>',
-			esc_html__( 'URL', 'stagify' ),
-			esc_attr__( 'https://yoursite.com', 'stagify' )
+			esc_html__( 'URL', 'taskshunt' ),
+			esc_attr__( 'https://yoursite.com', 'taskshunt' )
 		);
 	}
 
@@ -380,18 +380,18 @@ final class SettingsPage {
 	 */
 	private function render_api_key_field(): void {
 		printf(
-			'<div class="stagify-field">'
-			. '<label for="stagify_api_key">%s</label>'
-			. '<div class="stagify-field-row">'
-			. '<input type="password" id="stagify_api_key" name="stagify_api_key" autocomplete="new-password" placeholder="%s" required>'
-			. '<button type="button" id="stagify-toggle-key" class="button button-small" data-label-show="%s" data-label-hide="%s">%s</button>'
+			'<div class="taskshunt-field">'
+			. '<label for="taskshunt_api_key">%s</label>'
+			. '<div class="taskshunt-field-row">'
+			. '<input type="password" id="taskshunt_api_key" name="taskshunt_api_key" autocomplete="new-password" placeholder="%s" required>'
+			. '<button type="button" id="taskshunt-toggle-key" class="button button-small" data-label-show="%s" data-label-hide="%s">%s</button>'
 			. '</div>'
 			. '</div>',
-			esc_html__( 'API Key', 'stagify' ),
-			esc_attr__( 'Paste from production site', 'stagify' ),
-			esc_attr__( 'Show', 'stagify' ),
-			esc_attr__( 'Hide', 'stagify' ),
-			esc_html__( 'Show', 'stagify' )
+			esc_html__( 'API Key', 'taskshunt' ),
+			esc_attr__( 'Paste from production site', 'taskshunt' ),
+			esc_attr__( 'Show', 'taskshunt' ),
+			esc_attr__( 'Hide', 'taskshunt' ),
+			esc_html__( 'Show', 'taskshunt' )
 		);
 	}
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="Stagify">
-    <description>Stagify WordPress Plugin coding standards.</description>
+<ruleset name="TaskShunt">
+    <description>TaskShunt WordPress Plugin coding standards.</description>
 
     <!-- What to scan -->
     <file>.</file>
@@ -24,7 +24,7 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="stagify"/>
+                <element value="taskshunt"/>
             </property>
         </properties>
     </rule>

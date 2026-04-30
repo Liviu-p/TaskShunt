@@ -2,18 +2,18 @@
 /**
  * Serializer registry.
  *
- * @package Stagify\Serializers
+ * @package TaskShunt\Serializers
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Serializers;
+namespace TaskShunt\Serializers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\PayloadSerializerInterface;
+use TaskShunt\Contracts\PayloadSerializerInterface;
 
 /**
  * Holds all registered payload serializers and resolves them by object type.
@@ -52,7 +52,7 @@ final class SerializerRegistry {
 
 		throw new \RuntimeException(
 			/* translators: %s: WordPress object type slug */
-			esc_html( sprintf( __( 'No serializer registered for object type "%s".', 'stagify' ), $object_type ) )
+			esc_html( sprintf( __( 'No serializer registered for object type "%s".', 'taskshunt' ), $object_type ) )
 		);
 	}
 }

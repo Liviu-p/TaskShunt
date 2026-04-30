@@ -5,7 +5,7 @@
  * Loads Composer autoloader and Brain\Monkey for mocking WordPress functions
  * without requiring a full WordPress installation.
  *
- * @package Stagify\Tests
+ * @package TaskShunt\Tests
  */
 
 declare(strict_types=1);

@@ -1,4 +1,4 @@
-interface StagifyModalData {
+interface TaskShuntModalData {
 	ajaxUrl: string;
 	nonce: string;
 	actionLabels: Record< string, string >;
@@ -25,29 +25,29 @@ interface PreviewItem {
 	excerpt?: string;
 }
 
-declare const stagifyModal: StagifyModalData;
+declare const taskshuntModal: TaskShuntModalData;
 
 ( () => {
 	function getEl( id: string ): HTMLElement | null {
 		return document.getElementById( id );
 	}
 
-	( window as any ).stagifyConfirm = ( opts: ConfirmOptions ): Promise< boolean | string > => {
+	( window as any ).taskshuntConfirm = ( opts: ConfirmOptions ): Promise< boolean | string > => {
 		return new Promise( ( resolve ) => {
-			const ov = getEl( 'stagify-modal-overlay' );
-			const ti = getEl( 'stagify-modal-title' );
-			const msg = getEl( 'stagify-modal-message' );
-			const pv = getEl( 'stagify-modal-preview' );
-			const ok = getEl( 'stagify-modal-ok' ) as HTMLButtonElement | null;
-			const cn = getEl( 'stagify-modal-cancel' ) as HTMLButtonElement | null;
+			const ov = getEl( 'taskshunt-modal-overlay' );
+			const ti = getEl( 'taskshunt-modal-title' );
+			const msg = getEl( 'taskshunt-modal-message' );
+			const pv = getEl( 'taskshunt-modal-preview' );
+			const ok = getEl( 'taskshunt-modal-ok' ) as HTMLButtonElement | null;
+			const cn = getEl( 'taskshunt-modal-cancel' ) as HTMLButtonElement | null;
 
 			if ( ! ov || ! ti || ! msg || ! pv || ! ok || ! cn ) {
 				resolve( false );
 				return;
 			}
 
-			const pr = getEl( 'stagify-modal-prompt' );
-			const inp = getEl( 'stagify-modal-input' ) as HTMLInputElement | null;
+			const pr = getEl( 'taskshunt-modal-prompt' );
+			const inp = getEl( 'taskshunt-modal-input' ) as HTMLInputElement | null;
 
 			ti.textContent = opts.title || '';
 			msg.textContent = opts.message || '';
@@ -63,19 +63,19 @@ declare const stagifyModal: StagifyModalData;
 			}
 
 			ok.textContent = opts.confirm || 'OK';
-			ok.className = 'button button-primary' + ( opts.danger ? ' stagify-modal-confirm--danger' : '' );
-			ov.classList.add( 'stagify-modal--open' );
+			ok.className = 'button button-primary' + ( opts.danger ? ' taskshunt-modal-confirm--danger' : '' );
+			ov.classList.add( 'taskshunt-modal--open' );
 
 			if ( opts.prompt && inp ) {
 				setTimeout( () => inp.focus(), 50 );
 			}
 
 			// Fetch preview if taskId provided.
-			if ( opts.previewTaskId && ( window as any ).stagifyAdminBar ) {
+			if ( opts.previewTaskId && ( window as any ).taskshuntAdminBar ) {
 				pv.style.display = 'block';
-				pv.innerHTML = '<div class="stagify-preview-loading">' + stagifyModal.loadingPreview + '</div>';
+				pv.innerHTML = '<div class="taskshunt-preview-loading">' + taskshuntModal.loadingPreview + '</div>';
 
-				fetch( ( window as any ).stagifyAdminBar.ajaxUrl + '?action=stagify_preview_task&task_id=' + opts.previewTaskId + '&_ajax_nonce=' + ( window as any ).stagifyAdminBar.nonce )
+				fetch( ( window as any ).taskshuntAdminBar.ajaxUrl + '?action=taskshunt_preview_task&task_id=' + opts.previewTaskId + '&_ajax_nonce=' + ( window as any ).taskshuntAdminBar.nonce )
 					.then( ( r ) => r.json() )
 					.then( ( d: { success: boolean; data: { items: PreviewItem[] } } ) => {
 						if ( ! d.success ) {
@@ -91,17 +91,17 @@ declare const stagifyModal: StagifyModalData;
 							return;
 						}
 
-						let html = '<div class="stagify-preview-list">';
+						let html = '<div class="taskshunt-preview-list">';
 						items.forEach( ( item ) => {
-							const actionCls = 'stagify-action--' + item.action;
-							const actionLabel = stagifyModal.actionLabels[ item.action ] || item.action;
-							const typeLabel = stagifyModal.typeLabels[ item.type ] || item.type;
-							html += '<div class="stagify-preview-item">';
-							html += '<span class="stagify-preview-action ' + actionCls + '">' + actionLabel + '</span> ';
+							const actionCls = 'taskshunt-action--' + item.action;
+							const actionLabel = taskshuntModal.actionLabels[ item.action ] || item.action;
+							const typeLabel = taskshuntModal.typeLabels[ item.type ] || item.type;
+							html += '<div class="taskshunt-preview-item">';
+							html += '<span class="taskshunt-preview-action ' + actionCls + '">' + actionLabel + '</span> ';
 							html += '<strong>' + ( item.title || item.object_id ) + '</strong>';
-							html += '<span class="stagify-preview-type">' + typeLabel + '</span>';
+							html += '<span class="taskshunt-preview-type">' + typeLabel + '</span>';
 							if ( item.excerpt ) {
-								html += '<p class="stagify-preview-excerpt">' + item.excerpt + '</p>';
+								html += '<p class="taskshunt-preview-excerpt">' + item.excerpt + '</p>';
 							}
 							html += '</div>';
 						} );
@@ -115,7 +115,7 @@ declare const stagifyModal: StagifyModalData;
 			}
 
 			function close( val: boolean | string ): void {
-				ov!.classList.remove( 'stagify-modal--open' );
+				ov!.classList.remove( 'taskshunt-modal--open' );
 				ok!.onclick = null;
 				cn!.onclick = null;
 				pv!.innerHTML = '';
@@ -159,12 +159,12 @@ declare const stagifyModal: StagifyModalData;
 
 	// Links with data-confirm attributes.
 	document.addEventListener( 'click', ( e: Event ) => {
-		const el = ( e.target as HTMLElement ).closest< HTMLAnchorElement >( '.stagify-confirm-link' );
+		const el = ( e.target as HTMLElement ).closest< HTMLAnchorElement >( '.taskshunt-confirm-link' );
 		if ( ! el ) {
 			return;
 		}
 		e.preventDefault();
-		( window as any ).stagifyConfirm( {
+		( window as any ).taskshuntConfirm( {
 			title: el.dataset.confirmTitle,
 			message: el.dataset.confirmMessage,
 			confirm: el.dataset.confirmLabel,
@@ -178,12 +178,12 @@ declare const stagifyModal: StagifyModalData;
 
 	// Submit buttons with data-confirm attributes.
 	document.addEventListener( 'click', ( e: Event ) => {
-		const el = ( e.target as HTMLElement ).closest< HTMLElement >( '.stagify-confirm-submit' );
+		const el = ( e.target as HTMLElement ).closest< HTMLElement >( '.taskshunt-confirm-submit' );
 		if ( ! el ) {
 			return;
 		}
 		e.preventDefault();
-		( window as any ).stagifyConfirm( {
+		( window as any ).taskshuntConfirm( {
 			title: el.dataset.confirmTitle,
 			message: el.dataset.confirmMessage,
 			confirm: el.dataset.confirmLabel,
@@ -196,15 +196,15 @@ declare const stagifyModal: StagifyModalData;
 	} );
 
 	// Confetti function — called on first-time milestones.
-	( window as any ).stagifyConfetti = (): void => {
+	( window as any ).taskshuntConfetti = (): void => {
 		const c = document.createElement( 'div' );
-		c.className = 'stagify-confetti-container';
+		c.className = 'taskshunt-confetti-container';
 		document.body.appendChild( c );
 
 		const colors = [ '#ff7759', '#39594d', '#4c6ee6', '#d18ee2', '#f0b849', '#212121', '#ca492d' ];
 		for ( let i = 0; i < 80; i++ ) {
 			const p = document.createElement( 'div' );
-			p.className = 'stagify-confetti-piece';
+			p.className = 'taskshunt-confetti-piece';
 			p.style.left = Math.random() * 100 + '%';
 			p.style.background = colors[ Math.floor( Math.random() * colors.length ) ];
 			p.style.width = ( Math.random() * 8 + 6 ) + 'px';
@@ -220,7 +220,7 @@ declare const stagifyModal: StagifyModalData;
 
 	// Inline rename handler.
 	document.addEventListener( 'click', ( e: Event ) => {
-		const el = ( e.target as HTMLElement ).closest< HTMLElement >( '.stagify-rename-trigger' );
+		const el = ( e.target as HTMLElement ).closest< HTMLElement >( '.taskshunt-rename-trigger' );
 		if ( ! el ) {
 			return;
 		}
@@ -239,7 +239,7 @@ declare const stagifyModal: StagifyModalData;
 		const input = document.createElement( 'input' );
 		input.type = 'text';
 		input.value = current;
-		input.className = 'stagify-rename-input';
+		input.className = 'taskshunt-rename-input';
 		input.style.cssText = 'width:100%;height:32px;border:1px solid #d9d9dd;border-radius:8px;padding:0 10px;font-size:13px;';
 		titleCell.innerHTML = '';
 		titleCell.appendChild( input );
@@ -253,17 +253,17 @@ declare const stagifyModal: StagifyModalData;
 				return;
 			}
 
-			if ( typeof stagifyAdminBar === 'undefined' ) {
+			if ( typeof taskshuntAdminBar === 'undefined' ) {
 				titleCell!.innerHTML = origHtml;
 				return;
 			}
 
-			fetch( ( window as any ).stagifyAdminBar.ajaxUrl, {
+			fetch( ( window as any ).taskshuntAdminBar.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: new URLSearchParams( {
-					action: 'stagify_rename_task',
-					_ajax_nonce: ( window as any ).stagifyAdminBar.nonce,
+					action: 'taskshunt_rename_task',
+					_ajax_nonce: ( window as any ).taskshuntAdminBar.nonce,
 					task_id: id || '',
 					title: val,
 				} ),
@@ -282,7 +282,7 @@ declare const stagifyModal: StagifyModalData;
 							titleCell!.appendChild( ra );
 						}
 
-						const trigger = titleCell!.querySelector< HTMLElement >( '.stagify-rename-trigger' );
+						const trigger = titleCell!.querySelector< HTMLElement >( '.taskshunt-rename-trigger' );
 						if ( trigger ) {
 							trigger.dataset.title = d.data.title;
 						}

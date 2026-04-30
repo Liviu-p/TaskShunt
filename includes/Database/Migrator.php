@@ -2,19 +2,19 @@
 /**
  * Database migrator.
  *
- * @package Stagify\Database
+ * @package TaskShunt\Database
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Database;
+namespace TaskShunt\Database;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\MigrationInterface;
-use Stagify\Database\Migrations\Migration100;
+use TaskShunt\Contracts\MigrationInterface;
+use TaskShunt\Database\Migrations\Migration100;
 
 /**
  * Runs pending database migrations in version order.
@@ -40,7 +40,7 @@ final class Migrator {
 	/**
 	 * Option key used to persist the installed schema version.
 	 */
-	private const VERSION_OPTION = 'stagify_db_version';
+	private const VERSION_OPTION = 'taskshunt_db_version';
 
 	/**
 	 * Create a Migrator.

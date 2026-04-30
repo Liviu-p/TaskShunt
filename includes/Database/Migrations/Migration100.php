@@ -2,21 +2,21 @@
 /**
  * Migration 1.0.0 — initial schema.
  *
- * @package Stagify\Database\Migrations
+ * @package TaskShunt\Database\Migrations
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Database\Migrations;
+namespace TaskShunt\Database\Migrations;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\MigrationInterface;
+use TaskShunt\Contracts\MigrationInterface;
 
 /**
- * Creates the initial stagify database tables.
+ * Creates the initial taskshunt database tables.
  */
 final class Migration100 implements MigrationInterface {
 
@@ -36,14 +36,14 @@ final class Migration100 implements MigrationInterface {
 	}
 
 	/**
-	 * Create the stagify_tasks table.
+	 * Create the taskshunt_tasks table.
 	 *
 	 * @return void
 	 */
 	private function create_tasks_table(): void {
 		global $wpdb;
 		dbDelta(
-			"CREATE TABLE {$wpdb->prefix}stagify_tasks (
+			"CREATE TABLE {$wpdb->prefix}taskshunt_tasks (
 			  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			  title varchar(255) NOT NULL DEFAULT '',
 			  status varchar(20) NOT NULL DEFAULT 'pending',
@@ -58,14 +58,14 @@ final class Migration100 implements MigrationInterface {
 	}
 
 	/**
-	 * Create the stagify_task_items table.
+	 * Create the taskshunt_task_items table.
 	 *
 	 * @return void
 	 */
 	private function create_task_items_table(): void {
 		global $wpdb;
 		dbDelta(
-			"CREATE TABLE {$wpdb->prefix}stagify_task_items (
+			"CREATE TABLE {$wpdb->prefix}taskshunt_task_items (
 			  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			  task_id bigint(20) unsigned NOT NULL,
 			  type varchar(20) NOT NULL DEFAULT '',
@@ -84,14 +84,14 @@ final class Migration100 implements MigrationInterface {
 	}
 
 	/**
-	 * Create the stagify_servers table.
+	 * Create the taskshunt_servers table.
 	 *
 	 * @return void
 	 */
 	private function create_servers_table(): void {
 		global $wpdb;
 		dbDelta(
-			"CREATE TABLE {$wpdb->prefix}stagify_servers (
+			"CREATE TABLE {$wpdb->prefix}taskshunt_servers (
 			  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			  name varchar(255) NOT NULL DEFAULT '',
 			  url varchar(2048) NOT NULL DEFAULT '',
@@ -103,14 +103,14 @@ final class Migration100 implements MigrationInterface {
 	}
 
 	/**
-	 * Create the stagify_file_snapshots table.
+	 * Create the taskshunt_file_snapshots table.
 	 *
 	 * @return void
 	 */
 	private function create_file_snapshots_table(): void {
 		global $wpdb;
 		dbDelta(
-			"CREATE TABLE {$wpdb->prefix}stagify_file_snapshots (
+			"CREATE TABLE {$wpdb->prefix}taskshunt_file_snapshots (
 			  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			  path varchar(1000) NOT NULL DEFAULT '',
 			  hash varchar(64) NOT NULL DEFAULT '',
@@ -123,14 +123,14 @@ final class Migration100 implements MigrationInterface {
 	}
 
 	/**
-	 * Create the stagify_push_log table.
+	 * Create the taskshunt_push_log table.
 	 *
 	 * @return void
 	 */
 	private function create_push_log_table(): void {
 		global $wpdb;
 		dbDelta(
-			"CREATE TABLE {$wpdb->prefix}stagify_push_log (
+			"CREATE TABLE {$wpdb->prefix}taskshunt_push_log (
 			  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			  task_id bigint(20) unsigned NOT NULL,
 			  pushed_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

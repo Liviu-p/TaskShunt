@@ -2,18 +2,18 @@
 /**
  * File item handler for the receiver API.
  *
- * @package Stagify\Api\Handlers
+ * @package TaskShunt\Api\Handlers
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Api\Handlers;
+namespace TaskShunt\Api\Handlers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\TaskAction;
+use TaskShunt\Domain\TaskAction;
 
 /**
  * Applies a single file change on the receiver site.
@@ -33,7 +33,7 @@ final class FileHandler {
 		return array(
 			'success' => true,
 			/* translators: 1: action name, 2: object ID */
-			'message' => sprintf( __( 'File %1$s queued for object %2$d.', 'stagify' ), $action->value, $object_id ),
+			'message' => sprintf( __( 'File %1$s queued for object %2$d.', 'taskshunt' ), $action->value, $object_id ),
 		);
 	}
 }

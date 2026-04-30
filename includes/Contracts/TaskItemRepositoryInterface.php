@@ -2,19 +2,19 @@
 /**
  * Task item repository interface.
  *
- * @package Stagify\Contracts
+ * @package TaskShunt\Contracts
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Contracts;
+namespace TaskShunt\Contracts;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItemType;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItemType;
 
 interface TaskItemRepositoryInterface {
 
@@ -69,14 +69,14 @@ interface TaskItemRepositoryInterface {
 	 * @param TaskItemType $type        Category of the item.
 	 * @param string       $object_type The WordPress object type.
 	 * @param string       $object_id   Identifier of the object within its type.
-	 * @return \Stagify\Domain\TaskItem|null
+	 * @return \TaskShunt\Domain\TaskItem|null
 	 */
 	public function find_item(
 		int $task_id,
 		TaskItemType $type,
 		string $object_type,
 		string $object_id
-	): ?\Stagify\Domain\TaskItem;
+	): ?\TaskShunt\Domain\TaskItem;
 
 	/**
 	 * Delete a single item by its ID and decrement the parent task's item_count.

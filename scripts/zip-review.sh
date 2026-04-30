@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build a zip of the Stagify plugin for WordPress.org review.
+# Build a zip of the TaskShunt plugin for WordPress.org review.
 # Includes source files (SCSS, TypeScript) and build tooling so reviewers
 # can inspect and rebuild the compiled assets.
 #
@@ -8,7 +8,7 @@
 #
 set -euo pipefail
 
-PLUGIN_SLUG="stagify"
+PLUGIN_SLUG="taskshunt"
 PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$(mktemp -d)"
 DEST="${BUILD_DIR}/${PLUGIN_SLUG}"
@@ -21,7 +21,7 @@ echo "=> Copying plugin files..."
 mkdir -p "$DEST"
 
 # Core plugin files.
-cp "$PLUGIN_DIR/stagify.php"   "$DEST/"
+cp "$PLUGIN_DIR/taskshunt.php"   "$DEST/"
 cp "$PLUGIN_DIR/readme.txt"    "$DEST/"
 cp "$PLUGIN_DIR/composer.json" "$DEST/"
 cp -R "$PLUGIN_DIR/admin"      "$DEST/"

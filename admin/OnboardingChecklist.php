@@ -2,21 +2,21 @@
 /**
  * Onboarding checklist — persistent setup guide.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Pages\SetupPage;
-use Stagify\Api\ReceiverApi;
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Domain\PluginMode;
+use TaskShunt\Admin\Pages\SetupPage;
+use TaskShunt\Api\ReceiverApi;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Domain\PluginMode;
 
 /**
  * Renders a step-by-step checklist until setup is complete.
@@ -26,7 +26,7 @@ final class OnboardingChecklist {
 	/**
 	 * Option key to dismiss the checklist.
 	 */
-	public const DISMISS_OPTION = 'stagify_onboarding_dismissed';
+	public const DISMISS_OPTION = 'taskshunt_onboarding_dismissed';
 
 	/**
 	 * Check if the onboarding checklist should be shown.
@@ -88,21 +88,21 @@ final class OnboardingChecklist {
 		$steps = array(
 			array(
 				'done'  => true,
-				'label' => __( 'Set this site as Staging', 'stagify' ),
+				'label' => __( 'Set this site as Staging', 'taskshunt' ),
 				'desc'  => '',
 			),
 			array(
 				'done'  => false,
-				'label' => __( 'Set up Production site', 'stagify' ),
-				'desc'  => __( 'Install Stagify on your live site, set it as Production, and generate an API key.', 'stagify' ),
+				'label' => __( 'Set up Production site', 'taskshunt' ),
+				'desc'  => __( 'Install TaskShunt on your live site, set it as Production, and generate an API key.', 'taskshunt' ),
 			),
 			array(
 				'done'  => $has_server,
-				'label' => __( 'Connect to Production', 'stagify' ),
+				'label' => __( 'Connect to Production', 'taskshunt' ),
 				'desc'  => $has_server ? '' : sprintf(
 					/* translators: %s: settings page URL */
-					__( 'Go to <a href="%s">Settings</a> and paste the production URL and API key.', 'stagify' ),
-					esc_url( admin_url( 'admin.php?page=stagify-settings' ) )
+					__( 'Go to <a href="%s">Settings</a> and paste the production URL and API key.', 'taskshunt' ),
+					esc_url( admin_url( 'admin.php?page=taskshunt-settings' ) )
 				),
 			),
 		);
@@ -131,20 +131,20 @@ final class OnboardingChecklist {
 		$steps = array(
 			array(
 				'done'  => true,
-				'label' => __( 'Set this site as Production', 'stagify' ),
+				'label' => __( 'Set this site as Production', 'taskshunt' ),
 				'desc'  => '',
 			),
 			array(
 				'done'  => $has_key,
-				'label' => __( 'Generate an API key', 'stagify' ),
-				'desc'  => $has_key ? '' : __( 'Click "Generate API key" above to create one.', 'stagify' ),
+				'label' => __( 'Generate an API key', 'taskshunt' ),
+				'desc'  => $has_key ? '' : __( 'Click "Generate API key" above to create one.', 'taskshunt' ),
 			),
 			array(
 				'done'  => false,
-				'label' => __( 'Connect from Staging', 'stagify' ),
+				'label' => __( 'Connect from Staging', 'taskshunt' ),
 				'desc'  => $has_key
-					? __( 'Copy the API key above and paste it in the Stagify settings on your staging site.', 'stagify' )
-					: __( 'After generating the key, copy it and paste it on your staging site.', 'stagify' ),
+					? __( 'Copy the API key above and paste it in the TaskShunt settings on your staging site.', 'taskshunt' )
+					: __( 'After generating the key, copy it and paste it on your staging site.', 'taskshunt' ),
 			),
 		);
 
@@ -166,7 +166,7 @@ final class OnboardingChecklist {
 			}
 		}
 
-		echo '<div class="stagify-checklist">';
+		echo '<div class="taskshunt-checklist">';
 		self::render_checklist_header( $done_count, $total_count );
 		self::render_checklist_steps( $steps );
 		echo '</div>';
@@ -181,18 +181,18 @@ final class OnboardingChecklist {
 	 */
 	private static function render_checklist_header( int $done_count, int $total_count ): void {
 		printf(
-			'<div class="stagify-checklist-header">'
+			'<div class="taskshunt-checklist-header">'
 			. '<div>'
 			. '<strong>%s</strong>'
-			. '<span class="stagify-checklist-progress">%s</span>'
+			. '<span class="taskshunt-checklist-progress">%s</span>'
 			. '</div>'
-			. '<div class="stagify-checklist-bar"><div class="stagify-checklist-bar-fill" style="width:%d%%"></div></div>'
+			. '<div class="taskshunt-checklist-bar"><div class="taskshunt-checklist-bar-fill" style="width:%d%%"></div></div>'
 			. '</div>',
-			esc_html__( 'Getting started', 'stagify' ),
+			esc_html__( 'Getting started', 'taskshunt' ),
 			esc_html(
 				sprintf(
 				/* translators: 1: completed steps, 2: total steps */
-					__( '%1$d of %2$d complete', 'stagify' ),
+					__( '%1$d of %2$d complete', 'taskshunt' ),
 					$done_count,
 					$total_count
 				)
@@ -208,16 +208,16 @@ final class OnboardingChecklist {
 	 * @return void
 	 */
 	private static function render_checklist_steps( array $steps ): void {
-		echo '<div class="stagify-checklist-steps">';
+		echo '<div class="taskshunt-checklist-steps">';
 
 		foreach ( $steps as $index => $step ) {
-			$class = $step['done'] ? 'stagify-checklist-step--done' : '';
+			$class = $step['done'] ? 'taskshunt-checklist-step--done' : '';
 			$icon  = $step['done']
-				? '<span class="dashicons dashicons-yes-alt stagify-check-done"></span>'
-				: '<span class="stagify-check-num">' . ( $index + 1 ) . '</span>';
+				? '<span class="dashicons dashicons-yes-alt taskshunt-check-done"></span>'
+				: '<span class="taskshunt-check-num">' . ( $index + 1 ) . '</span>';
 
 			printf(
-				'<div class="stagify-checklist-step %s">%s<div><strong>%s</strong>',
+				'<div class="taskshunt-checklist-step %s">%s<div><strong>%s</strong>',
 				esc_attr( $class ),
 				$icon, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				$step['done'] ? '<s>' . esc_html( $step['label'] ) . '</s>' : esc_html( $step['label'] )

@@ -2,21 +2,21 @@
 /**
  * Delete server action handler.
  *
- * @package Stagify\Admin\Actions
+ * @package TaskShunt\Admin\Actions
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Actions;
+namespace TaskShunt\Admin\Actions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\ServerRepositoryInterface;
+use TaskShunt\Contracts\ServerRepositoryInterface;
 
 /**
- * Handles the admin_post_stagify_delete_server request.
+ * Handles the admin_post_taskshunt_delete_server request.
  */
 final class DeleteServerAction {
 
@@ -35,10 +35,10 @@ final class DeleteServerAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_admin_referer( 'stagify_delete_server' );
+		check_admin_referer( 'taskshunt_delete_server' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
 		$server_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
@@ -46,7 +46,7 @@ final class DeleteServerAction {
 			$this->server_repository->delete( $server_id );
 		}
 
-		wp_safe_redirect( admin_url( 'admin.php?page=stagify-settings' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt-settings' ) );
 		exit;
 	}
 }

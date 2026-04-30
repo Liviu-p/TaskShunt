@@ -2,17 +2,17 @@
 /**
  * Unit tests for the Task entity.
  *
- * @package Stagify\Tests\Unit
+ * @package TaskShunt\Tests\Unit
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Tests\Unit;
+namespace TaskShunt\Tests\Unit;
 
 use Brain\Monkey;
 use PHPUnit\Framework\TestCase;
-use Stagify\Domain\Task;
-use Stagify\Domain\TaskStatus;
+use TaskShunt\Domain\Task;
+use TaskShunt\Domain\TaskStatus;
 
 /**
  * Tests Task entity construction, hydration, and status helpers.

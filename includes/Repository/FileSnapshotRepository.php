@@ -2,19 +2,19 @@
 /**
  * File snapshot repository.
  *
- * @package Stagify\Repository
+ * @package TaskShunt\Repository
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Repository;
+namespace TaskShunt\Repository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\FileSnapshotRepositoryInterface;
-use Stagify\Domain\RelativePath;
+use TaskShunt\Contracts\FileSnapshotRepositoryInterface;
+use TaskShunt\Domain\RelativePath;
 
 /**
  * Persists and retrieves file hash snapshots using a custom DB table.
@@ -34,7 +34,7 @@ final class FileSnapshotRepository implements FileSnapshotRepositoryInterface {
 	 * @param \wpdb $wpdb WordPress database object.
 	 */
 	public function __construct( private readonly \wpdb $wpdb ) {
-		$this->table = $wpdb->prefix . 'stagify_file_snapshots';
+		$this->table = $wpdb->prefix . 'taskshunt_file_snapshots';
 	}
 
 	/**

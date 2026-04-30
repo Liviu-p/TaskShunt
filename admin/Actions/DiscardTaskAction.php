@@ -2,24 +2,24 @@
 /**
  * Discard task action handler.
  *
- * @package Stagify\Admin\Actions
+ * @package TaskShunt\Admin\Actions
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin\Actions;
+namespace TaskShunt\Admin\Actions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Admin\Notices;
-use Stagify\Contracts\EventDispatcherInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
-use Stagify\Events\TaskDeleted;
+use TaskShunt\Admin\Notices;
+use TaskShunt\Contracts\EventDispatcherInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
+use TaskShunt\Events\TaskDeleted;
 
 /**
- * Handles the admin_post_stagify_discard_task request.
+ * Handles the admin_post_taskshunt_discard_task request.
  *
  * Verifies the nonce and capability, deletes the task, dispatches
  * TaskDeleted, then redirects back to the tasks list with a notice param.
@@ -43,17 +43,17 @@ final class DiscardTaskAction {
 	 * @return void
 	 */
 	public function handle(): void {
-		check_admin_referer( 'stagify_discard_task' );
+		check_admin_referer( 'taskshunt_discard_task' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'stagify' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'taskshunt' ) );
 		}
 
 		$task_id = isset( $_REQUEST['task_id'] ) ? (int) $_REQUEST['task_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $task_id <= 0 ) {
-			Notices::add( 'error', __( 'Invalid task ID.', 'stagify' ) );
-			wp_safe_redirect( admin_url( 'admin.php?page=stagify' ) );
+			Notices::add( 'error', __( 'Invalid task ID.', 'taskshunt' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=taskshunt' ) );
 			exit;
 		}
 
@@ -65,8 +65,8 @@ final class DiscardTaskAction {
 		$this->task_repository->delete( $task_id );
 		$this->event_dispatcher->dispatch( new TaskDeleted( $task_id ) );
 
-		Notices::add( 'success', __( 'Task discarded successfully.', 'stagify' ) );
-		wp_safe_redirect( admin_url( 'admin.php?page=stagify' ) );
+		Notices::add( 'success', __( 'Task discarded successfully.', 'taskshunt' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt' ) );
 		exit;
 	}
 }

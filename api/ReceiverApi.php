@@ -2,22 +2,22 @@
 /**
  * Receiver REST API registration.
  *
- * @package Stagify\Api
+ * @package TaskShunt\Api
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Api;
+namespace TaskShunt\Api;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Api\Handlers\ContentHandler;
-use Stagify\Api\Handlers\EnvironmentHandler;
-use Stagify\Api\Handlers\FileHandler;
-use Stagify\Domain\TaskAction;
-use Stagify\Domain\TaskItemType;
+use TaskShunt\Api\Handlers\ContentHandler;
+use TaskShunt\Api\Handlers\EnvironmentHandler;
+use TaskShunt\Api\Handlers\FileHandler;
+use TaskShunt\Domain\TaskAction;
+use TaskShunt\Domain\TaskItemType;
 
 /**
  * Registers REST API routes used by the receiver (production) side.
@@ -25,19 +25,19 @@ use Stagify\Domain\TaskItemType;
 final class ReceiverApi {
 
 	/**
-	 * REST namespace for all Stagify routes.
+	 * REST namespace for all TaskShunt routes.
 	 */
-	private const NAMESPACE = 'stagify/v1';
+	private const NAMESPACE = 'taskshunt/v1';
 
 	/**
 	 * WP option key storing the receiver API key.
 	 */
-	public const API_KEY_OPTION = 'stagify_receiver_api_key';
+	public const API_KEY_OPTION = 'taskshunt_receiver_api_key';
 
 	/**
 	 * Transient key for the receive operations log.
 	 */
-	private const LOG_TRANSIENT = 'stagify_receive_log';
+	private const LOG_TRANSIENT = 'taskshunt_receive_log';
 
 	/**
 	 * Maximum number of log entries to keep.
@@ -99,7 +99,7 @@ final class ReceiverApi {
 	}
 
 	/**
-	 * Handle GET /stagify/v1/ping.
+	 * Handle GET /taskshunt/v1/ping.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -107,7 +107,7 @@ final class ReceiverApi {
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
-				'version' => STAGIFY_VERSION,
+				'version' => TASKSHUNT_VERSION,
 				'site'    => get_bloginfo( 'name' ),
 			),
 			200
@@ -115,13 +115,13 @@ final class ReceiverApi {
 	}
 
 	/**
-	 * Permission callback: validate the X-Stagify-API-Key header.
+	 * Permission callback: validate the X-TaskShunt-API-Key header.
 	 *
 	 * @param \WP_REST_Request $request Incoming request.
 	 * @return bool
 	 */
 	public function check_api_key( \WP_REST_Request $request ): bool {
-		$provided = $request->get_header( 'X-Stagify-API-Key' );
+		$provided = $request->get_header( 'X-TaskShunt-API-Key' );
 
 		if ( empty( $provided ) ) {
 			return false;
@@ -137,7 +137,7 @@ final class ReceiverApi {
 	}
 
 	/**
-	 * Handle POST /stagify/v1/receive.
+	 * Handle POST /taskshunt/v1/receive.
 	 *
 	 * @param \WP_REST_Request $request Incoming request.
 	 * @return \WP_REST_Response
@@ -219,7 +219,7 @@ final class ReceiverApi {
 	 */
 	private function validate_body( array $body ): ?string {
 		if ( empty( $body['items'] ) || ! is_array( $body['items'] ) ) {
-			return __( 'The items field is required and must be a non-empty array.', 'stagify' );
+			return __( 'The items field is required and must be a non-empty array.', 'taskshunt' );
 		}
 
 		return $this->validate_items( $body['items'] );
@@ -268,14 +268,14 @@ final class ReceiverApi {
 	private function validate_item_type( array $item, int $position ): ?string {
 		if ( empty( $item['item_type'] ) ) {
 			/* translators: %d: item position in the array */
-			return sprintf( __( 'Item %d is missing the item_type field.', 'stagify' ), $position );
+			return sprintf( __( 'Item %d is missing the item_type field.', 'taskshunt' ), $position );
 		}
 
 		try {
 			TaskItemType::from( $item['item_type'] );
 		} catch ( \ValueError $e ) {
 			/* translators: 1: item position, 2: provided type value */
-			return sprintf( __( 'Item %1$d has an invalid item_type: %2$s.', 'stagify' ), $position, $item['item_type'] );
+			return sprintf( __( 'Item %1$d has an invalid item_type: %2$s.', 'taskshunt' ), $position, $item['item_type'] );
 		}
 
 		return null;
@@ -291,14 +291,14 @@ final class ReceiverApi {
 	private function validate_item_action( array $item, int $position ): ?string {
 		if ( empty( $item['action'] ) ) {
 			/* translators: %d: item position in the array */
-			return sprintf( __( 'Item %d is missing the action field.', 'stagify' ), $position );
+			return sprintf( __( 'Item %d is missing the action field.', 'taskshunt' ), $position );
 		}
 
 		try {
 			TaskAction::from( $item['action'] );
 		} catch ( \ValueError $e ) {
 			/* translators: 1: item position, 2: provided action value */
-			return sprintf( __( 'Item %1$d has an invalid action: %2$s.', 'stagify' ), $position, $item['action'] );
+			return sprintf( __( 'Item %1$d has an invalid action: %2$s.', 'taskshunt' ), $position, $item['action'] );
 		}
 
 		return null;
@@ -314,14 +314,14 @@ final class ReceiverApi {
 	private function validate_item_object_type( array $item, int $position ): ?string {
 		if ( empty( $item['object_type'] ) ) {
 			/* translators: %d: item position in the array */
-			return sprintf( __( 'Item %d is missing the object_type field.', 'stagify' ), $position );
+			return sprintf( __( 'Item %d is missing the object_type field.', 'taskshunt' ), $position );
 		}
 
 		$type = TaskItemType::from( $item['item_type'] );
 
 		if ( TaskItemType::Content === $type && ! post_type_exists( $item['object_type'] ) ) {
 			/* translators: 1: item position, 2: provided object_type value */
-			return sprintf( __( 'Item %1$d has an unregistered post type: %2$s.', 'stagify' ), $position, $item['object_type'] );
+			return sprintf( __( 'Item %1$d has an unregistered post type: %2$s.', 'taskshunt' ), $position, $item['object_type'] );
 		}
 
 		return null;
@@ -340,7 +340,7 @@ final class ReceiverApi {
 	private function validate_item_payload( array $item, int $position ): ?string {
 		if ( ! isset( $item['payload'] ) ) {
 			/* translators: %d: item position in the array */
-			return sprintf( __( 'Item %d is missing the payload field.', 'stagify' ), $position );
+			return sprintf( __( 'Item %d is missing the payload field.', 'taskshunt' ), $position );
 		}
 
 		if ( ! is_string( $item['payload'] ) ) {
@@ -351,7 +351,7 @@ final class ReceiverApi {
 
 		if ( JSON_ERROR_NONE !== json_last_error() ) {
 			/* translators: %d: item position in the array */
-			return sprintf( __( 'Item %d has an invalid JSON payload.', 'stagify' ), $position );
+			return sprintf( __( 'Item %d has an invalid JSON payload.', 'taskshunt' ), $position );
 		}
 
 		return null;
@@ -394,7 +394,7 @@ final class ReceiverApi {
 			TaskItemType::Environment => $this->environment_handler->handle( $action, $object_type, $object_id, $payload ),
 			TaskItemType::Database    => array(
 				'success' => false,
-				'message' => __( 'Database item type is not yet supported.', 'stagify' ),
+				'message' => __( 'Database item type is not yet supported.', 'taskshunt' ),
 			),
 		};
 	}

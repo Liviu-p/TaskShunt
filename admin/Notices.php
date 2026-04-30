@@ -2,12 +2,12 @@
 /**
  * Admin notices queue.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -24,7 +24,7 @@ final class Notices {
 	/**
 	 * Transient key for the notice queue.
 	 */
-	private const TRANSIENT = 'stagify_admin_notices';
+	private const TRANSIENT = 'taskshunt_admin_notices';
 
 	/**
 	 * Transient TTL in seconds (60 s — enough for a redirect).

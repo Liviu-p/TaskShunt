@@ -1,20 +1,20 @@
 <?php
 /**
- * WordPress Dashboard widget for Stagify.
+ * WordPress Dashboard widget for TaskShunt.
  *
- * @package Stagify\Admin
+ * @package TaskShunt\Admin
  */
 
 declare(strict_types=1);
 
-namespace Stagify\Admin;
+namespace TaskShunt\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Stagify\Contracts\ServerRepositoryInterface;
-use Stagify\Contracts\TaskRepositoryInterface;
+use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Contracts\TaskRepositoryInterface;
 
 /**
  * Registers and renders a dashboard widget showing the active task status.
@@ -42,8 +42,8 @@ final class DashboardWidget {
 			'wp_dashboard_setup',
 			function (): void {
 				wp_add_dashboard_widget(
-					'stagify_dashboard_widget',
-					__( 'Stagify', 'stagify' ),
+					'taskshunt_dashboard_widget',
+					__( 'TaskShunt', 'taskshunt' ),
 					function (): void {
 						$this->render();
 					}
@@ -58,10 +58,10 @@ final class DashboardWidget {
 					return;
 				}
 				wp_enqueue_style(
-					'stagify-admin',
-					STAGIFY_PLUGIN_URL . 'assets/css/stagify-admin.css',
+					'taskshunt-admin',
+					TASKSHUNT_PLUGIN_URL . 'assets/css/taskshunt-admin.css',
 					array(),
-					STAGIFY_VERSION
+					TASKSHUNT_VERSION
 				);
 			}
 		);
@@ -77,17 +77,17 @@ final class DashboardWidget {
 		$server      = $this->server_repository->find();
 		$all_tasks   = $this->task_repository->find_all();
 
-		echo '<div class="stagify-widget">';
+		echo '<div class="taskshunt-widget">';
 
 		if ( null === $server ) {
 			printf(
-				'<div class="stagify-widget-empty">'
+				'<div class="taskshunt-widget-empty">'
 				. '<p>%s</p>'
 				. '<a href="%s" class="button">%s</a>'
 				. '</div>',
-				esc_html__( 'Connect a production server to start pushing changes.', 'stagify' ),
-				esc_url( admin_url( 'admin.php?page=stagify-settings' ) ),
-				esc_html__( 'Set up server', 'stagify' )
+				esc_html__( 'Connect a production server to start pushing changes.', 'taskshunt' ),
+				esc_url( admin_url( 'admin.php?page=taskshunt-settings' ) ),
+				esc_html__( 'Set up server', 'taskshunt' )
 			);
 			echo '</div>';
 			return;
@@ -107,19 +107,19 @@ final class DashboardWidget {
 	/**
 	 * Render the active task section.
 	 *
-	 * @param \Stagify\Domain\Task $task Active task.
+	 * @param \TaskShunt\Domain\Task $task Active task.
 	 * @return void
 	 */
-	private function render_active_task( \Stagify\Domain\Task $task ): void {
-		$detail_url = admin_url( 'admin.php?page=stagify&action=view&task_id=' . $task->id );
+	private function render_active_task( \TaskShunt\Domain\Task $task ): void {
+		$detail_url = admin_url( 'admin.php?page=taskshunt&action=view&task_id=' . $task->id );
 
 		printf(
-			'<div class="stagify-widget-active">'
-			. '<div class="stagify-widget-row">'
-			. '<span class="stagify-pulse-dot"></span>'
+			'<div class="taskshunt-widget-active">'
+			. '<div class="taskshunt-widget-row">'
+			. '<span class="taskshunt-pulse-dot"></span>'
 			. '<div>'
 			. '<strong><a href="%s">%s</a></strong>'
-			. '<span class="stagify-widget-meta">%s</span>'
+			. '<span class="taskshunt-widget-meta">%s</span>'
 			. '</div>'
 			. '</div>',
 			esc_url( $detail_url ),
@@ -127,7 +127,7 @@ final class DashboardWidget {
 			esc_html(
 				sprintf(
 					/* translators: %d: number of changes */
-					_n( '%d change tracked', '%d changes tracked', $task->item_count, 'stagify' ),
+					_n( '%d change tracked', '%d changes tracked', $task->item_count, 'taskshunt' ),
 					$task->item_count
 				) 
 			)
@@ -135,9 +135,9 @@ final class DashboardWidget {
 
 		if ( $task->item_count > 0 ) {
 			printf(
-				'<a href="#" class="button stagify-push-btn stagify-widget-push" data-task-id="%d">%s</a>',
+				'<a href="#" class="button taskshunt-push-btn taskshunt-widget-push" data-task-id="%d">%s</a>',
 				(int) $task->id,
-				esc_html__( 'Push to production', 'stagify' )
+				esc_html__( 'Push to production', 'taskshunt' )
 			);
 		}
 
@@ -151,43 +151,43 @@ final class DashboardWidget {
 	 */
 	private function render_no_active(): void {
 		printf(
-			'<div class="stagify-widget-empty">'
+			'<div class="taskshunt-widget-empty">'
 			. '<p>%s</p>'
 			. '<a href="%s" class="button">%s</a>'
 			. '</div>',
-			esc_html__( 'No active task. Create one to start tracking changes.', 'stagify' ),
-			esc_url( admin_url( 'admin.php?page=stagify' ) ),
-			esc_html__( 'Go to Tasks', 'stagify' )
+			esc_html__( 'No active task. Create one to start tracking changes.', 'taskshunt' ),
+			esc_url( admin_url( 'admin.php?page=taskshunt' ) ),
+			esc_html__( 'Go to Tasks', 'taskshunt' )
 		);
 	}
 
 	/**
 	 * Render quick stats — pushed/pending counts.
 	 *
-	 * @param array<int, \Stagify\Domain\Task> $tasks All tasks.
+	 * @param array<int, \TaskShunt\Domain\Task> $tasks All tasks.
 	 * @return void
 	 */
 	private function render_quick_stats( array $tasks ): void {
 		$pushed  = 0;
 		$pending = 0;
 		foreach ( $tasks as $task ) {
-			if ( \Stagify\Domain\TaskStatus::Pushed === $task->status ) {
+			if ( \TaskShunt\Domain\TaskStatus::Pushed === $task->status ) {
 				++$pushed;
 			}
-			if ( \Stagify\Domain\TaskStatus::Pending === $task->status ) {
+			if ( \TaskShunt\Domain\TaskStatus::Pending === $task->status ) {
 				++$pending;
 			}
 		}
 
 		printf(
-			'<div class="stagify-widget-stats">'
-			. '<div class="stagify-widget-stat"><span>%d</span> %s</div>'
-			. '<div class="stagify-widget-stat"><span>%d</span> %s</div>'
+			'<div class="taskshunt-widget-stats">'
+			. '<div class="taskshunt-widget-stat"><span>%d</span> %s</div>'
+			. '<div class="taskshunt-widget-stat"><span>%d</span> %s</div>'
 			. '</div>',
 			(int) $pushed,
-			esc_html__( 'pushed', 'stagify' ),
+			esc_html__( 'pushed', 'taskshunt' ),
 			(int) $pending,
-			esc_html__( 'pending', 'stagify' )
+			esc_html__( 'pending', 'taskshunt' )
 		);
 	}
 }
