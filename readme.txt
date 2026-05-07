@@ -1,5 +1,5 @@
 === TaskShunt ===
-Contributors: taskshunt
+Contributors: liviu13
 Tags: staging, deployment, content sync, migration, push
 Requires at least: 6.0
 Tested up to: 6.9
@@ -26,7 +26,6 @@ It tracks every content and file change you make while a task is active, bundles
 = What Gets Tracked =
 
 * **Content** — Posts, pages, media/attachments, and any registered custom post type. Creates, updates, and deletes are all captured.
-* **Files** — Theme and plugin file changes (PHP, CSS, JS, JSON, HTML, SVG, Twig). TaskShunt takes SHA-256 snapshots so only genuinely changed files are included.
 * **Environment** — Plugin and theme activations, deactivations, installs, updates, and deletions.
 
 = Key Features =

@@ -434,8 +434,13 @@ final class ContentHandler {
 				continue;
 			}
 
+			// Sender ships meta as decoded PHP values (PostSerializer::unpack_meta).
+			// Never unserialize() bytes from the wire — that's PHP object injection.
 			foreach ( $values as $value ) {
-				add_post_meta( $post_id, $key, maybe_unserialize( $value ) );
+				if ( is_object( $value ) ) {
+					continue;
+				}
+				add_post_meta( $post_id, $key, $value );
 			}
 		}
 	}
