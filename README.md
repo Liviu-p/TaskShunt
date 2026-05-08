@@ -69,14 +69,3 @@ vendor/bin/phpunit --testsuite Unit
 
 The `phpcs.xml` ruleset enforces WordPress core, WordPress VIP minimum, and Slevomat coding standards. CI must stay green; suppress only with a justified `phpcs:ignore -- reason` comment.
 
-## Contributing
-
-1. Open an issue describing the change before opening large PRs.
-2. Branch from `main`.
-3. Keep `phpcs` and the unit suite green.
-4. Add/update tests where it makes sense.
-5. Update `readme.txt` (user-facing) and this `README.md` (developer-facing) if behavior changes.
-
-## License
-
-[GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html).
