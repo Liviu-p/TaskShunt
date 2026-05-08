@@ -87,6 +87,10 @@ TaskShunt's push payloads can include post content, plugin/theme operations, and
 * **Run both the sender and the receiver site over HTTPS.** The HMAC signature protects against forged or replayed requests, but only TLS prevents an on-path observer from reading payloads or capturing the API key as it is sent in the initial connection setup.
 * Restrict admin access on the receiver to trusted users — the API key is stored encrypted at rest, but anyone with administrator-level access to **TaskShunt > Settings** can read and regenerate it.
 
+= Source Code =
+
+TaskShunt is live on GitHub: [https://github.com/Liviu-p/TaskShunt](https://github.com/Liviu-p/TaskShunt).
+
 == Frequently Asked Questions ==
 
 = Does TaskShunt copy my entire database? =
