@@ -65,20 +65,9 @@ vendor/bin/phpcbf --standard=phpcs.xml .
 # Unit tests
 vendor/bin/phpunit --testsuite Unit
 
-# Integration tests
-vendor/bin/phpunit --testsuite Integration
 ```
 
 The `phpcs.xml` ruleset enforces WordPress core, WordPress VIP minimum, and Slevomat coding standards. CI must stay green; suppress only with a justified `phpcs:ignore -- reason` comment.
-
-## Building a release
-
-`scripts/zip.sh` produces a clean zip suitable for WordPress.org submission: it runs `composer install --no-dev`, copies only the runtime PHP and compiled assets, and excludes tests, dev dependencies, and source maps.
-
-```bash
-npm run zip
-# => taskshunt.zip
-```
 
 ## Contributing
 
