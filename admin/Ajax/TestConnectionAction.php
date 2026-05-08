@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use TaskShunt\Contracts\ServerRepositoryInterface;
+use TaskShunt\Services\RequestSigner;
 
 /**
  * Handles the wp_ajax_taskshunt_test_connection request.
@@ -67,7 +68,7 @@ final class TestConnectionAction {
 	 * Perform the HTTP ping and return a response array.
 	 *
 	 * @param string $url     Full ping endpoint URL.
-	 * @param string $api_key API key sent in the request header.
+	 * @param string $api_key Shared HMAC secret.
 	 * @return array{success: bool, message: string}
 	 */
 	private function ping( string $url, string $api_key ): array {
@@ -76,7 +77,7 @@ final class TestConnectionAction {
 			$url,
 			array(
 				'timeout' => self::TIMEOUT,
-				'headers' => array( 'X-TaskShunt-API-Key' => $api_key ),
+				'headers' => $this->signed_headers( $api_key ),
 			)
 		);
 
@@ -101,6 +102,24 @@ final class TestConnectionAction {
 			'success' => false,
 			/* translators: %d: HTTP status code returned by the server */
 			'message' => sprintf( __( 'Server responded with HTTP %d.', 'taskshunt' ), $code ),
+		);
+	}
+
+	/**
+	 * Build the signed headers for a ping request.
+	 *
+	 * @param string $api_key Shared HMAC secret.
+	 * @return array<string, string>
+	 */
+	private function signed_headers( string $api_key ): array {
+		$timestamp = time();
+		$nonce     = bin2hex( random_bytes( 16 ) );
+		$signature = RequestSigner::sign( 'GET', self::PING_ROUTE, $timestamp, $nonce, '', $api_key );
+
+		return array(
+			'X-TaskShunt-Timestamp' => (string) $timestamp,
+			'X-TaskShunt-Nonce'     => $nonce,
+			'X-TaskShunt-Signature' => $signature,
 		);
 	}
 }

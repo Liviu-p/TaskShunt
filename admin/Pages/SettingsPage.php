@@ -169,11 +169,43 @@ final class SettingsPage {
 		if ( null !== $server ) {
 			$this->render_server_card( $server );
 		} else {
+			if ( $this->server_repository->has_record() ) {
+				$this->render_orphan_notice();
+			}
 			echo '<p>' . esc_html__( 'Connect the production site where changes will be pushed.', 'taskshunt' ) . '</p>';
 			$this->render_server_form();
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * Notice shown when a server row exists but cannot be read (e.g. the
+	 * at-rest encryption key changed). Offers a one-click reset so the user
+	 * can re-add the connection without touching the database.
+	 *
+	 * @return void
+	 */
+	private function render_orphan_notice(): void {
+		$reset_url = wp_nonce_url(
+			add_query_arg(
+				array( 'action' => 'taskshunt_delete_server' ),
+				admin_url( 'admin-post.php' )
+			),
+			'taskshunt_delete_server'
+		);
+
+		printf(
+			'<div class="notice notice-warning inline" style="margin:0 0 12px;"><p><strong>%s</strong> %s</p>'
+			. '<p><a href="%s" class="button button-small taskshunt-link-danger taskshunt-confirm-link" data-confirm-title="%s" data-confirm-message="%s" data-confirm-label="%s" data-confirm-danger="1">%s</a></p></div>',
+			esc_html__( 'Existing server connection is unreadable.', 'taskshunt' ),
+			esc_html__( 'The stored credentials cannot be decrypted. Reset the connection and re-add it below.', 'taskshunt' ),
+			esc_url( $reset_url ),
+			esc_attr__( 'Reset connection?', 'taskshunt' ),
+			esc_attr__( 'This will remove the unreadable server row so you can configure a new connection.', 'taskshunt' ),
+			esc_attr__( 'Reset', 'taskshunt' ),
+			esc_html__( 'Reset connection', 'taskshunt' )
+		);
 	}
 
 	/**

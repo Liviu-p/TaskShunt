@@ -14,10 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A validated API key — the shared secret between sender and receiver.
+ * A validated API key — the shared HMAC secret between sender and receiver.
  *
- * The sender includes this key in the X-TaskShunt-API-Key HTTP header when pushing.
- * The receiver compares it against its stored key to authenticate the request.
+ * The key never travels on the wire: each request is signed with HMAC-SHA256
+ * (see RequestSigner) and the signature, a timestamp, and a nonce are sent in
+ * dedicated headers. The receiver looks up its stored copy of the key and
+ * recomputes the signature to authenticate the request.
  * Must be at least 16 characters — construction throws if shorter.
  */
 final readonly class ApiKey extends ValueObject {

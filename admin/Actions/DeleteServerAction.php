@@ -44,6 +44,10 @@ final class DeleteServerAction {
 		$server_id = isset( $_GET['task_id'] ) ? (int) $_GET['task_id'] : 0;
 		if ( $server_id > 0 ) {
 			$this->server_repository->delete( $server_id );
+		} else {
+			// No specific id — used by the "Reset connection" path when the row
+			// exists but cannot be hydrated (e.g. the at-rest key is unrecoverable).
+			$this->server_repository->delete_all();
 		}
 
 		wp_safe_redirect( admin_url( 'admin.php?page=taskshunt-settings' ) );

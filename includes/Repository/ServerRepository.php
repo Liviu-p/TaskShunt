@@ -17,6 +17,7 @@ use TaskShunt\Contracts\ServerRepositoryInterface;
 use TaskShunt\Domain\ApiKey;
 use TaskShunt\Domain\Server;
 use TaskShunt\Domain\ServerUrl;
+use TaskShunt\Services\Crypto;
 
 /**
  * Persists and retrieves the single server configuration (1-server limit).
@@ -46,7 +47,17 @@ final class ServerRepository implements ServerRepositoryInterface {
 	 */
 	public function find(): ?Server {
 		$row = $this->wpdb->get_row( "SELECT * FROM `{$this->table}` ORDER BY id ASC LIMIT 1", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return is_array( $row ) ? Server::from_db_row( $row ) : null;
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+
+		try {
+			$row['api_key'] = Crypto::decrypt( (string) $row['api_key'] );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return Server::from_db_row( $row );
 	}
 
 	/**
@@ -60,20 +71,29 @@ final class ServerRepository implements ServerRepositoryInterface {
 	 * @return int|false Inserted server ID, or false if limit reached.
 	 */
 	public function save( string $name, ServerUrl $url, ApiKey $api_key ): int|false {
-		$exists = $this->wpdb->get_var( "SELECT COUNT(*) FROM `{$this->table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$existing_id = $this->wpdb->get_var( "SELECT id FROM `{$this->table}` ORDER BY id ASC LIMIT 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		if ( (int) $exists > 0 ) {
-			return false;
+		$payload = array(
+			'name'    => $name,
+			'url'     => $url->get_value(),
+			'api_key' => Crypto::encrypt( $api_key->get_value() ),
+		);
+
+		if ( null !== $existing_id ) {
+			$updated = $this->wpdb->update(
+				$this->table,
+				$payload,
+				array( 'id' => (int) $existing_id ),
+				array( '%s', '%s', '%s' ),
+				array( '%d' )
+			);
+			return false === $updated ? false : (int) $existing_id;
 		}
 
+		$payload['created_at'] = gmdate( 'Y-m-d H:i:s' );
 		$this->wpdb->insert(
 			$this->table,
-			array(
-				'name'       => $name,
-				'url'        => $url->get_value(),
-				'api_key'    => $api_key->get_value(),
-				'created_at' => gmdate( 'Y-m-d H:i:s' ),
-			),
+			$payload,
 			array( '%s', '%s', '%s', '%s' )
 		);
 
@@ -89,5 +109,24 @@ final class ServerRepository implements ServerRepositoryInterface {
 	 */
 	public function delete( int $id ): void {
 		$this->wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
+	}
+
+	/**
+	 * Whether any server row exists in the table.
+	 *
+	 * @return bool
+	 */
+	public function has_record(): bool {
+		$count = $this->wpdb->get_var( "SELECT COUNT(*) FROM `{$this->table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $count > 0;
+	}
+
+	/**
+	 * Truncate every row in the servers table.
+	 *
+	 * @return void
+	 */
+	public function delete_all(): void {
+		$this->wpdb->query( "DELETE FROM `{$this->table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
 	}
 }

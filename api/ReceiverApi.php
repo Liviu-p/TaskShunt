@@ -18,6 +18,8 @@ use TaskShunt\Api\Handlers\EnvironmentHandler;
 use TaskShunt\Api\Handlers\FileHandler;
 use TaskShunt\Domain\TaskAction;
 use TaskShunt\Domain\TaskItemType;
+use TaskShunt\Services\Crypto;
+use TaskShunt\Services\RequestSigner;
 
 /**
  * Registers REST API routes used by the receiver (production) side.
@@ -43,6 +45,28 @@ final class ReceiverApi {
 	 * Maximum number of log entries to keep.
 	 */
 	private const LOG_MAX_ENTRIES = 20;
+
+	/**
+	 * Maximum permitted clock skew, in seconds, between sender and receiver.
+	 */
+	private const TIMESTAMP_WINDOW = 300;
+
+	/**
+	 * Transient key for the recent-nonce store used to defeat replays.
+	 */
+	private const NONCE_TRANSIENT = 'taskshunt_seen_nonces';
+
+	/**
+	 * Default cap on the raw request body, in bytes. Filterable via
+	 * `taskshunt_max_body_bytes`. 32 MB covers ~24 MB base64 attachments.
+	 */
+	private const MAX_BODY_BYTES = 33554432;
+
+	/**
+	 * Default cap on the number of items in a single push. Filterable via
+	 * `taskshunt_max_items`.
+	 */
+	private const MAX_ITEMS = 500;
 
 	/**
 	 * Create the receiver API.
@@ -83,7 +107,7 @@ final class ReceiverApi {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'handle_ping' ),
-				'permission_callback' => array( $this, 'check_api_key' ),
+				'permission_callback' => array( $this, 'verify_signature' ),
 			)
 		);
 
@@ -93,7 +117,7 @@ final class ReceiverApi {
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'handle_receive' ),
-				'permission_callback' => array( $this, 'check_api_key' ),
+				'permission_callback' => array( $this, 'verify_signature' ),
 			)
 		);
 	}
@@ -115,25 +139,100 @@ final class ReceiverApi {
 	}
 
 	/**
-	 * Permission callback: validate the X-TaskShunt-API-Key header.
+	 * Permission callback: verify the HMAC signature on every receiver request.
+	 *
+	 * Rejects requests that are missing any of the three signature headers,
+	 * fall outside the timestamp clock-skew window, fail HMAC verification,
+	 * or replay a nonce already seen inside that window.
 	 *
 	 * @param \WP_REST_Request $request Incoming request.
 	 * @return bool
 	 */
-	public function check_api_key( \WP_REST_Request $request ): bool {
-		$provided = $request->get_header( 'X-TaskShunt-API-Key' );
+	public function verify_signature( \WP_REST_Request $request ): bool {
+		$timestamp = $request->get_header( 'X-TaskShunt-Timestamp' );
+		$nonce     = $request->get_header( 'X-TaskShunt-Nonce' );
+		$signature = $request->get_header( 'X-TaskShunt-Signature' );
 
-		if ( empty( $provided ) ) {
+		if ( empty( $timestamp ) || empty( $nonce ) || empty( $signature ) ) {
 			return false;
 		}
 
-		$stored = get_option( self::API_KEY_OPTION, '' );
-
-		if ( '' === $stored ) {
+		if ( ! ctype_digit( (string) $timestamp ) ) {
 			return false;
 		}
 
-		return hash_equals( (string) $stored, (string) $provided );
+		$ts = (int) $timestamp;
+		if ( abs( time() - $ts ) > self::TIMESTAMP_WINDOW ) {
+			return false;
+		}
+
+		$key = $this->resolve_key();
+		if ( null === $key ) {
+			return false;
+		}
+
+		$verified = RequestSigner::verify(
+			$request->get_method(),
+			$request->get_route(),
+			$ts,
+			(string) $nonce,
+			(string) $request->get_body(),
+			(string) $signature,
+			$key
+		);
+
+		if ( ! $verified ) {
+			return false;
+		}
+
+		return $this->register_nonce( (string) $nonce );
+	}
+
+	/**
+	 * Fetch the receiver's HMAC key, decrypting the at-rest blob.
+	 *
+	 * @return string|null Plaintext key, or null if missing or undecryptable.
+	 */
+	private function resolve_key(): ?string {
+		$encoded = (string) get_option( self::API_KEY_OPTION, '' );
+		if ( '' === $encoded ) {
+			return null;
+		}
+
+		try {
+			return Crypto::decrypt( $encoded );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Record a nonce, returning false if it has already been seen inside the window.
+	 *
+	 * Stored as nonce => expires_at. Expired entries are pruned on each call.
+	 * Concurrent requests with an identical nonce can theoretically race past
+	 * the check; for a low-traffic deploy plugin (one push at a time) this is
+	 * acceptable, and the timestamp window remains a hard bound.
+	 *
+	 * @param string $nonce The nonce from the verified request.
+	 * @return bool False if replayed; true if recorded.
+	 */
+	private function register_nonce( string $nonce ): bool {
+		$store = get_transient( self::NONCE_TRANSIENT );
+		$store = is_array( $store ) ? $store : array();
+		$now   = time();
+
+		$store = array_filter( $store, static fn ( $expires ) => (int) $expires > $now );
+
+		if ( isset( $store[ $nonce ] ) ) {
+			return false;
+		}
+
+		$ttl             = 2 * self::TIMESTAMP_WINDOW;
+		$store[ $nonce ] = $now + $ttl;
+		set_transient( self::NONCE_TRANSIENT, $store, $ttl );
+
+		return true;
 	}
 
 	/**
@@ -157,6 +256,11 @@ final class ReceiverApi {
 	 * @return \WP_REST_Response
 	 */
 	private function process_receive( \WP_REST_Request $request ): \WP_REST_Response {
+		$max_body = (int) apply_filters( 'taskshunt_max_body_bytes', self::MAX_BODY_BYTES );
+		if ( strlen( (string) $request->get_body() ) > $max_body ) {
+			return $this->payload_too_large( $max_body );
+		}
+
 		$body = $request->get_json_params();
 
 		$error = $this->validate_body( $body );
@@ -196,6 +300,23 @@ final class ReceiverApi {
 	}
 
 	/**
+	 * Return a 413 Payload Too Large response.
+	 *
+	 * @param int $max_bytes Configured cap that was exceeded.
+	 * @return \WP_REST_Response
+	 */
+	private function payload_too_large( int $max_bytes ): \WP_REST_Response {
+		return new \WP_REST_Response(
+			array(
+				'success' => false,
+				/* translators: %d: max bytes */
+				'message' => sprintf( __( 'Request body exceeds %d bytes.', 'taskshunt' ), $max_bytes ),
+			),
+			413
+		);
+	}
+
+	/**
 	 * Return a 500 server error response without exposing internals.
 	 *
 	 * @param string $message Exception message.
@@ -220,6 +341,12 @@ final class ReceiverApi {
 	private function validate_body( array $body ): ?string {
 		if ( empty( $body['items'] ) || ! is_array( $body['items'] ) ) {
 			return __( 'The items field is required and must be a non-empty array.', 'taskshunt' );
+		}
+
+		$max_items = (int) apply_filters( 'taskshunt_max_items', self::MAX_ITEMS );
+		if ( count( $body['items'] ) > $max_items ) {
+			/* translators: %d: configured max item count */
+			return sprintf( __( 'Too many items in request (max %d).', 'taskshunt' ), $max_items );
 		}
 
 		return $this->validate_items( $body['items'] );

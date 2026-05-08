@@ -22,6 +22,7 @@ use TaskShunt\Domain\Task;
 use TaskShunt\Domain\TaskStatus;
 use TaskShunt\Events\TaskFailed;
 use TaskShunt\Events\TaskPushed;
+use TaskShunt\Services\RequestSigner;
 
 /**
  * Pushes a task to the production server. This is what happens when you click "Push now":
@@ -120,20 +121,30 @@ final class PushService {
 	/**
 	 * Send the HTTP POST request to the receiver.
 	 *
+	 * Each request is signed with HMAC-SHA256 over the canonical message
+	 * (method + path + timestamp + nonce + body). The shared key never
+	 * travels on the wire — it is the HMAC secret only.
+	 *
 	 * @param string $url     Full receive endpoint URL.
-	 * @param string $api_key API key for the X-TaskShunt-API-Key header.
+	 * @param string $api_key Shared HMAC secret.
 	 * @param string $body    JSON-encoded request body.
 	 * @return array|\WP_Error wp_remote_post response or WP_Error.
 	 */
 	private function send_request( string $url, string $api_key, string $body ): array|\WP_Error {
+		$timestamp = time();
+		$nonce     = bin2hex( random_bytes( 16 ) );
+		$signature = RequestSigner::sign( 'POST', self::RECEIVE_ROUTE, $timestamp, $nonce, $body, $api_key );
+
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		return wp_remote_post(
 			$url,
 			array(
 				'timeout' => self::TIMEOUT,
 				'headers' => array(
-					'Content-Type'      => 'application/json',
-					'X-TaskShunt-API-Key' => $api_key,
+					'Content-Type'          => 'application/json',
+					'X-TaskShunt-Timestamp' => (string) $timestamp,
+					'X-TaskShunt-Nonce'     => $nonce,
+					'X-TaskShunt-Signature' => $signature,
 				),
 				'body'    => $body,
 			)

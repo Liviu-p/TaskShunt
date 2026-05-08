@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use TaskShunt\Admin\OnboardingChecklist;
 use TaskShunt\Api\ReceiverApi;
+use TaskShunt\Services\Crypto;
 
 /**
  * Renders the receiver-mode admin page: API key management and mode switch.
@@ -92,13 +93,13 @@ final class ReceiverSettingsPage {
 
 		if ( 'save_api_key' === $action ) {
 			$api_key = isset( $_POST['taskshunt_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['taskshunt_api_key'] ) ) : '';
-			update_option( ReceiverApi::API_KEY_OPTION, $api_key );
+			update_option( ReceiverApi::API_KEY_OPTION, '' === $api_key ? '' : Crypto::encrypt( $api_key ) );
 			add_settings_error( 'taskshunt', 'taskshunt_saved', __( 'API key saved.', 'taskshunt' ), 'success' );
 		}
 
 		if ( 'generate_api_key' === $action ) {
 			$api_key = wp_generate_password( 40, false );
-			update_option( ReceiverApi::API_KEY_OPTION, $api_key );
+			update_option( ReceiverApi::API_KEY_OPTION, Crypto::encrypt( $api_key ) );
 			add_settings_error( 'taskshunt', 'taskshunt_generated', __( 'New API key generated.', 'taskshunt' ), 'success' );
 		}
 
@@ -113,8 +114,16 @@ final class ReceiverSettingsPage {
 	 * @return void
 	 */
 	private function render(): void {
-		$api_key  = get_option( ReceiverApi::API_KEY_OPTION, '' );
-		$has_key  = '' !== $api_key;
+		$encoded = (string) get_option( ReceiverApi::API_KEY_OPTION, '' );
+		$has_key = '' !== $encoded;
+		$api_key = '';
+		if ( $has_key ) {
+			try {
+				$api_key = Crypto::decrypt( $encoded );
+			} catch ( \Throwable $e ) {
+				$has_key = false;
+			}
+		}
 		$site_url = site_url();
 
 		echo '<div class="wrap taskshunt-wrap">';

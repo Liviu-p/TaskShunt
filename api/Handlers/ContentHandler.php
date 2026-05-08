@@ -276,13 +276,6 @@ final class ContentHandler {
 	 * @return array{success: bool, message: string, object_id?: int}
 	 */
 	private function create_new_attachment( array $file_array, array $payload ): array {
-		// Force the original filename — remove any existing file that would cause -1 suffix.
-		$upload_dir = wp_upload_dir();
-		$existing   = $upload_dir['path'] . '/' . $file_array['name'];
-		if ( file_exists( $existing ) ) {
-			wp_delete_file( $existing );
-		}
-
 		$post_id = media_handle_sideload( $file_array, 0, $payload['post']['post_title'] ?? '' );
 
 		if ( is_wp_error( $post_id ) ) {
@@ -437,9 +430,6 @@ final class ContentHandler {
 			// Sender ships meta as decoded PHP values (PostSerializer::unpack_meta).
 			// Never unserialize() bytes from the wire — that's PHP object injection.
 			foreach ( $values as $value ) {
-				if ( is_object( $value ) ) {
-					continue;
-				}
 				add_post_meta( $post_id, $key, $value );
 			}
 		}
@@ -470,7 +460,7 @@ final class ContentHandler {
 
 		foreach ( $fields as $field ) {
 			if ( isset( $post_data[ $field ] ) && is_string( $post_data[ $field ] ) ) {
-				$post_data[ $field ] = str_replace( $sender_url, $local_url, $post_data[ $field ] );
+				$post_data[ $field ] = $this->replace_url_boundary( $post_data[ $field ], $sender_url, $local_url );
 			}
 		}
 
@@ -502,12 +492,31 @@ final class ContentHandler {
 
 			foreach ( $values as $i => $value ) {
 				if ( is_string( $value ) ) {
-					$meta[ $key ][ $i ] = str_replace( $sender_url, $local_url, $value );
+					$meta[ $key ][ $i ] = $this->replace_url_boundary( $value, $sender_url, $local_url );
 				}
 			}
 		}
 
 		return $meta;
+	}
+
+	/**
+	 * Replace $from with $to wherever it appears as a URL host boundary.
+	 *
+	 * Naive str_replace would also rewrite "https://stage.example.com.evil.com"
+	 * when the sender is "https://stage.example.com". The negative lookahead
+	 * blocks the replacement when the next character could extend the host
+	 * (alphanumeric, dot, hyphen). $to is passed through preg_replace_callback
+	 * so backreference metacharacters are not interpreted.
+	 *
+	 * @param string $haystack Text to search.
+	 * @param string $from     Sender URL.
+	 * @param string $to       Local replacement URL.
+	 * @return string
+	 */
+	private function replace_url_boundary( string $haystack, string $from, string $to ): string {
+		$pattern = '#' . preg_quote( $from, '#' ) . '(?![\w.-])#';
+		return (string) preg_replace_callback( $pattern, static fn () => $to, $haystack );
 	}
 
 	/**

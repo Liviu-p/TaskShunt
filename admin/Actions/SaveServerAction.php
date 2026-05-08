@@ -69,7 +69,7 @@ final class SaveServerAction {
 		$result = $this->server_repository->save( $name, $url_vo, $key_vo );
 
 		if ( false === $result ) {
-			Notices::add( 'error', __( 'A server is already configured.', 'taskshunt' ) );
+			Notices::add( 'error', __( 'Failed to save server. Please try again.', 'taskshunt' ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=taskshunt-settings' ) );
 			exit;
 		}
