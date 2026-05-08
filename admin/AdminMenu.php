@@ -362,7 +362,7 @@ final class AdminMenu {
 	/**
 	 * Add nodes for the active task: recent items, push link, and view link.
 	 *
-	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \WP_Admin_Bar          $wp_admin_bar WordPress admin bar instance.
 	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
@@ -375,7 +375,7 @@ final class AdminMenu {
 	/**
 	 * Add item preview nodes for the active task.
 	 *
-	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \WP_Admin_Bar          $wp_admin_bar WordPress admin bar instance.
 	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
@@ -416,7 +416,7 @@ final class AdminMenu {
 	/**
 	 * Add the push or configure-server node.
 	 *
-	 * @param \WP_Admin_Bar        $wp_admin_bar WordPress admin bar instance.
+	 * @param \WP_Admin_Bar          $wp_admin_bar WordPress admin bar instance.
 	 * @param \TaskShunt\Domain\Task $task         The active task.
 	 * @return void
 	 */
@@ -538,7 +538,7 @@ final class AdminMenu {
 				add_query_arg(
 					array(
 						'taskshunt_action' => 'activate',
-						'task_id'        => $task->id,
+						'task_id'          => $task->id,
 					),
 					admin_url( 'admin.php?page=taskshunt' )
 				),

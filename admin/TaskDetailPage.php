@@ -140,7 +140,7 @@ final class TaskDetailPage {
 					add_query_arg(
 						array(
 							'taskshunt_action' => 'activate',
-							'task_id'        => $task->id,
+							'task_id'          => $task->id,
 						),
 						$base_action_url
 					)

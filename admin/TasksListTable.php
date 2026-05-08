@@ -284,8 +284,8 @@ final class TasksListTable extends \WP_List_Table {
 		return add_query_arg(
 			array(
 				'taskshunt_action' => 'activate',
-				'task_id'        => $task_id,
-				'_wpnonce'       => wp_create_nonce( 'taskshunt_task_action' ),
+				'task_id'          => $task_id,
+				'_wpnonce'         => wp_create_nonce( 'taskshunt_task_action' ),
 			),
 			admin_url( 'admin.php?page=taskshunt' )
 		);
