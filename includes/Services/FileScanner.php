@@ -52,6 +52,12 @@ final class FileScanner {
 	private const THROTTLE_SECONDS = 30;
 
 	/**
+	 * Maximum bytes embedded in a file payload. Larger files are skipped so the
+	 * push request body stays under typical reverse-proxy and PHP upload limits.
+	 */
+	private const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
+	/**
 	 * Create the file scanner.
 	 *
 	 * @param FileSnapshotRepositoryInterface $snapshot_repository Snapshot repository.
@@ -216,17 +222,31 @@ final class FileScanner {
 	 * @param string     $abs_path Absolute path for payload (empty for deletes).
 	 * @return void
 	 */
-	private function record_change( int $task_id, TaskAction $action, string $relative, string $abs_path ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		if ( $this->task_item_repository->item_exists( $task_id, TaskItemType::File, 'file', $relative ) ) {
-			return;
+	private function record_change( int $task_id, TaskAction $action, string $relative, string $abs_path ): void {
+		$payload_data = array(
+			'path'   => $relative,
+			'action' => $action->value,
+		);
+
+		if ( TaskAction::Delete !== $action ) {
+			$contents = $this->read_file_contents( $abs_path );
+			if ( null === $contents ) {
+				// Unreadable or oversized — skip recording. The snapshot upsert still
+				// happens in the caller, so we don't churn on the same file every scan.
+				return;
+			}
+			$payload_data['data'] = base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		}
 
-		$payload = wp_json_encode(
-			array(
-				'path'   => $relative,
-				'action' => $action->value,
-			) 
-		);
+		$payload = (string) wp_json_encode( $payload_data );
+
+		// If the file is already in the task, refresh its payload so a later push
+		// ships the latest contents (not whatever was captured on the first edit).
+		$existing = $this->task_item_repository->find_item( $task_id, TaskItemType::File, 'file', $relative );
+		if ( null !== $existing ) {
+			$this->task_item_repository->update_payload( $existing->id, $payload );
+			return;
+		}
 
 		$this->task_item_repository->add_item(
 			$task_id,
@@ -234,8 +254,33 @@ final class FileScanner {
 			$action,
 			'file',
 			$relative,
-			(string) $payload
+			$payload
 		);
+	}
+
+	/**
+	 * Read a file's raw contents, returning null if it's too large or unreadable.
+	 *
+	 * Uses native PHP IO instead of WP_Filesystem because the scanner runs inside
+	 * admin_init, where WP_Filesystem may not yet be initialized — and it would
+	 * silently return null, dropping every detected change.
+	 *
+	 * @param string $abs_path Absolute file path.
+	 * @return string|null
+	 */
+	private function read_file_contents( string $abs_path ): ?string {
+		if ( ! is_readable( $abs_path ) ) {
+			return null;
+		}
+
+		$size = filesize( $abs_path );
+		if ( false === $size || $size > self::MAX_FILE_BYTES ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents,WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown -- Reading a local file at a path we control; WP_Filesystem is unreliable here, see method docblock.
+		$contents = file_get_contents( $abs_path );
+		return false !== $contents ? $contents : null;
 	}
 
 	/**
